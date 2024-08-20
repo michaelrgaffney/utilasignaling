@@ -729,31 +729,31 @@ plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 
 #Signal Cost
 
-mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingN2b + (1|householdID),data = d2, family = nbinom2)
+mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
 summary(mscH2)
 plot(allEffects(mscH2))
 
-mscH2i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingN2b*ChildAge + (1|householdID),data = d2, family = nbinom2)
+mscH2i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mscH2i)
 plot(allEffects(mscH2i))
 
 #Signal Frequency
 
-msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2b + (1|householdID),data = d2, family = nbinom2)
+msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
 summary(msf2)
 plot(allEffects(msf2))
 
-msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2b*ChildAge + (1|householdID),data = d2, family = nbinom2)
+msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(msf2i)
 plot(allEffects(msf2i))
 
 # Maximum Signal Frequency
 
-mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2b + (1|householdID),data = d2, family = nbinom2)
+mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
 summary(mmsf2)
 plot(allEffects(mmsf2))
 
-mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2b*ChildAge + (1|householdID),data = d2, family = nbinom2)
+mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mmsf2i)
 plot(allEffects(mmsf2i))
 
@@ -761,23 +761,23 @@ plot(allEffects(mmsf2i))
 
 #Signal Cost
 
-mscH3i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingN2a*ChildAge + (1|householdID),data = d2, family = nbinom2)
+mscH3i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mscH3i)
 plot(allEffects(mscH3i))
 
 #Signal Frequency
 
-msf3i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2a*ChildAge + (1|householdID),data = d2, family = nbinom2)
+msf3i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(msf3i)
 plot(allEffects(msf3i))
 
 # Maximum Signal Frequency
 
-mmsf3 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2a + (1|householdID),data = d2, family = nbinom2)
+mmsf3 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA + (1|householdID),data = d2, family = nbinom2)
 summary(mmsf2)
 plot(allEffects(mmsf2))
 
-mmsf3i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingN2a*ChildAge + (1|householdID),data = d2, family = nbinom2)
+mmsf3i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mmsf3i)
 plot(allEffects(mmsf3i))
 
