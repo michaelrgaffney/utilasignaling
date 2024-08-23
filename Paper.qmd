@@ -1,7 +1,11 @@
 ---
 title: "Child Signals of Need in Utila, Honduras"
+execute: 
+  echo: false
+  warning: false
 format: html
 editor: visual
+tbl-cap-location: bottom
 bibliography: signaling.bib
 ---
 
@@ -126,7 +130,8 @@ The survey data for this study come from a larger project run by the Utila Child
 
 ### *Frequency of child signaling, alloparenting contributions, and conflict with caretaker*
 
-We used 6-point Likert scales to get caregiver reports of 1) child signaling, 2) interpersonal conflict with each participating child, 3) and child alloparenting behavior. See Table 1 for exact wording.
+We used 6-point Likert scales to get caregiver reports of 1) child signaling, 2) interpersonal conflict with each participating child, 3) and child alloparenting behavior. See @tbl-freqvars for exact wording.
+
 
 |                                 |                                                                                                                   |
 |-------------------------|-----------------------------------------------|
@@ -138,9 +143,10 @@ We used 6-point Likert scales to get caregiver reports of 1) child signaling, 2)
 | Parent/Child Conflict Frequency | How often do you have conflicts with your child?                                                                  |
 | Child Alloparenting Frequency   | How often does your child take care of their other siblings?                                                      |
 
-**Table 1**. Table showing variable names and question wording for measures about the frequency of behaviors. All questions had the following labels attached to each point on its Likert scale: Never; Once a month or less; More than once a month but less than once a week; More than once a week but not daily; Daily; Multiple times per day.
+: Table showing variable names and question wording for measures about the frequency of behaviors. All questions had the following labels attached to each point on its Likert scale: Never; Once a month or less; More than once a month but less than once a week; More than once a week but not daily; Daily; Multiple times per day. {#tbl-freqvars}
 
-As these responses reflect frequencies of actual behavior, we converted these to counts which reflected the number of times per month a child engaged in these behaviors. The original wording of the Likert scale and the frequency conversion are shown in Table 2.
+
+As these responses reflect frequencies of actual behavior, we converted these to counts which reflected the number of times per month a child engaged in these behaviors. The original wording of the Likert scale and the frequency conversion are shown in @tbl-convertedfreqs.
 
 |                                                  |                               |
 |------------------------------------------------|-----------------------------------------------|
@@ -152,13 +158,13 @@ As these responses reflect frequencies of actual behavior, we converted these to
 | Daily                                            | 30                            |
 | Multiple times per day                           | 60                            |
 
-**Table 2.** Table showing conversions from Likert scale to count value for the frequencies of child behaviors included in this study. Variables created with this scheme include SadFreqN, CryFreqN, TantrumFreqN, RunawayFreqN, ConflictFreqN, and AlloparentingFreqN.
+: Table showing conversions from Likert scale to count value for the frequencies of child behaviors included in this study. Variables created with this scheme include SadFreqN, CryFreqN, TantrumFreqN, RunawayFreqN, ConflictFreqN, and AlloparentingFreqN. {#tbl-convertedfreqs}
 
 From these count variables, we created three additional variables to be used, primarily, as our main dependent variables in analyses. SignalFreq was the sum of the frequencies of child sadness, crying, and temper tantrums. SignalFreqMax was the frequency of the most common of these three signals. SignalCost was the sum of the frequencies of these three signals weighted by their relative costliness (i.e., SignalCost = SadFreqN + CryFreqN\*2 + TantrumFreqN\*3). The frequency of running away was not included in the creation of any of these variables due to uncertainty over whether it was likely to be a credible signal due to the relative safety of Utila compared to other areas in which running away has been found to be a successful strategy for children.
 
 ### *Relative neediness of children and relative investment in children within the family*
 
-We also used 6-point Likert scales to get parental reports of 1) the relative neediness of each participating child and 2) the relative investment they provide to each participating child compared to the rest of their children. See Table 3 for exact wording.
+We also used 6-point Likert scales to get parental reports of 1) the relative neediness of each participating child and 2) the relative investment they provide to each participating child compared to the rest of their children. See Table @tbl-relvars for exact wording.
 
 |                     |                                                                                                  |
 |-------------------------|-----------------------------------------------|
@@ -166,7 +172,7 @@ We also used 6-point Likert scales to get parental reports of 1) the relative ne
 | Relative Need       | How much time, effort, and resources does this child need compared to your other children?       |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
 
-**Table 3.** Table showing variable names and question wording for measures about relative need and investment. Both questions had the following labels attached to each point on its Likert scale: Much less; Less; The same amount; More; Much more.
+: Table showing variable names and question wording for measures about relative need and investment. Both questions had the following labels attached to each point on its Likert scale: Much less; Less; The same amount; More; Much more. {#tbl-relvars}
 
 ### *Last instance of child signaling*
 
@@ -180,7 +186,7 @@ We computed each child's height, weight, and BMI Zscores with respect to the WHO
 
 ### *Perceptions of child immune function (or current susceptibility to illness)*
 
-Caretakers were also asked three questions using a five point Likert scale about their child's current health which involved the likelihood of them becoming sick. We then inverted the scores for two measures so that a score of 5 corresponded with the lowest susceptibility to illness before averaging the scores of these to create the CurrentHealthMean variable. Means were still calculated if 1-2 values had an NA (only xxx cases), with the numerator being the number of variables with data. See Table 4 for the wording of these variables.
+Caretakers were also asked three questions using a five point Likert scale about their child's current health which involved the likelihood of them becoming sick. We then inverted the scores for two measures so that a score of 5 corresponded with the lowest susceptibility to illness before averaging the scores of these to create the CurrentHealthMean variable. Means were still calculated if 1-2 values had an NA (only xxx cases), with the numerator being the number of variables with data. See Table @tbl-healthvars for the wording of these variables.
 
 |                |                                                                                       |
 |-------------------------|-----------------------------------------------|
@@ -189,7 +195,7 @@ Caretakers were also asked three questions using a five point Likert scale about
 | Currenthealth2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
 | Currenthealth3 | My child’s immune system protects him/her from most illnesses that other kids get.    |
 
-: **Table 4.** Table showing variable names and question wording for measures about a child's current likelihood of becoming sick. All three questions were asked using a Likert scale from 1-5 where 1 was labeled "Strongly disagree" and 5 was labeled "Strongly agree." The scores for Currenthealth1 and Currenthealth2 were inverted so that 5 corresponded with the lowest susceptibility to illness.
+: Table showing variable names and question wording for measures about a child's current likelihood of becoming sick. All three questions were asked using a Likert scale from 1-5 where 1 was labeled "Strongly disagree" and 5 was labeled "Strongly agree." The scores for Currenthealth1 and Currenthealth2 were inverted so that 5 corresponded with the lowest susceptibility to illness. {#tbl-healthvars}
 
 ### *Demographic questions*
 
@@ -214,10 +220,8 @@ The anonymized data used in the study are available at xxxxxxxLINKxxxxxxx. Study
 # Results
 
 ```{r sumtab_children}
-#| echo: false
-#| label: sumtab_children
-#| fig-cap: "Summary statistics for child study variables."
-
+#| label: tbl-sumtab_children
+#| tbl-cap: Summary statistics for child study variables.
 vars_c <- c(
   ChildAge = "Age (years)",
   SadFreqN = "Sad frequency (times per month)",
@@ -240,10 +244,10 @@ kable(custom.summarize(d2, vars_c)) %>% kable_styling()
 
 ```
 
+
 ```{r sumtab_adults}
-#| echo: false
-#| label: sumtab_cadults
-#| fig-cap: "Summary statistics for adult and household study variables."
+#| label: tbl-sumtab_adults
+#| tbl-cap: Summary statistics for adult and household study variables.
 
 vars_c <- c(
   CaregiverAge = "Age (years)",
@@ -256,6 +260,211 @@ kable(custom.summarize(d2, vars_c)) %>% kable_styling()
 #kable(custom.summarize(d2, vars), caption = "Summary statistics for child study variables.") %>% kable_styling()
 
 ```
+
+## Distributions of signaling behavior, alloparenting effort, and conflict 
+
+:::{#fig-barplot_SignalFreq}
+```{r}
+barplot_SignalFreq
+```
+
+caption
+:::
+
+:::{#fig-barplot_ConflictFreq}
+```{r}
+barplot_conflict
+```
+
+caption
+:::
+
+:::{#fig-barplot_AlloparentingFreq}
+```{r}
+barplot_alloparenting
+```
+
+caption
+:::
+
+## Signaling behavior is negatively associated with age
+
+```{r}
+#| label: tbl-main_models
+#| tbl-cap: Regression tables for our main exploratory models.
+r_vars <- c(
+  ChildAge = "Age (years)",
+  SexMale = "Sex (male)",
+  OtherChildrenHH = "Other children",
+  LogIncome = "Income (log)",
+  number_adults = "Adults in home",
+  PartnerStatusUnpartnered = "Partner status (single)",
+  EducationLevelYears = "Parent ed. (years)",
+  ConflictFreqN = "Conflict freq.",
+  SignalFreq = "Signal freq.",
+  SignalCost = "Signal cost",
+  SignalFreqMax = "Max signal freq.",
+  CurrentHealthMean = "Percieved immunity",
+  SadFreqN = "Sadness freq.",
+  CryFreqN = "Crying freq.",
+  TantrumFreqN = "Tantrum freq.",
+  AlloparentingFreqN = "Child allocare"
+)
+modelsummary(list(Sadness = msadH, Crying = mcryH, Tantrum = mtantrumH, SignalFreq = msfH, SignalCost = mscH, SignalFreqMax = mmsfH), gof_map = "nobs", coef_rename = r_vars, stars = TRUE, coef_omit = "(Intercept)")
+```
+
+
+:::{#fig-effect1}
+```{r}
+plot_predictions(msadH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of sadness (per month)") + xlab("Child age (years)") + xlim(5,20)
+```
+
+The effect of the age on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior. Bars are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Each dot is 1 child. Overlapping points are represented by the transparency of the point (lower transparency equals more values at a given coordinate). See @tbl-main_models for the corresponding regression table.
+:::
+
+:::{#fig-effect2}
+```{r}
+plot_predictions(mcryH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Crying frequency (per month)") + xlab("Child age (years)") + xlim(5,20)
+```
+
+combine with other age plots and use caption 1
+:::
+
+:::{#fig-effect3}
+```{r}
+plot_predictions(mtantrumH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Tantrum frequency (per month)") + xlab("Child age (years)") + xlim(5,20)
+```
+
+combine with other age plots and use caption 1
+:::
+
+:::{#fig-effect4}
+```{r}
+plot_predictions(mscH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Summed signal cost") + xlab("Child age (years)") + xlim(5,20)
+```
+
+combine with other age plots and use caption 1
+:::
+
+:::{#fig-effect5}
+```{r}
+plot_predictions(msfH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Summed frequency of signals") + xlab("Child age (years)") + xlim(5,20)
+```
+
+combine with other age plots and use caption 1
+:::
+
+:::{#fig-effect6}
+```{r}
+plot_predictions(mmsfH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of most common signal") + xlab("Child age (years)") + xlim(5,20)
+```
+
+combine with other age plots and use caption 1
+:::
+
+## Signaling behavior is positively associated with conflict with primary caretakers
+
+:::{#fig-effect1c}
+```{r}
+plot_predictions(msadH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of sadness (per month)") + xlab("Frequency of conflict (per month)") 
+```
+
+The effect of the frequency of conflict with one's primary caretaker on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior. Bars are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Each dot is 1 child. Overlapping points are represented by the transparency of the point (lower transparency equals more values at a given coordinate). See @tbl-main_models for the corresponding regression table.
+:::
+
+:::{#fig-effect2c}
+```{r}
+plot_predictions(mcryH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Crying frequency (per month)") + xlab("Frequency of conflict (per month)")
+```
+
+combine with other confict plots and use caption 1
+:::
+
+:::{#fig-effect3c}
+```{r}
+plot_predictions(mtantrumH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Tantrum frequency (per month)") + xlab("Frequency of conflict (per month)")
+```
+
+combine with other conflict plots and use caption 1
+:::
+
+:::{#fig-effect4c}
+```{r}
+plot_predictions(mscH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Summed signal cost") + xlab("Frequency of conflict (per month)")
+```
+
+combine with other conflict plots and use caption 1
+:::
+
+:::{#fig-effect5c}
+```{r}
+plot_predictions(msfH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Summed frequency of signals") + xlab("Frequency of conflict (per month)") 
+```
+
+combine with other conflict plots and use caption 1
+:::
+
+:::{#fig-effect6c}
+```{r}
+plot_predictions(mmsfH, condition = "ConflictFreqN", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of most common signal") + xlab("Frequency of conflict (per month)")
+```
+
+combine with other conflict plots and use caption 1
+:::
+
+## Interaction between child sex and child alloparenting 
+
+## Summed signal cost and tantrum frequency are negatively associated with body fat
+
+```{r}
+#| label: tbl-bodyfat_models
+#| tbl-cap: Regression tables for the models examining body fat measures.
+r_vars <- c(
+  ChildAge = "Age (years)",
+  SexMale = "Sex (male)",
+  OtherChildrenHH = "Other children",
+  LogIncome = "Income (log)",
+  number_adults = "Adults in home",
+  PartnerStatusUnpartnered = "Partner status (single)",
+  EducationLevelYears = "Parent ed. (years)",
+  ConflictFreqN = "Conflict freq.",
+  SignalFreq = "Signal freq.",
+  SignalCost = "Signal cost",
+  SignalFreqMax = "Max signal freq.",
+  CurrentHealthMean = "Percieved immunity",
+  SadFreqN = "Sadness freq.",
+  CryFreqN = "Crying freq.",
+  TantrumFreqN = "Tantrum freq.",
+  AlloparentingFreqN = "Child allocare",
+  TricepR = "Tricep skinfold (residuals)",
+  SubscapR = "Subscapular skinfold (residuals)",
+  BodyFat = "BodyFat (composite)"
+)
+modelsummary(list(SignalCost = mBFc, Tantrum = mBFtantrum, SignalCost = msubC, Tantrum = msubTantrum, SignalCost = mtriC, Tantrum = mtriTantrum), gof_map = "nobs", coef_rename = r_vars, stars = TRUE, coef_omit = "(Intercept)")
+```
+
+:::{#fig-cost_bodyfat}
+```{r}
+plot_predictions(mBFc, condition = "BodyFat", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Summed signal cost") + xlab("Body fat composite") + xlim(0,10) + ylim(0,200)
+```
+
+combine with other age plots and use caption 1
+:::
+
+:::{#fig-tantrum_bodyfat}
+```{r}
+plot_predictions(mBFtantrum, condition = "BodyFat", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of tantrums (per month)") + xlab("Body fat composite") + xlim(0,10)
+```
+
+combine with other body fat plots and use caption 1
+:::
+
+## Cargivers percieve older children as relatively needy 
+
+## Parental responses to last signal of need
+
+## Sociodemographics
+
 
 # Discussion
 

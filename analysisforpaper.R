@@ -1,61 +1,8 @@
-#' ---
-#' title: Child signaling
-#' ---
-#' # Child signaling
-#' **Data**: interviews with caretakers (usually mothers) in 157 families, with data
-#' on 375 children (more complete data on ~242)
-#'
-#' **Principle outcome variable**: child signaling frequency (Likert scale converted to times per month)
-#'
-#' **Secondary outcome variable**: child signaling cost (sad = low, crying = moderate, tantrums = high)
-#' (SadFreq + CryFreq\*2 + TantrumFreq\*3)
-#'
-#' **Tertiary outcome variable**: parental response to the most recent instance of child signaling
-#'
-#' **Predictor variables**:
-#'
-#' * ChildAge
-#' * Sex
-#' * Other children in the household (OtherChildrenHH)
-#' * LogIncome (median value of range for each option on the Likert Scale)
-#' * Number of adults, including the caretaker taking the survey (number_adults)
-#' * Partner status of caretaker (PartnerStatus: Partnered/Unpartnered)
-#' * Frequency of conflict between child and caretaker (Likert scale converted to times per month)
-#' * Frequency of the child's alloparenting contributions as a Likert scale converted to times per month (AlloparentingFreqN)
-#' * Caretaker's education level in years (EducationLevelYears)
-#' * Mean of caretaker's responses to three child health measures (CurrentHealthMean):
-#'
-#'   1) If an illness is 'going around', my child will get it.
-#'
-#'   2) My child’s immune system protects him/her from most illnesses that other kids get.
-#'
-#'   3) In general, my child is very susceptible to colds, flu, and other infectious diseases.
-#' * Random effects grouping variable (householdID)
-#'
-#' **Results**:
-#'
-#' * Negative association between age and child signaling (all signaling measures)
-#' * Positive association between conflict with parent and child signaling (all signaling measures)
-#' * Sex and focal child alloparenting effort interact (postive for females, negative/flat for males)
-#' * In most models, there is a negative association between education and child signaling?
-#' * Negative association between caretaker estimates of child health and child signaling for some measures. This does not extend to the costlier signals.
-#'
-#' **Null Results (often not presented here)**:
-#'
-#' * Caretaker's reported social support not associated with child signaling
-#' * Very few age by sex interactions for signaling
-#' * Older models showed a LogIncome by household interaction. LogIncome is not a significant predictor of child signaling in our current models.
-#'
-#' **Note**:
-#'
-#' * Code for analyzing the effects of relatedness within households still needs work.
-#'
-#' # Load libraries
-
-
 # loading libraries -------------------------------------------------------
 
 #+ message=F, warning=F, fig.height=9, fig.width=10
+
+# note some are no longer used
 library(utiladata2023) # data package
 library(tidyverse)
 # library(lme4)
@@ -79,18 +26,20 @@ library(hagenutils)
 library(localgrowth)
 library(knitr)
 library(kableExtra)
+library(modelsummary)
 
 source("recode.R")
 
-#' # Functions used
+
+# functions used ----------------------------------------------------------
 
 # function to invert the scoring on a Likert scale
 invert <- function(x){
   ((x - max(x, na.rm = TRUE)) * -1) + min(x, na.rm = TRUE)
   }
 
-# functions to calculate values from multiple columns in ways that 1) NAs are not counted 2)
-# yet do not result in NAs if values exist for other columns.
+# functions to calculate values from multiple columns in ways that 1) NAs are not counted
+# 2) yet do not result in NAs if values exist for other columns.
 sum2 <- function(..., na.rm = F){
   v <- as.numeric(list(...))
   if(all(is.na(v))) return(NA)
@@ -109,7 +58,8 @@ mean2 <- function(..., na.rm = F){
   mean(v, na.rm = na.rm)
 }
 
-#' # Data frame prep
+
+# dataframe prep ----------------------------------------------------------
 
 anthropometricMeans <- anthropometrics |>
   dplyr::select(
@@ -243,7 +193,7 @@ d <- children |>
     ),
     ChildAlloparent = ifelse(AlloparentingFreqN >3, 1, 0),
     RelativeMaternalInvestment = factor( #NOTE this is not always the mom
-      RelativeMaternalInvestment, # do we need Much less if it was never picked?
+      RelativeMaternalInvestment,
       ordered = TRUE,
       levels = c("Much less", "Less", "The same amount", "More", "Much more")),
     RelativeMaternalInvestment2 = case_when(
@@ -315,7 +265,7 @@ d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, 
 
 # prepare household variables for analyses
 d2 <- d |>
-  mutate( # should we not do this for when we convert to numeric?
+  mutate(
     EducationLevel = case_when(
       EducationLevel == "Fourth grade" ~ "4th grade or less",
       EducationLevel == "Tenth grade" ~ "Some high school",
@@ -373,12 +323,6 @@ d2 <- d |>
     ExplicitInvestmentDesired2 = ifelse(ExplicitInvestmentDesired == "Maybe", 0, ExplicitInvestmentDesired),
     LossOfPrivlegesOrItem2 = ifelse(LossOfPrivlegesOrItem == "Maybe", 0, LossOfPrivlegesOrItem),
     SeparationAttentionSeeking2 = ifelse(SeparationAttentionSeeking == "Maybe", 0, SeparationAttentionSeeking),
-    # AdultsChildcareN1 = AdultsChildcare*30,
-    # AdultsChildcareN2 = AdultsChildcare*60,
-    # OtherAlloparentingN1 = OtherChildAlloparenting + AdultsChildcareN1, # how to handle NAs?
-    # OtherAlloparentingN2 = OtherChildAlloparenting + AdultsChildcareN2,
-    #CaregiverMarried = as.factor(CaregiverMarital_1),
-    #CaregiverPartneredLongTerm = as.factor(CaregiverMarital_2),
     PartnerStatus = as.factor(if_else(as.factor(CaregiverMarital_1) == "1" | as.factor(CaregiverMarital_2) == "1", "Partnered", "Unpartnered", missing = "Unpartnered")) # CHECK
   ) |>
   rowwise() |>
@@ -404,8 +348,8 @@ d2 <- d |>
   ) |>
   mutate( # CHECK
     OtherChildAlloparentingFreqN = sum(AlloparentingFreqN, na.rm = TRUE) - AlloparentingFreqN,
-    OtherAlloparentingA = as.numeric(AdultsChildcare[1]) * 30 + OtherChildAlloparentingFreqN,
-    OtherAlloparentingB = as.numeric(AdultsChildcare[1]) * 60 + OtherChildAlloparentingFreqN,
+    HHChildCareA = as.numeric(AdultsChildcare[1]) * 30 + OtherChildAlloparentingFreqN,
+    HHChildCareB = as.numeric(AdultsChildcare[1]) * 60 + OtherChildAlloparentingFreqN,
     OtherChildAlloparents = sum(ChildAlloparent, na.rm = TRUE) - ChildAlloparent,
     HHOtherKidsAge0_2.5 = sum(Age0_2.5, na.rm = TRUE) - Age0_2.5, # Helfrecht and Meehan 2015 style risk periods
     HHOtherKidsAge2.5_5 = sum(Age2.5_5, na.rm = TRUE) - Age2.5_5,
@@ -415,9 +359,24 @@ d2 <- d |>
     .by = householdID
   ) |>
   mutate(
-    OtherAlloparents = as.numeric(AdultsChildcare) + OtherChildAlloparents #Check Change to TotalChildCare
+    OtherCare = as.numeric(AdultsChildcare) + OtherChildAlloparents #Check Change to TotalChildCare
   )
 
+# sample characteristics --------------------------------------------------
+
+# scatterplot of CaregiverAge and ChildAge
+# note 20 year old caregiver reporting on a 20 year old has a CaregiverRelation of "Other"
+ggplot(data = d2, aes(CaregiverAge, ChildAge)) + geom_count() + geom_smooth() + labs(title = "Scatterplot of CaregiverAge and ChildAge")
+
+#bar plot of household income
+ggplot(caregivers, aes(y=IncomeCategory)) +
+  geom_bar() + labs(y = "IncomeCaregory (household level)")
+
+# bar plot of ChildAge with Sex as color
+ggplot(d2, aes(y=ChildAge, fill = Sex)) +
+  geom_bar()
+
+# dataframe used to plot sample characteristics using the sample from our main models
 modeldf <- d2 |>
   dplyr::select(
     householdID,
@@ -435,36 +394,85 @@ modeldf <- d2 |>
     EducationLevelYears,
     CurrentHealthMean,
     ImmigrateUtila,
-    UserLanguage, # only 19 children with english speaking
+    UserLanguage,
+    SadFreqOF,
   ) |>
   na.omit()
 
-#' # Sample characteristics
-
-#+ message=F, warning=F, fig.height=9, fig.width=10
-
-# Note 20 year old caregiver reporting on a 20 year old has a CaregiverRelation of "Other"
-ggplot(data = d2, aes(CaregiverAge, ChildAge)) + geom_count() + geom_smooth() + labs(title = "Scatterplot of CaregiverAge and ChildAge")
-
-ggplot(caregivers, aes(y=IncomeCategory)) +
-  geom_bar() + labs(y = "IncomeCaregory (household level)")
-
-table(d2$Sex)
-
-ggplot(d2, aes(y=ChildAge, fill = Sex)) +
-  geom_bar()
-
-# Data for out main models without NAs
+# bar plot of ChildAge with Sex as color, but with the sample used for our main models
 ggplot(modeldf, aes(y=ChildAge, fill = Sex)) +
   geom_bar()
 
-caregivers3 <- caregivers |>  filter(!is.na(Neighborhood))
-ggplot(caregivers3, aes(y=Neighborhood, fill=ImmigrateUtila)) +
+# # bar plot of Neighborhood with ImmigrateUtila as color
+caregivers2 <- caregivers |>  filter(!is.na(Neighborhood))
+ggplot(caregivers2, aes(y=Neighborhood, fill=ImmigrateUtila)) +
   geom_bar() + labs(title = "Immigration status by neighborhood")
 
-#' # Signaling frequency and cost histograms
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
+
+signalfreqdf <- d2 |>
+  dplyr::select(
+    householdID,
+    childHHid,
+    uniqueID,
+    Sex,
+    SadFreqOF,
+    CryFreqOF,
+    TantrumFreqOF
+    # ConflictFreqOF,
+    # AlloparentingFreq0
+  ) |>
+  rename(
+    Sadness = SadFreqOF,
+    Crying = CryFreqOF,
+    Tantrums = TantrumFreqOF
+    #Conflict = ConflictFreqOF,
+    #Alloparenting = AlloparentingFreq0
+  )
+
+signaldf_long <- signalfreqdf |>
+  pivot_longer(cols = Sadness:Tantrums, names_to = "Signal", values_to = "Freq")  |>
+  mutate(
+    Signal = factor(Signal, levels = c("Sadness", "Crying", "Tantrums"))
+  ) |>
+  na.omit()
+
+barplot_SignalFreq <- ggplot(signaldf_long, aes(y=Freq, fill=Signal)) + geom_bar(position = "dodge")
+barplot_SignalFreq
+
+ggplot(signaldf_long, aes(Signal, Freq, group = uniqueID)) + geom_line(show.legend = FALSE, alpha = .25 , position = position_jitter(h = .1, w = .1))
+
+signaldf_long_sum <- signaldf_long |>
+  group_by(Signal, Freq) |>
+  summarise(N = n())
+
+ggplot(signaldf_long_sum, aes(N, Signal, fill = Freq)) + geom_col(position = "stack")
+
+ggplot(signaldf_long_sum, aes(Freq, N, color = Signal, group = Signal)) + geom_line()
+
+# alluvial plot
+x <- table(signalfreqdf$Sadness, signalfreqdf$Crying) |>
+  as.data.frame() |>
+  dplyr::filter(Freq > 3)
+
+library(ggalluvial)
+ggplot(x, aes(axis1 = Var1, axis2 = Var2, y = Freq)) +
+  geom_alluvium(aes(fill = Var1), color = "black") +
+  geom_stratum() +
+  scale_x_discrete(limits = c("Sadness", "Crying"), expand = c(.2, .05))
+
+d2_conflict_filter <- d2 |>
+  filter_at(vars(ConflictFreqOF,Sex),all_vars(!is.na(.)))
+
+barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge")
+barplot_conflict
+
+d2_alloparent_filter <- d2 |>
+  filter_at(vars(AlloparentingFreq0,Sex),all_vars(!is.na(.)))
+
+barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge")
+barplot_alloparenting
+# signaling frequency and cost histograms ---------------------------------
 
 ggplot(d2, aes(x=SadFreqN, fill=Sex)) +
   geom_histogram()
@@ -472,14 +480,15 @@ ggplot(d2, aes(x=CryFreqN, fill=Sex)) +
   geom_histogram()
 ggplot(d2, aes(x=TantrumFreqN, fill=Sex)) +
   geom_histogram()
-ggplot(d2, aes(x=RunawayFreqN, fill=Sex)) +
-  geom_histogram()
 ggplot(d2, aes(x=SignalFreq, fill=Sex)) +
   geom_histogram()
 ggplot(d2, aes(x=SignalCost, fill=Sex)) +
   geom_histogram()
 ggplot(d2, aes(x=SignalFreqMax, fill=Sex)) +
   geom_histogram()
+
+barplot_sad <- ggplot(modeldf, aes(y=SadFreqOF, fill=Sex, na.rm = TRUE)) + geom_bar()
+barplot_sad
 
 #' # Correlation matrix of predictor and outcome variables
 
@@ -496,26 +505,21 @@ maincormat <- d2[c("CurrentHealthMean", "EducationLevelYears", "OtherChildrenHH"
 
 ggcorrplot(maincormat, hc.order = TRUE, lab = TRUE)
 
-#' # Analyses
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
+# CurrentHealthMean models ------------------------------------------------
 
-# CONFIRM WE WANT ALLOPARENTINGFreqN
-
-ggplot(data = d2, aes(ChildAge, AlloparentingFreqN, colour = Sex)) + geom_count() + geom_smooth() + labs(title = "Scatterplot of Child Age and AlloparentingFreqN")
-ggplot(data = d2, aes(ChildAge, AlloparentingFreqN, colour = Sex)) + geom_jitter(width = 0.25, height = 0.25) + geom_smooth() + labs(title = "Scatterplot of Child Age and AlloparentingFreqN")
-
+# signal cost
 mscH <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
 summary(mscH)
 plot(allEffects(mscH))
 
-# Signal frequency (sum of frequencies of sadness, crying, and temper tantrums [running away excluded])
+# signal frequency
 
-msfH <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+msfH <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
 summary(msfH)
 plot(allEffects(msfH))
 
-# Frequency of most common signal (running away excluded)
+# frequency of most common signal (running away excluded)
 
 mmsfH <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
 summary(mmsfH)
@@ -539,23 +543,235 @@ mtantrumH <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome
 summary(mtantrumH)
 plot(allEffects(mtantrumH))
 
-#' # Appendix 1: Visualization of signaling by alloparenting contributions and sex
+# anthropometric models ---------------------------------------------------
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
+# HeightZ, WeightZ, BMIZ, and BodyFatPercentage are not significant predictors
+# (not close either) of signaling behavior in our standard models
 
-# visualize signaling by sex based on alloparenting contributions
-ggplot(d2, aes(ChildAge, SignalFreq)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(vars(AlloparentingFreq))
-ggplot(d2, aes(ChildAge, SignalFreqMax)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(vars(AlloparentingFreq))
-ggplot(d2, aes(ChildAge, SignalCost)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(vars(AlloparentingFreq))
+# GripStrengthMean and GripR are not either (as main effects or interacted with Sex)
 
-ggplot(d2, aes(ChildAge, TantrumFreqN)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(~factor(AlloparentingFreqN))
-ggplot(d2, aes(ChildAge, CryFreqN)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(~factor(AlloparentingFreqN))
-ggplot(d2, aes(ChildAge, SadFreqN)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(~factor(AlloparentingFreqN))
-ggplot(d2, aes(ChildAge, RunawayFreqN)) + geom_jitter(aes(colour = Sex), width = .25) + facet_wrap(~factor(AlloparentingFreqN))
+# Tricep residuals
+mtriC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mtriC)
+plot(allEffects(mtriC))
 
-# Appendix 2: ordinal logistic regression of parental response
+  # Tricep residuals = not a signficant predictor of signal frequency.
+  # Effect on cost may be due to its association with tantrum frequency.
+  # (Tantrum model below)
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
+mtriTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mtriTantrum)
+plot(allEffects(mtriTantrum))
+
+# Subscap residuals
+msubC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + SubscapR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(msubC)
+plot(allEffects(msubC))
+
+  # Subscap residuals = not a signficant predictor of signal frequency.
+  # Effect on cost may be due to its association with tantrum frequency.
+  # (Tantrum model below)
+
+msubTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + SubscapR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(msubTantrum)
+plot(allEffects(msubTantrum))
+
+# BodyFat
+d2$BodyFat <- c(scale(d2$TricepR) + scale(d2$SubscapR))
+mBFc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFc)
+plot(allEffects(mBFc))
+
+  # BodyFat scaled composite = not a signficant predictor of signal frequency.
+  # Effect on cost may be due to its association with tantrum frequency.
+  # (Tantrum model below)
+
+mBFtantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFtantrum)
+plot(allEffects(mBFtantrum))
+
+mtest <- glmmTMB(HeightZ ~ FoodSecurityMean + Sex + (1|householdID), data = d2, family = gaussian())
+summary(mtest)
+plot(allEffects(mtest))
+
+mtest <- glmmTMB(WeightZ ~ FoodSecurityMean + Sex + (1|householdID), data = d2, family = gaussian())
+summary(mtest)
+plot(allEffects(mtest))
+
+# ConflictFreqN model -----------------------------------------------------------
+
+# original
+mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
+summary(mconflict)
+plot(allEffects(mconflict))
+
+# with HHChildCareB*ChildAge
+mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + HHChildCareB*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mconflict)
+plot(allEffects(mconflict))
+
+mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + HHChildCareA*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mconflict)
+plot(allEffects(mconflict))
+
+# number of alloparents not a significant predictor
+# (as main effect or in an HHChildCareB*ChildAge interaction)
+
+# RunawayFreqN model ------------------------------------------------------
+
+# fat measures marginally significant despite severe loss of nobs 225 -> 83
+
+mrunawayH <- glmmTMB(RunawayFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
+summary(mrunawayH)
+plot(allEffects(mrunawayH))
+
+
+# childcare within the family models ----------------------------------
+
+# keep adults and children on their original scales
+
+# measures = or number of caretakers
+
+# note childcare measure often not significant wihtout BodyFat in the model
+
+
+#Signal Cost
+
+d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
+table(d2$AdultsNoChildcare)
+
+mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
+summary(mscH2)
+plot(allEffects(mscH2))
+
+mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + AdultsNoChildcare + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
+summary(mscH2)
+plot(allEffects(mscH2))
+
+modeldf2 <- d2 |>
+  dplyr::select(
+    householdID,
+    childHHid,
+    AdultsChildcare,
+    AdultsNoChildcare
+  ) |>
+  na.omit()
+
+#Signal Frequency
+
+msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareB + (1|householdID),data = d2, family = nbinom2)
+summary(msf2)
+plot(allEffects(msf2))
+
+msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareB*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(msf2i)
+plot(allEffects(msf2i))
+
+# Maximum Signal Frequency
+
+mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareB + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2)
+plot(allEffects(mmsf2))
+
+mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareB*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2i)
+plot(allEffects(mmsf2i))
+
+# Adult care lightly weighted
+
+#Signal Cost
+
+mscH3 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears+ BodyFat + HHChildCareA + (1|householdID),data = d2, family = nbinom2)
+summary(mscH3)
+plot(allEffects(mscH3))
+
+mscH3i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareA*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mscH3i)
+plot(allEffects(mscH3i))
+
+#Signal Frequency
+
+msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareA + (1|householdID),data = d2, family = nbinom2)
+summary(msf2)
+plot(allEffects(msf2))
+
+# Maximum Signal Frequency
+
+mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareA + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2)
+plot(allEffects(mmsf2))
+
+mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + HHChildCareA*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2i)
+plot(allEffects(mmsf2i))
+
+# Number of alloparents
+
+hist(d2$OtherCare) # Few beyond 4, most 3 and below
+
+#Signal Cost
+
+mscH3 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare + (1|householdID),data = d2, family = nbinom2)
+summary(mscH3)
+plot(allEffects(mscH3))
+
+mscH3i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mscH3i)
+plot(allEffects(mscH3i))
+
+#Signal Frequency
+
+msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare + (1|householdID),data = d2, family = nbinom2)
+summary(msf2)
+plot(allEffects(msf2))
+
+msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(msf2i)
+plot(allEffects(msf2i))
+
+# Maximum Signal Frequency
+
+mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2)
+plot(allEffects(mmsf2))
+
+mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherCare*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mmsf2i)
+plot(allEffects(mmsf2i))
+
+# child alloparenting effort model ----------------------------------------
+
+# care (adult's heavily weighted)
+malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsNoChildcare + PartnerStatus + EducationLevelYears + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
+summary(malloparenting)
+plot(allEffects(malloparenting))
+
+# number of others providing care
+malloparenting2 <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + number_adults + PartnerStatus + EducationLevelYears + OtherCare + (1|householdID),data = d2, family = nbinom2)
+summary(malloparenting2)
+plot(allEffects(malloparenting2))
+
+# relatedness within the family -------------------------------------------
+
+# Child relatedness (relatedness relative to every kid in household) = not a significant
+# predictor
+
+# Sibling relatedness
+
+# SignalCost and SignalFreqMax = marginally significant
+
+# SignalFreq model
+# sibling relatedness no longer significant with BodyFat
+mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + (1|householdID),data = d2, family = nbinom2)
+summary(mSRF)
+plot(allEffects(mSRF))
+
+# with YoungerKids*ChildAge
+mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids*ChildAge + (1|householdID),data = d2, family = nbinom2)
+summary(mSRF3)
+plot(allEffects(mSRF3))
+
+# ordinal logistic regression of parental response ------------------------
 
 # note 6 instances of both positive and negative coded as NA
 table(d2$PositiveResponse, d2$NegativeResponse)
@@ -568,125 +784,8 @@ plot_predictions(mp7, condition = c("Punishment2", "group"), type = "probs", vco
 plot_predictions(mp7, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID)
 plot_predictions(mp7, condition = c("Family2", "group"), type = "probs", vcov = ~householdID)
 
-#' # Appendix 3: Models without health measures and with AlloparentingFreqN
-# note some have interactions between ChildAge and sex that do not exist in the health models
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
-
-# Signal Frequency
-
-# partner status not significant unlike the signalfreqmax model
-msf <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(msf)
-plot(allEffects(msf))
-
-# Maximum Signal Frequency
-
-# OtherChildrenHH:LogIncome now marginally significant after changing from Neighborhood random effect to Household
-mmsf <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH*LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf)
-plot(allEffects(mmsf))
-
-#Signal Cost
-msc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-# Signal specific frequency
-msad <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(msad)
-plot(allEffects(msad))
-
-# ChildAge*Sex interaction (Marginal with AlloparentingFreqN)
-mcry <- glmmTMB(CryFreqN ~ ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(mcry)
-plot(allEffects(mcry))
-
-mtantrum <- glmmTMB(TantrumFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(mtantrum)
-plot(allEffects(mtantrum))
-
-# conflict frequency
-# AlloparentingFreqN seems to really hurt our power through reduced sample size
-
-mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
-summary(mconflict)
-plot(allEffects(mconflict))
-
-#' # Appendix 4: Current health sub-measures
-
-#+ message=F, warning=F, fig.height=9, fig.width=10
-
-# none are significant if all are included
-# Currenthealth2 = not a significant predictor
-
-# Currenthealth1: If an illness is 'going around', my child will get it.
-mscH1 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth1 + (1|householdID),data = d2, family = nbinom2)
-summary(mscH1)
-plot(allEffects(mscH1))
-
-msfH1 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth1 + (1|householdID),data = d2, family = nbinom2)
-summary(msfH1)
-plot(allEffects(msfH1))
-
-mmsfH1 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH*LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth1 + (1|householdID),data = d2, family = nbinom2)
-summary(mmsfH1)
-plot(allEffects(mmsfH1))
-
-# Currenthealth2: In general, my child is very susceptible to colds, flu, and other infectious diseases.
-
-mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth2 + (1|householdID),data = d2, family = nbinom2)
-summary(mscH2)
-plot(allEffects(mscH2))
-
-msfH2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth2 + (1|householdID),data = d2, family = nbinom2)
-summary(msfH2)
-plot(allEffects(msfH2))
-
-mmsfH2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH*LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth2 + (1|householdID),data = d2, family = nbinom2)
-summary(mmsfH2)
-plot(allEffects(mmsfH2))
-
-# Currenthealth3: My child’s immune system protects him/her from most illnesses that other kids get.
-
-mscH3 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth3 + (1|householdID),data = d2, family = nbinom2)
-summary(mscH3)
-plot(allEffects(mscH3))
-
-msfH3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth3 + (1|householdID),data = d2, family = nbinom2)
-summary(msfH3)
-plot(allEffects(msfH3))
-
-mmsfH3 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH*LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth3 + (1|householdID),data = d2, family = nbinom2)
-summary(mmsfH3)
-plot(allEffects(mmsfH3))
-
-# No Currenthealth variables predict tantrums
-
-msadK1 <- glmmTMB(SadFreqN ~ ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth1 + (1|householdID),data = d2, family = nbinom2)
-summary(msadK1)
-plot(allEffects(msadK1))
-
-# Marginally significant
-mcryK1 <- glmmTMB(CryFreqN ~ ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth1 + (1|householdID),data = d2, family = nbinom2)
-summary(mcryK1)
-plot(allEffects(mcryK1))
-
-msadK3 <- glmmTMB(SadFreqN ~ ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + Currenthealth3 + (1|householdID),data = d2, family = nbinom2)
-summary(msadK3)
-plot(allEffects(msadK3))
-
-#' # Appendix 5: Runaway frequency model
-
-#+ message=F, warning=F, fig.height=9, fig.width=10
-
-mrunawayH <- glmmTMB(RunawayFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mrunawayH)
-plot(allEffects(mrunawayH))
-
-#' # Appendix 6: Ordinal logistic regression models for relative need and maternal investment
-
-#+ message=F, warning=F, fig.height=9, fig.width=10
+# ordinal logistic regression models for relative need and materna --------
 
 # Results with NeighborhoodF as a random effect and vc0 seem like outliers compared to all other methods
 
@@ -721,378 +820,12 @@ exp(cbind(coef(mI),(ci)))
 plot_predictions(mI, condition = c("OtherChildrenHH", "group"), type = "probs")
 plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 
-#' # New Analyses: Alloparenting within the family
 
-#+ message=F, warning=F, fig.height=9, fig.width=12
-
-# Adult alloparenting heavily weighted
-
-#Signal Cost
-
-mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
-summary(mscH2)
-plot(allEffects(mscH2))
-
-mscH2i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mscH2i)
-plot(allEffects(mscH2i))
-
-#Signal Frequency
-
-msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
-summary(msf2)
-plot(allEffects(msf2))
-
-msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(msf2i)
-plot(allEffects(msf2i))
-
-# Maximum Signal Frequency
-
-mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf2)
-plot(allEffects(mmsf2))
-
-mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingB*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf2i)
-plot(allEffects(mmsf2i))
-
-# Adult alloparenting lightly weighted
-
-#Signal Cost
-
-mscH3i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mscH3i)
-plot(allEffects(mscH3i))
-
-#Signal Frequency
-
-msf3i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(msf3i)
-plot(allEffects(msf3i))
-
-# Maximum Signal Frequency
-
-mmsf3 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf2)
-plot(allEffects(mmsf2))
-
-mmsf3i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparentingA*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf3i)
-plot(allEffects(mmsf3i))
-
-# Number of alloparents
-
-hist(d2$OtherAlloparents) # Few beyond 4, most 3 and below
-
-#Signal Cost
-
-mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparents + (1|householdID),data = d2, family = nbinom2)
-summary(mscH2)
-plot(allEffects(mscH2))
-
-mscH2i <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + OtherAlloparents*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mscH2i)
-plot(allEffects(mscH2i))
-
-#Signal Frequency
-
-msf2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparents + (1|householdID),data = d2, family = nbinom2)
-summary(msf2)
-plot(allEffects(msf2))
-
-msf2i <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparents*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(msf2i)
-plot(allEffects(msf2i))
-
-# Maximum Signal Frequency
-
-mmsf2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparents + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf2)
-plot(allEffects(mmsf2))
-
-mmsf2i <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + OtherAlloparents*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mmsf2i)
-plot(allEffects(mmsf2i))
-
-#' # New Analyses: Child Age Ranges
-
-#+ message=F, warning=F, fig.height=9, fig.width=9
-
-# Age models with all ranges
-
-# 2.5 - < 5 = different direction
-
-mAllAgeSF <- glmmTMB(SignalFreq ~ ChildAge + Sex + HHOtherKidsAge0_2.5 + HHOtherKidsAge2.5_5 + HHOtherKidsAge5_10 + HHOtherKidsAge10Plus + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mAllAgeSF)
-plot(allEffects(mAllAgeSF))
-
-mAllAgeSC <- glmmTMB(SignalCost ~ ChildAge + Sex + HHOtherKidsAge0_2.5 + HHOtherKidsAge2.5_5 + HHOtherKidsAge5_10 + HHOtherKidsAge10Plus + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mAllAgeSC)
-plot(allEffects(mAllAgeSC))
-
-mAllAgeSFM <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + HHOtherKidsAge0_2.5 + HHOtherKidsAge2.5_5 + HHOtherKidsAge5_10 + HHOtherKidsAge10Plus + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mAllAgeSFM)
-plot(allEffects(mAllAgeSFM))
-
-# Models with just >= 2.5 - < 5 and total children
-d2$OtherChildrenHH2 <- d2$OtherChildrenHH - d2$HHOtherKidsAge2.5_5
-
-# Signal Frequency
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction and AlloparentingFreqN*Sex interaction
-ms2_5SFi <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SFi)
-plot(allEffects(ms2_5SFi))
-
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction
-ms2_5SF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SF)
-plot(allEffects(ms2_5SF))
-
-# SignalCost
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction and AlloparentingFreqN*Sex interaction
-ms2_5SCi <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SCi)
-plot(allEffects(ms2_5SCi))
-
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction
-ms2_5SC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SC)
-plot(allEffects(ms2_5SC))
-
-# Max Signal Frequency
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction and AlloparentingFreqN*Sex interaction
-ms2_5SFMi <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SFMi)
-plot(allEffects(ms2_5SFMi))
-
-# with AlloparentingFreq*HHOtherKidsAge2.5_5 interaction
-ms2_5SFM <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(ms2_5SFM)
-plot(allEffects(ms2_5SFM))
-
-
-
-
-
-
-# Previous model but for under 5
-msfH5minus <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH2 + HHOtherKidsAge5Minus*AlloparentingFreqN + LogIncome + number_adults + ConflictFreqN + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(msfH5minus)
-plot(allEffects(msfH5minus))
-
-# AlloparentingFreqN*Sex back in
-# Show
-
-
-# Frequency of most common signal (running away excluded)
-
-mmsfH <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + HHOtherKidsAge2.5_5 + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mmsfH)
-plot(allEffects(mmsfH))
-
-mmsfH <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + HHOtherKidsAge2.5_5*AlloparentingFreqN + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mmsfH)
-plot(allEffects(mmsfH))
-
-# This age range was not a significant predictor of specific signals. Marignal effect in some tantrum models.
 
 # Notes:
-
-# Aaron recommended his package for Z-scoring
-# Also recommended not worrying about biomarkers
 
 # Survey language as a way to get at differences in culture
 # - Spanish: 322
 # - English: 53
 # - Nothing close to significant in our existing models.
-# - Not a significant when the sole predictor.
 
-# Sex of kids (not measured for the youngest kids)
-# - no signaling data either so nothing to do here
-
-# Revisit summed alloparenting contributions  (merged child alloparenting with adults)
-# - OtherAlloparentingN2 marginally significant in some models.
-# - Likely need to change its form: How to handle NAs and 0s?
-# - Slightly different wording from previous questions is troublesome (is the caretaker who did the survey included?)
-
-# Explore alloparenting*conflict
-# - nothing close to an interaction here when replacing sex with conflict in the alloparenting interaction.
-
-# interactions between conflict and kids and adults (couldn't read my writing here)
-
-# more in the model predicting conflict
-
-# "No significant relationships between Sidama infant signaling
-# behaviors and the frequency of care exist. However, results indicate that signaling behaviors were
-# positively associated with the size of infants' alloparental network."
-# - Jessica Collins dissertation
-
-# Want age categories similar to Helfrecht and Meehan 2015
-# counts of sibs/children in specific age ranges? (seems like it makes sense to do this with relatedness)
-
-# OtherAlloparentingN2 Models
-# sex by OtherAlloparentingN2 marginalish
-
-
-malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(malloparenting)
-plot(allEffects(malloparenting))
-
-# number of younger kids
-# other child care
-
-mscH <- glmmTMB(SignalCost ~ ChildAge*YoungerKids + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
-summary(mscH)
-plot(allEffects(mscH))
-
-
-#' # New Analyses: Anthropometrics
-
-#+ message=F, warning=F, fig.height=9, fig.width=9
-
-# NOBS = 72
-mscHW <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + HeightZ + WeightZ + (1|householdID),data = d2, family = nbinom2)
-summary(mscHW)
-plot(allEffects(mscHW))
-
-msfHW <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + HeightZ + WeightZ + (1|householdID),data = d2, family = nbinom2)
-summary(msfHW)
-plot(allEffects(msfHW))
-
-mscBMI <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BMIZ + (1|householdID),data = d2, family = nbinom2)
-summary(mscBMI)
-plot(allEffects(mscBMI))
-
-msfBMI <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BMIZ + (1|householdID),data = d2, family = nbinom2)
-summary(msfBMI)
-plot(allEffects(msfBMI))
-
-
-
-
-
-
-
-msc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + GripR*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-# Tricep Residuals (N and N2)
-msc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-
-
-d2$BodyFat <- c(scale(d2$TricepR) + scale(d2$SubscapR))
-msc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-msc <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-
-
-
-
-msc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + SubscapR*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-
-
-
-
-msc <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFatPercentageR*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msc)
-plot(allEffects(msc))
-
-#' # New Analyses: Relatedness within the family
-
-#+ message=F, warning=F, fig.height=9, fig.width=9
-
-# Child relatedness
-mCRC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanChildRelatedness + number_adults + (1|householdID),data = d2, family = nbinom2)
-summary(mCRC)
-plot(allEffects(mCRC))
-
-mCRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanChildRelatedness + number_adults + (1|householdID),data = d2, family = nbinom2)
-summary(mCRF)
-plot(allEffects(mCRF))
-
-# Sibling relatedness
-mSRC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + (1|householdID),data = d2, family = nbinom2)
-summary(mSRC)
-plot(allEffects(mSRC))
-
-mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + (1|householdID),data = d2, family = nbinom2)
-summary(mSRF)
-plot(allEffects(mSRF))
-
-mSRFM <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + (1|householdID),data = d2, family = nbinom2)
-summary(mSRFM)
-plot(allEffects(mSRFM))
-
-#Sibling Relatedness with kids 2.5 to 5 years old
-d2$OtherChildrenHH2 <- d2$OtherChildrenHH - d2$HHOtherKidsAge2.5_5
-
-mSRC2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH2 + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + HHOtherKidsAge2.5_5 + (1|householdID),data = d2, family = nbinom2)
-summary(mSRC2)
-plot(allEffects(mSRC2))
-
-mSRF2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH2 + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + HHOtherKidsAge2.5_5 + (1|householdID),data = d2, family = nbinom2)
-summary(mSRF2)
-plot(allEffects(mSRF2))
-
-mSRFM2 <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH2 + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + HHOtherKidsAge2.5_5 + (1|householdID),data = d2, family = nbinom2)
-summary(mSRFM2)
-plot(allEffects(mSRFM2))
-
-# Models with OlderKids and Younger Kids instead of children 2.5 - 5
-
-mSRC3 <- glmmTMB(SignalCost ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids + (1|householdID),data = d2, family = nbinom2)
-summary(mSRC3)
-plot(allEffects(mSRC3))
-
-mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids*ChildAge + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids + (1|householdID),data = d2, family = nbinom2)
-summary(mSRF3)
-plot(allEffects(mSRF3))
-
-mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mSRF3)
-plot(allEffects(mSRF3))
-
-#' # New Analyses: Adults who provide housework
-
-# Huge difference compared to AlloparentingFreqN
-
-msfhw1 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + AdultsHousework*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msfhw1)
-plot(allEffects(msfhw1))
-
-mschw1 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + AdultsHousework*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(mschw1)
-plot(allEffects(mschw1))
-
-msfhw2 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + AdultsHousework*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(msfhw2)
-plot(allEffects(msfhw2))
-
-mschw1 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + AdultsHousework*Sex + (1|householdID),data = d2, family = nbinom2)
-summary(mschw1)
-plot(allEffects(mschw1))
-
-
-
-
-
-
-
-
-
-d5 <- d2 |>
-  dplyr::filter(!is.na(CryFreq))
-table(is.na(d5$AlloparentingFreq), d5$ChildAge, useNA = "a")
