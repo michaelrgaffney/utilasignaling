@@ -27,6 +27,7 @@ library(localgrowth)
 library(knitr)
 library(kableExtra)
 library(modelsummary)
+library(ggalluvial)
 
 source("recode.R")
 
@@ -415,7 +416,7 @@ signalfreqdf <- d2 |>
     householdID,
     childHHid,
     uniqueID,
-    Sex,
+    # Sex,
     SadFreqOF,
     CryFreqOF,
     TantrumFreqOF
@@ -430,7 +431,80 @@ signalfreqdf <- d2 |>
     #Alloparenting = AlloparentingFreq0
   )
 
-signaldf_long <- signalfreqdf |>
+freq_short <- c(
+  "Never" = "0",
+  "Once a month or less" = "≤1",
+  "More than once a month but less than once a week" = "2-3",
+  "More than once a week but not daily" = "4-29",
+  "Daily" = "30",
+  "Multiple times per day" = ">30"
+)
+
+freq_short2 <- c(
+  "0" = "Low",
+  "≤1" = "Low",
+  "2-3" = "Medium",
+  "4-29" = "Medium",
+  "30" = "High",
+  ">30" = "High"
+)
+
+sfdf <-
+  signalfreqdf |>
+  mutate(
+    across(Sadness:Tantrums, \(x) factor(c(freq_short[x]), levels = c(freq_short)))
+  ) |>
+  na.omit()
+
+signalheatmap <- function(d, signal1, signal2){
+  out <- table(d[[signal1]], d[[signal2]])
+  print(out)
+  out2 <- matrix(out, ncol=ncol(out), dimnames = dimnames(out))
+  hagenheat(out2, seriation_method = 'Identity', viridis_option = 'C') +
+    ggtitle("Signal frequency (times per month)") +
+    ylab(signal1) +
+    xlab(signal2) +
+    theme_minimal(20) +
+    theme(axis.title.y = element_text(angle = 0))
+}
+
+signalheatmap(sfdf, 'Crying', 'Sadness')
+signalheatmap(sfdf, 'Tantrums', 'Sadness')
+signalheatmap(sfdf, 'Tantrums', 'Crying')
+
+sfdfsum <-
+  sfdf |>
+  summarise(
+    Freq = n(),
+    .by = c(Sadness, Crying, Tantrums)
+  ) |>
+  arrange(desc(Freq))
+
+sfdfsum2 <-
+  sfdf |>
+  mutate(
+    across(Sadness:Tantrums, \(x) factor(c(freq_short2[x]), levels = rev(unique(freq_short2))))
+  ) |>
+  summarise(
+    Freq = n(),
+    .by = c(Sadness, Crying, Tantrums)
+  ) |>
+  arrange(desc(Freq)) |>
+  dplyr::filter(Freq > 2)
+
+
+ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
+  geom_alluvium(aes(fill = Sadness), color = "black", show.legend = F) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Sadness", "Crying", "Tantrums"), expand = c(.2, .05)) +
+  ylab("Number of\nchildren") +
+  theme_minimal(20) +
+  theme(axis.title.y = element_text(angle = 0, hjust = 1))
+
+
+signaldf_long <-
+  sfdf |>
   pivot_longer(cols = Sadness:Tantrums, names_to = "Signal", values_to = "Freq")  |>
   mutate(
     Signal = factor(Signal, levels = c("Sadness", "Crying", "Tantrums"))
@@ -455,7 +529,6 @@ x <- table(signalfreqdf$Sadness, signalfreqdf$Crying) |>
   as.data.frame() |>
   dplyr::filter(Freq > 3)
 
-library(ggalluvial)
 ggplot(x, aes(axis1 = Var1, axis2 = Var2, y = Freq)) +
   geom_alluvium(aes(fill = Var1), color = "black") +
   geom_stratum() +
