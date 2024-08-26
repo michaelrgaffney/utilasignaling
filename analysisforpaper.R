@@ -501,6 +501,7 @@ signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, ax
   ylab("Number of\nchildren") +
   theme_minimal(20) +
   theme(axis.title.y = element_text(angle = 0, hjust = 1))
+
 signal_alluvial_plot
 
 signaldf_long <-
