@@ -502,6 +502,14 @@ ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq
   theme_minimal(20) +
   theme(axis.title.y = element_text(angle = 0, hjust = 1))
 
+# ggplot(sfdfsum2, aes(axis1 = Tantrums, axis2 = Crying, axis3 = Sadness, y = Freq)) +
+#   geom_alluvium(aes(fill = Tantrums), color = "black", show.legend = F) +
+#   geom_stratum() +
+#   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+#   scale_x_discrete(limits = c("Tantrums", "Crying", "Sadness"), expand = c(.2, .05)) +
+#   ylab("Number of\nchildren") +
+#   theme_minimal(20) +
+#   theme(axis.title.y = element_text(angle = 0, hjust = 1))
 
 signaldf_long <-
   sfdf |>
