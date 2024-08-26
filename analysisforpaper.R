@@ -493,7 +493,7 @@ sfdfsum2 <-
   dplyr::filter(Freq > 2)
 
 
-ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
+signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
   geom_alluvium(aes(fill = Sadness), color = "black", show.legend = F) +
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
@@ -501,7 +501,7 @@ ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq
   ylab("Number of\nchildren") +
   theme_minimal(20) +
   theme(axis.title.y = element_text(angle = 0, hjust = 1))
-
+signal_alluvial_plot
 
 signaldf_long <-
   sfdf |>
@@ -511,8 +511,8 @@ signaldf_long <-
   ) |>
   na.omit()
 
-barplot_SignalFreq <- ggplot(signaldf_long, aes(y=Freq, fill=Signal)) + geom_bar(position = "dodge")
-barplot_SignalFreq
+# barplot_SignalFreq <- ggplot(signaldf_long, aes(y=Freq, fill=Signal)) + geom_bar(position = "dodge")
+# barplot_SignalFreq
 
 ggplot(signaldf_long, aes(Signal, Freq, group = uniqueID)) + geom_line(show.legend = FALSE, alpha = .25 , position = position_jitter(h = .1, w = .1))
 
@@ -520,7 +520,8 @@ signaldf_long_sum <- signaldf_long |>
   group_by(Signal, Freq) |>
   summarise(N = n())
 
-ggplot(signaldf_long_sum, aes(N, Signal, fill = Freq)) + geom_col(position = "stack")
+barplot_SignalFreq <- ggplot(signaldf_long_sum, aes(N, Signal, fill = Freq)) + geom_col(position = "stack")
+barplot_SignalFreq
 
 ggplot(signaldf_long_sum, aes(Freq, N, color = Signal, group = Signal)) + geom_line()
 
@@ -537,14 +538,19 @@ ggplot(x, aes(axis1 = Var1, axis2 = Var2, y = Freq)) +
 d2_conflict_filter <- d2 |>
   filter_at(vars(ConflictFreqOF,Sex),all_vars(!is.na(.)))
 
-barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge")
+barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of conflict") + theme(axis.title.y = element_blank())
+# barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of conflict") + theme(axis.title.y = element_blank(), legend.position = "none")
 barplot_conflict
 
 d2_alloparent_filter <- d2 |>
   filter_at(vars(AlloparentingFreq0,Sex),all_vars(!is.na(.)))
 
-barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge")
+barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of child alloparenting") + theme(axis.title.y = element_blank())
+# barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of child alloparenting") + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
 barplot_alloparenting
+
+# library(gridExtra)
+# grid.arrange(barplot_conflict, barplot_alloparenting, ncol = 2)
 # signaling frequency and cost histograms ---------------------------------
 
 ggplot(d2, aes(x=SadFreqN, fill=Sex)) +
@@ -865,12 +871,20 @@ plot_predictions(mp7, condition = c("Family2", "group"), type = "probs", vcov = 
 # Using preferred model for signal frequency (without partner status)
 # signal Freq and Child age still significant after controlling for education years
 # CurrentHealthMean has no predictive ability when added
-mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN + CurrentHealthMean, d2)
+mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN, d2)
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID)
 plot_predictions(mN1, condition = c("SignalFreq", "group"), type = "probs", vcov = ~householdID)
-plot_predictions(mN1, condition = c("CurrentHealthMean", "group"), type = "probs", vcov = ~householdID)
+
+(ci <- confint(mN1))
+exp(cbind(coef(mN1),(ci)))
+
+mN2 <- polr(RelativeNeed3 ~ SignalCost + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN, d2)
+summary(mN2)
+coeftest(mN2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+plot_predictions(mN2, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID)
+plot_predictions(mN2, condition = c("SignalCost", "group"), type = "probs", vcov = ~householdID)
 
 (ci <- confint(mN1))
 exp(cbind(coef(mN1),(ci)))

@@ -263,6 +263,15 @@ kable(custom.summarize(d2, vars_c)) %>% kable_styling()
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict 
 
+Child sadness, crying, and temper tantrums were reasonably common, with caretakers reporting over xx% of children engaging in each at least xxxTimexxx. A small subset of children engaged in these signals/states at least daily (stats). However, many children were reported to never engage in these signals/states (stat) or engage in them once a month or less (cite). 
+
+Conflict between children and caretakers was also common, with `r sum(na.omit(d2$ConflictFreqN >= 8))` children (`r signif(sum((na.omit(d2$ConflictFreqN >= 8)) / sum(!is.na(d2$ConflictFreqN)) * 100), 2)`%) having conflicts with parents more than once a week. As with the frequencies of various types of signaling, many children (`r sum(na.omit(d2$ConflictFreqN == 0))` [`r signif(sum((na.omit(d2$ConflictFreqN == 0)) / sum(!is.na(d2$ConflictFreqN)) * 100), 2)`%]) were described as never having conflicts with parents (stat).
+
+# note these figures do not match plot currently (do we want to only include those with other data or all kids mentioned in households?)
+
+The frequency of alloparenting effort was bimodally distributed, with `r sum(na.omit(d2$AlloparentingFreqN == 0))` children (`r signif(sum((na.omit(d2$AlloparentingFreqN == 0)) / sum(!is.na(d2$AlloparentingFreqN)) * 100), 2)`%) being reported to never engage in it (`r sum(d2$NumberOfChildren==1)` instances were due to a child being an only child) and `r sum(na.omit(d2$AlloparentingFreqN >= 30))` children (`r signif(sum((na.omit(d2$AlloparentingFreqN >= 30)) / sum(!is.na(d2$AlloparentingFreqN)) * 100), 2)`%) being reported to help with childcare at least once a day. 
+
+
 :::{#fig-barplot_SignalFreq}
 ```{r}
 barplot_SignalFreq
@@ -270,6 +279,15 @@ barplot_SignalFreq
 
 caption
 :::
+
+:::{#fig-signal_alluvial_plot}
+```{r}
+signal_alluvial_plot
+```
+
+Place next to stacked barplot?
+:::
+
 
 :::{#fig-barplot_ConflictFreq}
 ```{r}
@@ -288,6 +306,8 @@ caption
 :::
 
 ## Signaling behavior is negatively associated with age
+
+For every signaling measure except sadness (which also involves non-signaling functions), there was a statistically significant negative relationship between the age of the child and the frequency of signaling when controlling for the sex of the child, household demographics, the frequency of conflict with one's primary caretaker, and an alloparenting effort by sex interaction. See @tbl-main_models for regression statistics.
 
 ```{r}
 #| label: tbl-main_models
@@ -319,7 +339,7 @@ modelsummary(list(Sadness = msadH, Crying = mcryH, Tantrum = mtantrumH, SignalFr
 plot_predictions(msadH, condition = "ChildAge", vcov = TRUE, points = .25) + theme_minimal(15) + ylab("Frequency of sadness (per month)") + xlab("Child age (years)") + xlim(5,20)
 ```
 
-The effect of the age on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior. Bars are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Each dot is 1 child. Overlapping points are represented by the transparency of the point (lower transparency equals more values at a given coordinate). See @tbl-main_models for the corresponding regression table.
+The effect of age on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior. Bars are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Each dot is 1 child. Overlapping points are represented by the transparency of the point (lower transparency equals more values at a given coordinate). See @tbl-main_models for the corresponding regression table.
 :::
 
 :::{#fig-effect2}
@@ -363,6 +383,8 @@ combine with other age plots and use caption 1
 :::
 
 ## Signaling behavior is positively associated with conflict with primary caretakers
+
+There was a statistically significant positive relationship between the frequency of conflict between a child and their primary caretaker and the frequency of signaling when controlling for the sex of the child, the age of the child, household demographics, and an alloparenting effort by sex interaction. See @tbl-main_models for regression statistics.
 
 :::{#fig-effect1c}
 ```{r}
@@ -414,7 +436,14 @@ combine with other conflict plots and use caption 1
 
 ## Interaction between child sex and child alloparenting 
 
+For each signal, there was also a significant interaction between how often a child cared for their siblings and the sex of the child, whereby the slope of the relationship was positive or flat for girls and flat or negative for boys. In other words, our models predict that as children provide more allocare within their families, the frequency of signaling would remain at the same rate or, more often, increase with alloparenting effort for girls and remain at the same rate or decrease with alloparenting effort for boys.
+
 ## Summed signal cost and tantrum frequency are negatively associated with body fat
+
+(Alternative way, show just composite measure and all signaling outcomes)
+There were significant negative relationships between summed signal cost and tantrum frequency and 1) the residuals for subscapular skinfold thickness (stat), 2) triscapular skinflold thickness (stat), 3) and a scaled composite of the two measures (stat) when controlling for the sex of the child, the age of the child, the frequency of conflict with one's primary caretaker, household demographics, and an alloparenting effort by sex interaction. See @tbl-bodyfat_models for regression statistics.
+
+Height Z-scores, weight Z-scores, BMI Z-scores, and body fat percentage residuals were not significant predictors of signaling behavior in models with the same control variables see SI plot for regression table.
 
 ```{r}
 #| label: tbl-bodyfat_models
@@ -461,7 +490,11 @@ combine with other body fat plots and use caption 1
 
 ## Cargivers percieve older children as relatively needy 
 
+There were significant positive relationships between perceived relative neediness within the family and both the summed frequency of child signaling and child age when controlling for child sex, household demographics, the frequency of conflict between child and caretaker, and the frequency of a child providing allocare. There were also positive relationships between summed signal cost and perceived relative neediness within the family when controlling for the same variables; howerver, these associations were not significant. 
+
 ## Parental responses to last signal of need
+
+There were no significant relationships between, child age, child sex, the number of children in the household, and log family income and the valence (positive, neutral, or negative) of parental reponses from the child's perspective. However, primary caretakers were significantly more likely to respond respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness (stat), and significantly less likely to respond positively when they attrivuted the cause of signaling to child punishment (stat). See fig xxxxx and SI table xxx.
 
 ## Sociodemographics
 
