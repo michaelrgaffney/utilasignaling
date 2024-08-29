@@ -1,24 +1,18 @@
 # loading libraries -------------------------------------------------------
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
-
-# note some are no longer used
+# note: list is cleaned up but some may no longer used
 library(utiladata2023) # data package
 library(tidyverse)
-# library(lme4)
 library(effects)
 library(visreg)
 library(emmeans)
 library(car)
 library(haven)
 library(MASS)
-library(glmmTMB) # try this negative binomial (random effect for neighborhood)
-#library(gee)
-#library(geepack)
+library(glmmTMB)
 library(sandwich)
 library(lmtest)
 library(ggcorrplot)
-#library(geeM)
 library(marginaleffects)
 library(ordinal) # clmm # polr
 library(brms)
@@ -28,9 +22,9 @@ library(knitr)
 library(kableExtra)
 library(modelsummary)
 library(ggalluvial)
+library(patchwork)
 
 source("recode.R")
-
 
 # functions used ----------------------------------------------------------
 
@@ -58,7 +52,6 @@ mean2 <- function(..., na.rm = F){
   if(all(is.na(v))) return(NA)
   mean(v, na.rm = na.rm)
 }
-
 
 # dataframe prep ----------------------------------------------------------
 
@@ -173,7 +166,7 @@ d <- children |>
       #.default = ConflictFreq
       ),
     AlloparentingFreq0 = case_when(
-      is.na(AlloparentingFreq) & ChildAge < 5 ~ "Never",
+      is.na(AlloparentingFreq) & ChildAge < 5 ~ "Never", #does nothing
       is.na(AlloparentingFreq) & NumberOfChildren == 1 ~ "Never",
       is.na(AlloparentingFreq) & Siblings == 0 ~ "Never", # check later
       is.na(AlloparentingFreq) & YoungerKids == 0 ~ "Never",
@@ -239,12 +232,12 @@ d <- children |>
     NeutralResponseF = as.factor(NeutralResponseBinary),
     NegativeResponseBinary = ifelse(NegativeResponse >= 1, 1, 0),
     NegativeResponseF = as.factor(NegativeResponseBinary),
-    ParentalResponse = case_when(
+    CaregiverResponse = case_when(
       PositiveResponse > 0 & NegativeResponse == 0 ~ "1",
       PositiveResponse == 0 & NegativeResponse == 0 ~ "0",
       PositiveResponse == 0 & NegativeResponse > 0 ~ "-1"
     ),
-    ParentalResponse = factor(ParentalResponse, ordered = TRUE, levels = c("-1", "0", "1"))
+    CaregiverResponse = factor(CaregiverResponse, ordered = TRUE, levels = c("-1", "0", "1"))
   ) |>
   rowwise() |>
   mutate(
@@ -363,26 +356,17 @@ d2 <- d |>
     OtherCare = as.numeric(AdultsChildcare) + OtherChildAlloparents #Check Change to TotalChildCare
   )
 
-# sample characteristics --------------------------------------------------
+# dataframe for plots -----------------------------------------------------
 
-# scatterplot of CaregiverAge and ChildAge
-# note 20 year old caregiver reporting on a 20 year old has a CaregiverRelation of "Other"
-ggplot(data = d2, aes(CaregiverAge, ChildAge)) + geom_count() + geom_smooth() + labs(title = "Scatterplot of CaregiverAge and ChildAge")
-
-#bar plot of household income
-ggplot(caregivers, aes(y=IncomeCategory)) +
-  geom_bar() + labs(y = "IncomeCaregory (household level)")
-
-# bar plot of ChildAge with Sex as color
-ggplot(d2, aes(y=ChildAge, fill = Sex)) +
-  geom_bar()
-
-# dataframe used to plot sample characteristics using the sample from our main models
+# filters based on having at least one value of SadFreqN, CryFreqN, or TantrumFreqN
 modeldf <- d2 |>
   dplyr::select(
     householdID,
     childHHid,
     Sex,
+    CryFreqN,
+    SadFreqN,
+    TantrumFreqN,
     SignalFreq,
     SignalCost,
     SignalFreqMax,
@@ -393,42 +377,42 @@ modeldf <- d2 |>
     ConflictFreqN,
     AlloparentingFreqN,
     EducationLevelYears,
+    Currenthealth1,
+    Currenthealth2,
+    Currenthealth3,
     CurrentHealthMean,
-    ImmigrateUtila,
-    UserLanguage,
     SadFreqOF,
+    CryFreqOF,
+    TantrumFreqOF,
+    ConflictFreqOF,
+    AlloparentingFreq0,
+    NumberOfChildren,
+    RelativeNeed,
+    RelativeNeed3,
+    PositiveResponse,
+    NegativeResponse,
+    CaregiverAge
   ) |>
-  na.omit()
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN)))
 
-# bar plot of ChildAge with Sex as color, but with the sample used for our main models
-ggplot(modeldf, aes(y=ChildAge, fill = Sex)) +
-  geom_bar()
+# raw data plots  --------------------------------------------------
 
-# # bar plot of Neighborhood with ImmigrateUtila as color
-caregivers2 <- caregivers |>  filter(!is.na(Neighborhood))
-ggplot(caregivers2, aes(y=Neighborhood, fill=ImmigrateUtila)) +
-  geom_bar() + labs(title = "Immigration status by neighborhood")
+## main paper plots --------------------------------------------------------
 
-
-
+#
 signalfreqdf <- d2 |>
   dplyr::select(
     householdID,
     childHHid,
     uniqueID,
-    # Sex,
     SadFreqOF,
     CryFreqOF,
     TantrumFreqOF
-    # ConflictFreqOF,
-    # AlloparentingFreq0
   ) |>
   rename(
     Sadness = SadFreqOF,
     Crying = CryFreqOF,
     Tantrums = TantrumFreqOF
-    #Conflict = ConflictFreqOF,
-    #Alloparenting = AlloparentingFreq0
   )
 
 freq_short <- c(
@@ -492,7 +476,6 @@ sfdfsum2 <-
   arrange(desc(Freq)) |>
   dplyr::filter(Freq > 2)
 
-
 signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
   geom_alluvium(aes(fill = Sadness), color = "black", show.legend = F) +
   geom_stratum() +
@@ -503,6 +486,21 @@ signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, ax
   theme(axis.title.y = element_text(angle = 0, hjust = 1))
 
 signal_alluvial_plot
+
+sfdfsum3 <- sfdfsum2 |>
+  unite(SignalCombo, Sadness, Crying, Tantrums, remove = FALSE)
+
+signal_alluvial_plot2 <- ggplot(sfdfsum3, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
+  geom_alluvium(aes(fill = as.factor(SignalCombo)), color = "black", show.legend = F) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Sadness", "Crying", "Tantrums"), expand = c(.08, .05)) +
+  ylab("Number of\nchildren") +
+  theme_minimal(20) +
+  theme(axis.title.y = element_text(angle = 0, hjust = 1))
+# scale_fill_viridis_d(option = "D")
+
+signal_alluvial_plot2
 
 signaldf_long <-
   sfdf |>
@@ -521,7 +519,13 @@ signaldf_long_sum <- signaldf_long |>
   group_by(Signal, Freq) |>
   summarise(N = n())
 
-barplot_SignalFreq <- ggplot(signaldf_long_sum, aes(N, Signal, fill = Freq)) + geom_col(position = "stack")
+barplot_SignalFreq <- ggplot(signaldf_long_sum, aes(N, Signal, fill = fct_rev(Freq))) +
+  geom_col(position = "stack", color = "grey") +
+  scale_fill_viridis_d(option = "B", direction = -1) +
+  labs(x = "Number of children", y = "") +
+  guides(fill = guide_legend("Frequency")) +
+  theme_minimal(15)
+
 barplot_SignalFreq
 
 ggplot(signaldf_long_sum, aes(Freq, N, color = Signal, group = Signal)) + geom_line()
@@ -531,48 +535,55 @@ x <- table(signalfreqdf$Sadness, signalfreqdf$Crying) |>
   as.data.frame() |>
   dplyr::filter(Freq > 3)
 
-ggplot(x, aes(axis1 = Var1, axis2 = Var2, y = Freq)) +
-  geom_alluvium(aes(fill = Var1), color = "black") +
-  geom_stratum() +
-  scale_x_discrete(limits = c("Sadness", "Crying"), expand = c(.2, .05))
+d2_conflict_filter <- modeldf |>
+  mutate(
+    ConflictFreq2 = factor(freq_short[ConflictFreqOF], levels = c(freq_short))
+  )|>
+  filter_at(vars(ConflictFreqOF),all_vars(!is.na(.)))
 
-d2_conflict_filter <- d2 |>
-  filter_at(vars(ConflictFreqOF,Sex),all_vars(!is.na(.)))
-
-barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of conflict") + theme(axis.title.y = element_blank())
-# barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreqOF, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of conflict") + theme(axis.title.y = element_blank(), legend.position = "none")
+barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreq2, fill= Sex)) +
+  geom_bar(position = "stack") +
+  labs(title = "Frequency of conflict") +
+  scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
+  labs(x = "Number of children", y = "") +
+  theme_minimal(15)
 barplot_conflict
 
-d2_alloparent_filter <- d2 |>
-  filter_at(vars(AlloparentingFreq0,Sex),all_vars(!is.na(.)))
+d2_alloparent_filter <- modeldf |>
+  mutate(
+    AlloparentingFreq02 = factor(freq_short[AlloparentingFreq0], levels = c(freq_short))
+  )|>
+  filter_at(vars(AlloparentingFreq0),all_vars(!is.na(.)))
 
-barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of child alloparenting") + theme(axis.title.y = element_blank())
-# barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq0, fill= Sex)) + geom_bar(position = "dodge") + labs(title = "Frequency of child alloparenting") + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
+barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq02, fill= Sex)) +
+  geom_bar(position = "stack") +
+  labs(title = "Frequency of child alloparenting") +
+  scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
+  labs(x = "Number of children", y = "") +
+  theme_minimal(15)
+
 barplot_alloparenting
 
-# library(gridExtra)
-# grid.arrange(barplot_conflict, barplot_alloparenting, ncol = 2)
-# signaling frequency and cost histograms ---------------------------------
+## possible SI plots ----------------------------------------------------
 
-ggplot(d2, aes(x=SadFreqN, fill=Sex)) +
-  geom_histogram()
-ggplot(d2, aes(x=CryFreqN, fill=Sex)) +
-  geom_histogram()
-ggplot(d2, aes(x=TantrumFreqN, fill=Sex)) +
-  geom_histogram()
-ggplot(d2, aes(x=SignalFreq, fill=Sex)) +
-  geom_histogram()
-ggplot(d2, aes(x=SignalCost, fill=Sex)) +
-  geom_histogram()
-ggplot(d2, aes(x=SignalFreqMax, fill=Sex)) +
-  geom_histogram()
+#bar plot of household income
+ggplot(caregivers, aes(y=IncomeCategory)) +
+  geom_bar() + labs(y = "IncomeCaregory (household level)")
 
-barplot_sad <- ggplot(modeldf, aes(y=SadFreqOF, fill=Sex, na.rm = TRUE)) + geom_bar()
-barplot_sad
+# scatterplot of CaregiverAge and ChildAge
+# note 20 year old caregiver reporting on a 20 year old has a CaregiverRelation of "Other"
+ggplot(data = modeldf, aes(CaregiverAge, ChildAge)) + geom_count() + geom_smooth() + labs(title = "Scatterplot of CaregiverAge and ChildAge")
 
-#' # Correlation matrix of predictor and outcome variables
+# bar plot of ChildAge with Sex as color, but with the sample used for our main models
+ggplot(modeldf, aes(y=ChildAge, fill = Sex)) +
+  geom_bar()
 
-#+ message=F, warning=F, fig.height=9, fig.width=10
+# # bar plot of Neighborhood with ImmigrateUtila as color
+caregivers2 <- caregivers |>  filter(!is.na(Neighborhood))
+ggplot(caregivers2, aes(y=Neighborhood, fill=ImmigrateUtila)) +
+  geom_bar() + labs(title = "Immigration status by neighborhood")
+
+# Correlation matrix of predictor and outcome variables
 
 maincormat <- d2[c("CurrentHealthMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeNeed3", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")] |>
   mutate(
@@ -585,8 +596,7 @@ maincormat <- d2[c("CurrentHealthMean", "EducationLevelYears", "OtherChildrenHH"
 
 ggcorrplot(maincormat, hc.order = TRUE, lab = TRUE)
 
-
-# CurrentHealthMean models ------------------------------------------------
+# main models ------------------------------------------------
 
 # signal cost
 mscH <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
@@ -606,10 +616,6 @@ summary(mmsfH)
 plot(allEffects(mmsfH))
 
 # Signal specific models
-
-# Current health only a significant predictor of sad frequency
-# little in the way of conflicts on interest with illness as long as it does not involve low survival probability at the youngest of ages?
-# in line with this reasoning, CurrentHealthMean does not predict conflict
 
 msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
 summary(msadH)
@@ -658,13 +664,28 @@ plot(allEffects(msubTantrum))
 
 # BodyFat
 d2$BodyFat <- c(scale(d2$TricepR) + scale(d2$SubscapR))
+
+# do we want CurrentHealthMean in these models?
+
+mBFf <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFf)
+plot(allEffects(mBFf))
+
+mBFfm <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFfm)
+plot(allEffects(mBFfm))
+
 mBFc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFc)
 plot(allEffects(mBFc))
 
-  # BodyFat scaled composite = not a signficant predictor of signal frequency.
-  # Effect on cost may be due to its association with tantrum frequency.
-  # (Tantrum model below)
+mBFsad <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFsad)
+plot(allEffects(mBFsad))
+
+mBFcry <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mBFcry)
+plot(allEffects(mBFcry))
 
 mBFtantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFtantrum)
@@ -854,18 +875,28 @@ plot(allEffects(mSRF3))
 # ordinal logistic regression of parental response ------------------------
 
 # note 6 instances of both positive and negative coded as NA
-table(d2$PositiveResponse, d2$NegativeResponse)
+table(modeldf$PositiveResponse, modeldf$NegativeResponse)
 
-mp7 <- polr(ParentalResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
-summary(mp7)
+mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
+summary(mpr)
 
-coeftest(mp7, vcov = vcovCL, type = "HC0", cluster = ~householdID)
-plot_predictions(mp7, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID)
-plot_predictions(mp7, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID)
-plot_predictions(mp7, condition = c("Family2", "group"), type = "probs", vcov = ~householdID)
+coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID) +
+  xlab("Cause involved punishment") +
+  ylab("Caregiver response")
+p_response_pain <- plot_predictions(mpr, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID) +
+  xlab("Cause involved discomfort, pain, injury, illness") +
+  ylab("Caregiver response") +
+  labs(color=fct_rev('Caregiver response')) +
+  scale_fill_discrete(guide="none")
 
+signaling_plot_last_signal_response <- (p_response_punishment + theme(legend.position = "none")) + (p_response_pain + theme(legend.position = c(1, 1.15))) +
+  plot_layout(ncol = 1, byrow = FALSE) +
+  plot_annotation(title = "", tag_levels = "A")
 
-# ordinal logistic regression models for relative need and materna --------
+signaling_plot_last_signal_response
+
+# ordinal logistic regression models for relative need  --------
 
 # Results with NeighborhoodF as a random effect and vc0 seem like outliers compared to all other methods
 
@@ -875,17 +906,32 @@ plot_predictions(mp7, condition = c("Family2", "group"), type = "probs", vcov = 
 mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN, d2)
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
-plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID)
-plot_predictions(mN1, condition = c("SignalFreq", "group"), type = "probs", vcov = ~householdID)
+
+p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) + ylab("Relative need (w/in household)")
+p_need_age_sf
+
+#Check legend
+p_need_signalfreq <- plot_predictions(mN1, condition = c("SignalFreq", "group"), type = "probs", vcov = ~householdID) + ylab("Relative need (w/in household)") + labs(color='Relative need') + scale_fill_discrete(guide="none")
+p_need_signalfreq
 
 (ci <- confint(mN1))
 exp(cbind(coef(mN1),(ci)))
 
+signaling_plot_need <- (p_need_age_sf + theme(legend.position = "none")) + (p_need_signalfreq + theme(legend.position = c(1, 1.15))) +
+  plot_layout(ncol = 1, byrow = FALSE) +
+  plot_annotation(title = "", tag_levels = "A")
+
+signaling_plot_need
+
 mN2 <- polr(RelativeNeed3 ~ SignalCost + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN, d2)
 summary(mN2)
 coeftest(mN2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
-plot_predictions(mN2, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID)
-plot_predictions(mN2, condition = c("SignalCost", "group"), type = "probs", vcov = ~householdID)
+
+p_need_age_sc <- plot_predictions(mN2, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID)
+p_need_age_sc
+
+p_need_signalcost <- plot_predictions(mN2, condition = c("SignalCost", "group"), type = "probs", vcov = ~householdID)
+p_need_signalcost
 
 (ci <- confint(mN1))
 exp(cbind(coef(mN1),(ci)))
@@ -916,4 +962,190 @@ plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 # - Spanish: 322
 # - English: 53
 # - Nothing close to significant in our existing models.
+
+
+
+
+
+
+
+# plots -------------------------------------------------------
+
+
+## age --------------------------------------------------------------------
+
+p_age_sad <- plot_predictions(msadH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Sadness freq.") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+p_age_cry <- plot_predictions(mcryH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Crying freq.") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+p_age_tantrum <- plot_predictions(mtantrumH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Tantrum freq.") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+p_age_freq <- plot_predictions(msfH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Summed freq.") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+p_age_cost <- plot_predictions(mscH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Signal cost") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+p_age_freq_max <- plot_predictions(mmsfH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Max freq.") +
+  xlab("Child age (years)") +
+  xlim(5,20)
+
+signaling_data_plot_age <- p_age_sad + p_age_cry + p_age_tantrum + p_age_freq + p_age_freq_max + p_age_cost +
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+  plot_annotation(title = "Signaling measures", tag_levels = "A")
+
+signaling_data_plot_age
+
+## conflict --------------------------------------------------------------------
+
+p_conflict_sad <- plot_predictions(msadH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Sadness freq.") +
+  xlab("Conflict freq. (per month)")
+
+p_conflict_cry <- plot_predictions(mcryH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Crying freq.") +
+  xlab("Conflict freq. (per month)")
+
+p_conflict_tantrum <- plot_predictions(mtantrumH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Tantrum freq.") +
+  xlab("Conflict freq. (per month)")
+
+# ylim(0, 60)
+
+p_conflict_freq <- plot_predictions(msfH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Summed freq.") +
+  xlab("Conflict freq. (per month)")
+
+p_conflict_cost <- plot_predictions(mscH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Signal cost") +
+  xlab("Conflict freq. (per month)")
+
+p_conflict_freq_max <- plot_predictions(mmsfH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Max freq.") +
+  xlab("Conflict freq. (per month)")
+
+signaling_data_plot_conflict <- p_conflict_sad + p_conflict_cry + p_conflict_tantrum + p_conflict_freq + p_conflict_freq_max + p_conflict_cost +
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+  plot_annotation(title = "Signaling measures", tag_levels = "A")
+
+signaling_data_plot_conflict
+
+## alloparenting:sex  --------------------------------------------------------------------
+
+p_allo_by_sex_sad <- plot_predictions(msadH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Sadness freq.") +
+  xlab("Alloparenting freq. (per month)")
+
+p_allo_by_sex_cry <- plot_predictions(mcryH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Crying freq.") +
+  xlab("Alloparenting freq. (per month)")
+
+p_allo_by_sex_tantrum <- plot_predictions(mtantrumH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Tantrum freq.") +
+  xlab("Alloparenting freq. (per month)")
+
+p_allo_by_sex_freq <- plot_predictions(msfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Summed freq.") +
+  xlab("Alloparenting freq. (per month)")
+
+p_allo_by_sex_cost <- plot_predictions(mscH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Signal cost") +
+  xlab("Alloparenting freq. (per month)")
+
+p_allo_by_sex_freq_max <- plot_predictions(mmsfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Max freq.") +
+  xlab("Alloparenting freq. (per month)")
+
+signaling_data_plot_allo_by_sex <- p_allo_by_sex_sad + p_allo_by_sex_cry + p_allo_by_sex_tantrum + p_allo_by_sex_freq + p_allo_by_sex_freq_max + p_allo_by_sex_cost +
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+  plot_annotation(title = "Signaling measures", tag_levels = "A")
+
+signaling_data_plot_allo_by_sex
+
+
+## body fat ---------------------------------------------------------------
+
+p_bodyfat_cost <- plot_predictions(mBFc, condition = c("BodyFat"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Signal cost") +
+  xlab("Body fat composite")
+
+p_bodyfat_crying <- plot_predictions(mBFcry, condition = "BodyFat", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Crying freq.") +
+  xlab("Body fat composite")
+
+p_bodyfat_tantrum <- plot_predictions(mBFtantrum, condition = "BodyFat", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Tantrum freq.") +
+  xlab("Body fat composite")
+
+signaling_data_plot_bodyfat <- p_bodyfat_cost + p_bodyfat_crying + p_bodyfat_tantrum +
+  plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE) +
+  plot_annotation(title = "Signaling measures", tag_levels = "A")
+signaling_data_plot_bodyfat
+
+# x <- summary(mBFtantrum)
+# x$coefficients$cond["BodyFat", "Estimate"]
+# x$coefficients$cond["BodyFat", "Pr(>|z|)"]
+
+
+# tables to extract values from -------------------------------------------
+
+rel_need_table <- table(modeldf$RelativeNeed3)
+
+response_overlap <- table(modeldf$PositiveResponse, modeldf$NegativeResponse)
+
+# model statistics --------------------------------------------------------
+
+library (glue)
+library (tidyverse)
+library (broom)
+tdy <- function (m) {
+  tidy (m, conf.int = T) |>
+mutate(
+  # Adjust string to taste
+  str_old = glue ("$\\beta={signif(estimate, 2)}$ ({signif(conf.low, 2)}, {signif(conf.high, 2)})"),
+  str2 = glue("p = {signif(p.value, 2)}"),
+  str = glue ("$\\beta={signif(estimate, 2)}$, 95% CI:{signif(conf.low, 2)} - {signif(conf.high, 2)}, p = {signif(p.value, 2)}"),
+) %>%
+split (.$term)
+}
+models <- list (msadH = msadH, mcryH = mcryH, mtantrumH = mtantrumH, msfH = msfH, mscH = mscH, mmsfH = mmsfH, mBFc = mBFc, mBFtantrum=mBFtantrum)
+stats <- map (models, tdy)
+stats$mBFc$BodyFat$str
+stats$mBFc$BodyFat$str2
+
 
