@@ -84,7 +84,7 @@ anthropometricMeans$GripR <- residuals(m)
 m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex)), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$TricepR <- residuals(m2)
 
-m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 2), data = anthropometricMeans, na.action = na.exclude)
+m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$SubscapR <- residuals(m3)
 
 m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
@@ -203,6 +203,7 @@ d <- children |>
     RelativeNeedRecode2 = case_when(
       RelativeNeed == "Much more" ~ "More",
       RelativeNeed == "Much less" ~ "Less",
+      #RelativeNeed == "The same amount" ~ "The same",
       .default = RelativeNeed),
     RelativeMaternalInvestment2 = factor( # NOTE this is not always the mom
       RelativeMaternalInvestment2,
@@ -215,7 +216,7 @@ d <- children |>
     RelativeNeed3 = factor(
       RelativeNeedRecode2,
       ordered = TRUE,
-      levels = c("Less", "The same amount", "More")),
+      levels = c("Less", "The same amount", "More")), # change back to "The same" here
     Currenthealth1 = invert(Currenthealth1),
     Currenthealth2 = invert(Currenthealth2),
     Currenthealth3 = Currenthealth3 + 0, # to remove labels
@@ -251,8 +252,8 @@ d <- children |>
   left_join(anthropometricMeans, by = "ChildID")
 
 # add household data to d2
-d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory,
-                                EducationLevel, AdultsMoney, AdultsHousework, AdultsChildcare, CaregiverAge,
+d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
+                                EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                                 number_children2, number_adults, UserLanguage, contains("CaregiverMarital"),
                                 contains("SocialSupport"), contains("FoodSecurity")), by = "householdID") |>
   left_join(dplyr::select(causes, -householdID, -childHHid, -ChildID, -Sad1), by = "uniqueID")
@@ -260,55 +261,56 @@ d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, 
 # prepare household variables for analyses
 d2 <- d |>
   mutate(
-    EducationLevel = case_when(
-      EducationLevel == "Fourth grade" ~ "4th grade or less",
-      EducationLevel == "Tenth grade" ~ "Some high school",
-      EducationLevel == "Eleventh grade" ~ "Some high school",
-      .default = EducationLevel),
-    IncomeCategory = ifelse(IncomeCategory == "Prefer not to answer", NA, IncomeCategory),
-    IncomeCategoryN = case_when(
-      IncomeCategory == "Less than 5,000 Lempira per month" ~ 2500,
-      IncomeCategory == "5,001 to 10,000 Lempira per month" ~ 7500,
-      IncomeCategory == "10,001 to 20,000 Lempira per month" ~ 15000,
-      IncomeCategory == "20,001 to 40,000 Lempira per month" ~ 30000,
-      IncomeCategory == "40,001 to 80,000 Lempira per month" ~ 60000,
-      IncomeCategory == "Over 80,000 Lempira per month" ~ 120000
-      ),
+    # EducationLevel = case_when(
+    #   EducationLevel == "Fourth grade" ~ "4th grade or less",
+    #   EducationLevel == "Tenth grade" ~ "Some high school",
+    #   EducationLevel == "Eleventh grade" ~ "Some high school",
+    #   .default = EducationLevel),
+    # IncomeCategory = ifelse(IncomeCategory == "Prefer not to answer", NA, IncomeCategory),
+    # IncomeCategoryN = case_when(
+    #   IncomeCategory == "Less than 5,000 Lempira per month" ~ 2500,
+    #   IncomeCategory == "5,001 to 10,000 Lempira per month" ~ 7500,
+    #   IncomeCategory == "10,001 to 20,000 Lempira per month" ~ 15000,
+    #   IncomeCategory == "20,001 to 40,000 Lempira per month" ~ 30000,
+    #   IncomeCategory == "40,001 to 80,000 Lempira per month" ~ 60000,
+    #   IncomeCategory == "Over 80,000 Lempira per month" ~ 120000
+    #   ),
     LogIncome = log10(IncomeCategoryN),
+    BodyFat = c(scale(TricepR) + scale(SubscapR)),
     RecentSignalSeverity = com1[as.character(Sad1)],
     RecentSignalCause = com2[as.character(Sad1)],
     AdultsHousework = as.numeric(AdultsHousework),
-    AdultsChildcare = as.numeric(AdultsChildcare),
+    #AdultsChildcare = as.numeric(AdultsChildcare),
     Neighborhood2 = as.numeric(Neighborhood == "Camponado/Campolancho"),
     NeighborhoodF = as.factor(Neighborhood),
     OtherChildrenHH = number_children2 - 1,
-    IncomeCategory = factor(
-      IncomeCategory,
-      ordered = TRUE,
-      levels = c("Less than 5,000 Lempira per month", "5,001 to 10,000 Lempira per month", "10,001 to 20,000 Lempira per month", "20,001 to 40,000 Lempira per month", "40,001 to 80,000 Lempira per month", "Over 80,000 Lempira per month")),
-    IncomeCategory2 = as.numeric(IncomeCategory),
-    EducationLevel = factor(
-      EducationLevel,
-      ordered = TRUE,
-      levels = c("No education", "First grade", "Second grade", "4th grade or less", "Fifth grade", "Completed 6th grade", "Seventh grade", "Completed 8th grade", "Ninth grade", "Some high school", "Completed high school", "Some university", "Professional certificate", "Completed university", "Post-graduate degree")),
-    EducationLevelYears = case_when( #
-      EducationLevel == "No education" ~ "0",
-      EducationLevel == "First grade" ~ "1",
-      EducationLevel == "Second grade" ~ "2",
-      EducationLevel == "4th grade or less" ~ "3.5", # what number for this?
-      EducationLevel == "Fifth grade" ~ "5",
-      EducationLevel == "Completed 6th grade" ~ "6",
-      EducationLevel == "Seventh grade" ~ "7",
-      EducationLevel == "Completed 8th grade" ~ "8",
-      EducationLevel == "Ninth grade" ~ "9",
-      EducationLevel == "Some high school" ~ "10.5", # what number for this?
-      EducationLevel == "Completed high school" ~ "12",
-      EducationLevel == "Some university" ~ "13.5",
-      EducationLevel == "Professional certificate" ~ "14",
-      EducationLevel == "Completed university" ~ "16",
-      EducationLevel == "Post-graduate degree" ~ "17", # what number here? 24 doctorate; 19 masters and professional degree
-      .default = EducationLevel),
-    EducationLevelYears = as.numeric(EducationLevelYears),
+    # IncomeCategory = factor(
+    #   IncomeCategory,
+    #   ordered = TRUE,
+    #   levels = c("Less than 5,000 Lempira per month", "5,001 to 10,000 Lempira per month", "10,001 to 20,000 Lempira per month", "20,001 to 40,000 Lempira per month", "40,001 to 80,000 Lempira per month", "Over 80,000 Lempira per month")),
+    # IncomeCategory2 = as.numeric(IncomeCategory),
+    # EducationLevel = factor(
+    #   EducationLevel,
+    #   ordered = TRUE,
+    #   levels = c("No education", "First grade", "Second grade", "4th grade or less", "Fifth grade", "Completed 6th grade", "Seventh grade", "Completed 8th grade", "Ninth grade", "Some high school", "Completed high school", "Some university", "Professional certificate", "Completed university", "Post-graduate degree")),
+    # EducationLevelYears = case_when( #
+    #   EducationLevel == "No education" ~ "0",
+    #   EducationLevel == "First grade" ~ "1",
+    #   EducationLevel == "Second grade" ~ "2",
+    #   EducationLevel == "4th grade or less" ~ "3.5", # what number for this?
+    #   EducationLevel == "Fifth grade" ~ "5",
+    #   EducationLevel == "Completed 6th grade" ~ "6",
+    #   EducationLevel == "Seventh grade" ~ "7",
+    #   EducationLevel == "Completed 8th grade" ~ "8",
+    #   EducationLevel == "Ninth grade" ~ "9",
+    #   EducationLevel == "Some high school" ~ "10.5", # what number for this?
+    #   EducationLevel == "Completed high school" ~ "12",
+    #   EducationLevel == "Some university" ~ "13.5",
+    #   EducationLevel == "Professional certificate" ~ "14",
+    #   EducationLevel == "Completed university" ~ "16",
+    #   EducationLevel == "Post-graduate degree" ~ "17", # what number here? 24 doctorate; 19 masters and professional degree
+    #   .default = EducationLevel),
+    # EducationLevelYears = as.numeric(EducationLevelYears),
     Punishment2 = ifelse(Punishment == "Maybe", 0, Punishment),
     Family2 = ifelse(Family == "Maybe", 0, Family),
     OutsideFamily2 = ifelse(OutsideFamily == "Maybe", 0, OutsideFamily),
@@ -391,7 +393,18 @@ modeldf <- d2 |>
     RelativeNeed3,
     PositiveResponse,
     NegativeResponse,
-    CaregiverAge
+    CaregiverAge,
+    IncomeCategoryN,
+    SubscapR,
+    HeightZ,
+    WeightZ,
+    BMIZ,
+    SubscapMean,
+    SubscapR,
+    TricepMean,
+    TricepR,
+    BodyFat,
+
   ) |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN)))
 
@@ -498,7 +511,7 @@ signal_alluvial_plot2 <- ggplot(sfdfsum3, aes(axis1 = Sadness, axis2 = Crying, a
   ylab("Number of\nchildren") +
   theme_minimal(20) +
   theme(axis.title.y = element_text(angle = 0, hjust = 1))
-# scale_fill_viridis_d(option = "D")
+  # scale_fill_viridis_d(option = "B")
 
 signal_alluvial_plot2
 
@@ -662,9 +675,6 @@ msubTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogInco
 summary(msubTantrum)
 plot(allEffects(msubTantrum))
 
-# BodyFat
-d2$BodyFat <- c(scale(d2$TricepR) + scale(d2$SubscapR))
-
 # do we want CurrentHealthMean in these models?
 
 mBFf <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
@@ -701,22 +711,11 @@ plot(allEffects(mtest))
 
 # ConflictFreqN model -----------------------------------------------------------
 
-# original
-mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + (1|householdID),data = d2, family = nbinom2)
+d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
+
+mconflict <- glmmTMB(ConflictFreqN ~ ChildAge + Sex + OlderKids + YoungerKids + LogIncome + AdultsNoChildcare + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + AdultsChildcare + OtherChildAlloparentingFreqN + (1|householdID),data = d2, family = nbinom2)
 summary(mconflict)
 plot(allEffects(mconflict))
-
-# with HHChildCareB*ChildAge
-mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + HHChildCareB*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mconflict)
-plot(allEffects(mconflict))
-
-mconflict <- glmmTMB(ConflictFreqN ~ ChildAge+ Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + HHChildCareA*ChildAge + (1|householdID),data = d2, family = nbinom2)
-summary(mconflict)
-plot(allEffects(mconflict))
-
-# number of alloparents not a significant predictor
-# (as main effect or in an HHChildCareB*ChildAge interaction)
 
 # RunawayFreqN model ------------------------------------------------------
 
@@ -737,8 +736,6 @@ plot(allEffects(mrunawayH))
 
 
 #Signal Cost
-
-d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
 table(d2$AdultsNoChildcare)
 
 mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
@@ -842,15 +839,15 @@ plot(allEffects(mmsf2i))
 
 # child alloparenting effort model ----------------------------------------
 
+d3 <- d2 |>
+  dplyr::filter(YoungerKids > 1, OtherChildAlloparentingFreqN < 121)
+
+# model cannot handle high alloparenting family
+
 # care (adult's heavily weighted)
-malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsNoChildcare + PartnerStatus + EducationLevelYears + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
+malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsChildcare + OtherChildAlloparentingFreqN + (1|householdID),data = d3, family = nbinom2)
 summary(malloparenting)
 plot(allEffects(malloparenting))
-
-# number of others providing care
-malloparenting2 <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + number_adults + PartnerStatus + EducationLevelYears + OtherCare + (1|householdID),data = d2, family = nbinom2)
-summary(malloparenting2)
-plot(allEffects(malloparenting2))
 
 # relatedness within the family -------------------------------------------
 
@@ -862,8 +859,7 @@ plot(allEffects(malloparenting2))
 # SignalCost and SignalFreqMax = marginally significant
 
 # SignalFreq model
-# sibling relatedness no longer significant with BodyFat
-mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + (1|householdID),data = d2, family = nbinom2)
+mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness + (1|householdID),data = d2, family = nbinom2)
 summary(mSRF)
 plot(allEffects(mSRF))
 
@@ -871,30 +867,6 @@ plot(allEffects(mSRF))
 mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mSRF3)
 plot(allEffects(mSRF3))
-
-# ordinal logistic regression of parental response ------------------------
-
-# note 6 instances of both positive and negative coded as NA
-table(modeldf$PositiveResponse, modeldf$NegativeResponse)
-
-mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
-summary(mpr)
-
-coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
-p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID) +
-  xlab("Cause involved punishment") +
-  ylab("Caregiver response")
-p_response_pain <- plot_predictions(mpr, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID) +
-  xlab("Cause involved discomfort, pain, injury, illness") +
-  ylab("Caregiver response") +
-  labs(color=fct_rev('Caregiver response')) +
-  scale_fill_discrete(guide="none")
-
-signaling_plot_last_signal_response <- (p_response_punishment + theme(legend.position = "none")) + (p_response_pain + theme(legend.position = c(1, 1.15))) +
-  plot_layout(ncol = 1, byrow = FALSE) +
-  plot_annotation(title = "", tag_levels = "A")
-
-signaling_plot_last_signal_response
 
 # ordinal logistic regression models for relative need  --------
 
@@ -907,19 +879,33 @@ mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogI
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
-p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) + ylab("Relative need (w/in household)")
+p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) +
+  ylab("Relative need") +
+  xlab("Child age (years)") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  scale_fill_viridis_d(option = "B", end = .8) +
+  scale_linewidth_ordinal(range = c(5,10)) +
+  guides(color = guide_legend(override.aes = list(linewidth=2.5))) +
+  labs(color = "", fill = "") +
+  theme_minimal() +
+  theme(legend.position = "top", plot.tag.position = "right")
 p_need_age_sf
 
-#Check legend
-p_need_signalfreq <- plot_predictions(mN1, condition = c("SignalFreq", "group"), type = "probs", vcov = ~householdID) + ylab("Relative need (w/in household)") + labs(color='Relative need') + scale_fill_discrete(guide="none")
+p_need_signalfreq <-
+  plot_predictions(mN1, condition = c("SignalFreq", "group"), type = "probs", vcov = ~householdID) +
+  ylab("Relative need") +
+  xlab("Signal frequency (times per month)") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  scale_fill_viridis_d(option = "B", end = .8) +
+  labs(color = "", fill = "") +
+  theme_minimal() +
+  theme(plot.tag.position = "right")
 p_need_signalfreq
 
-(ci <- confint(mN1))
-exp(cbind(coef(mN1),(ci)))
-
-signaling_plot_need <- (p_need_age_sf + theme(legend.position = "none")) + (p_need_signalfreq + theme(legend.position = c(1, 1.15))) +
-  plot_layout(ncol = 1, byrow = FALSE) +
-  plot_annotation(title = "", tag_levels = "A")
+signaling_plot_need <- (p_need_age_sf + theme(legend.position = "top")) +
+  (p_need_signalfreq + theme(legend.position = "none", legend.title = element_blank())) +
+  plot_layout(ncol = 1, byrow = FALSE, axes = "collect_y") +
+  plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
 
 signaling_plot_need
 
@@ -954,7 +940,38 @@ exp(cbind(coef(mI),(ci)))
 plot_predictions(mI, condition = c("OtherChildrenHH", "group"), type = "probs")
 plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 
+# ordinal logistic regression of parental response ------------------------
 
+# note 6 instances of both positive and negative coded as NA
+table(modeldf$PositiveResponse, modeldf$NegativeResponse)
+
+mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
+summary(mpr)
+
+coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID) +
+  xlab("Cause involved punishment") +
+  ylab("Caregiver response") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  guides(color = guide_legend(override.aes = list(linewidth=1))) +
+  theme_minimal() + # theme_minimal needs to come before plot.tag.position
+  theme(legend.position = "top", plot.tag.position = "right")
+
+p_response_pain <- plot_predictions(mpr, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID) +
+  xlab("Cause involved discomfort, pain, injury, illness") +
+  ylab("Caregiver response") +
+  scale_fill_discrete(guide="none") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  theme_minimal() +
+  theme(plot.tag.position = "right") +
+  labs(color = "", fill = "")
+
+signaling_plot_last_signal_response <- (p_response_punishment + theme(legend.position = "top", legend.title = element_blank())) +
+  (p_response_pain + theme(legend.position = "none", legend.title = element_blank())) +
+  plot_layout(ncol = 1, byrow = FALSE, axes = "collect_y") +
+  plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+
+signaling_plot_last_signal_response
 
 # Notes:
 
@@ -1012,11 +1029,11 @@ p_age_freq_max <- plot_predictions(mmsfH, condition = "ChildAge", vcov = TRUE, p
 
 signaling_data_plot_age <- p_age_sad + p_age_cry + p_age_tantrum + p_age_freq + p_age_freq_max + p_age_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A")
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
 
 signaling_data_plot_age
 
-## conflict --------------------------------------------------------------------
+## conflict (independent var)----------------------------------------------------------
 
 p_conflict_sad <- plot_predictions(msadH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
   theme_bw(15) +
@@ -1032,8 +1049,6 @@ p_conflict_tantrum <- plot_predictions(mtantrumH, condition = "ConflictFreqN", v
   theme_bw(15) +
   ylab("Tantrum freq.") +
   xlab("Conflict freq. (per month)")
-
-# ylim(0, 60)
 
 p_conflict_freq <- plot_predictions(msfH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
   theme_bw(15) +
@@ -1052,48 +1067,161 @@ p_conflict_freq_max <- plot_predictions(mmsfH, condition = "ConflictFreqN", vcov
 
 signaling_data_plot_conflict <- p_conflict_sad + p_conflict_cry + p_conflict_tantrum + p_conflict_freq + p_conflict_freq_max + p_conflict_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A")
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
 
 signaling_data_plot_conflict
 
-## alloparenting:sex  --------------------------------------------------------------------
+## conflict (dependent var) ------------------------------------------------
 
-p_allo_by_sex_sad <- plot_predictions(msadH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_conflict_dep_var_age <-
+  plot_predictions(mconflict, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Conflict freq. (per month)") +
+  xlab("Child age (years)")
+  #theme(plot.tag.position = "topright")
+
+p_conflict_dep_var_age
+
+p_conflict_dep_var_aCare <- plot_predictions(mconflict, condition = "AdultsChildcare", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_bw(15) +
+  ylab("Conflict freq. (per month)") +
+  xlab("Number of adults that contribute childcare")
+  #theme(plot.tag.position = "topright")
+
+p_conflict_dep_var_aCare
+
+signaling_data_plot_conflict_dep_var <-
+  p_conflict_dep_var_age + p_conflict_dep_var_aCare +
+  plot_layout(axes = "collect_y", ncol = 1, byrow = FALSE) +
+  plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.95, .95))
+
+signaling_data_plot_conflict_dep_var
+
+
+## education --------------------------------------------------------------
+
+p_edu_sad <- plot_predictions(msadH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Sadness freq.") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
 
-p_allo_by_sex_cry <- plot_predictions(mcryH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_edu_cry <- plot_predictions(mcryH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Crying freq.") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
 
-p_allo_by_sex_tantrum <- plot_predictions(mtantrumH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_edu_tantrum <- plot_predictions(mtantrumH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Tantrum freq.") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
 
-p_allo_by_sex_freq <- plot_predictions(msfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_edu_freq <- plot_predictions(msfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Summed freq.") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
 
-p_allo_by_sex_cost <- plot_predictions(mscH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_edu_cost <- plot_predictions(mscH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Signal cost") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
 
-p_allo_by_sex_freq_max <- plot_predictions(mmsfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_edu_freq_max <- plot_predictions(mmsfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Max freq.") +
-  xlab("Alloparenting freq. (per month)")
+  xlab("Caregiver education (years)")
+
+signaling_data_plot_edu <- p_edu_sad + p_edu_cry + p_edu_tantrum + p_edu_freq + p_edu_freq_max + p_edu_cost +
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+
+signaling_data_plot_edu
+
+## alloparenting:sex  --------------------------------------------------------------------
+plot_allo <- function(d, ylab){
+  ggplot(d, aes(AlloparentingFreqN, estimate)) +
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = Sex), alpha = .25) +
+    geom_line(aes(color = Sex)) +
+    geom_rug(data = drop_na(d2, Sex), aes(x = AlloparentingFreqN, y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b") +
+    scale_color_binary() +
+    scale_fill_binary() +
+    xlab("Alloparenting frequency (times per month)") +
+    ylab(ylab) +
+    theme_minimal(15)
+}
+
+pointsize <- .25
+
+d_allo_by_sex_sad <- plot_predictions(msadH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_sad <- plot_allo(d_allo_by_sex_sad, "Sadness freq.")
+
+d_allo_by_sex_cry <- plot_predictions(mcryH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_cry <- plot_allo(d_allo_by_sex_cry, "Crying freq.")
+
+d_allo_by_sex_tantrum <- plot_predictions(mtantrumH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_tantrum <- plot_allo(d_allo_by_sex_tantrum, "Tantrum freq.")
+
+d_allo_by_sex_freq <- plot_predictions(msfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_freq <- plot_allo(d_allo_by_sex_freq, "Summed freq.")
+
+d_allo_by_sex_cost <- plot_predictions(mscH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_cost <- plot_allo(d_allo_by_sex_cost, "Max freq.")
+
+d_allo_by_sex_freq_max <- plot_predictions(mmsfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
+p_allo_by_sex_freq_max <- plot_allo(d_allo_by_sex_freq_max, "Signal cost.")
 
 signaling_data_plot_allo_by_sex <- p_allo_by_sex_sad + p_allo_by_sex_cry + p_allo_by_sex_tantrum + p_allo_by_sex_freq + p_allo_by_sex_freq_max + p_allo_by_sex_cost +
-  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A")
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") +
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
 
 signaling_data_plot_allo_by_sex
 
+# p_allo_by_sex_sad <- plot_predictions(msadH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   scale_color_binary() +
+#   theme_bw(15) +
+#   ylab("Sadness freq.") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# p_allo_by_sex_sad
+#
+# p_allo_by_sex_cry <- plot_predictions(mcryH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Crying freq.") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# p_allo_by_sex_tantrum <- plot_predictions(mtantrumH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Tantrum freq.") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# p_allo_by_sex_freq <- plot_predictions(msfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Summed freq.") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# p_allo_by_sex_cost <- plot_predictions(mscH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Signal cost") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# p_allo_by_sex_freq_max <- plot_predictions(mmsfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Max freq.") +
+#   xlab("Alloparenting freq. (per month)")
+#
+# signaling_data_plot_allo_by_sex <- p_allo_by_sex_sad + p_allo_by_sex_cry + p_allo_by_sex_tantrum + p_allo_by_sex_freq + p_allo_by_sex_freq_max + p_allo_by_sex_cost +
+#   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") +
+#   plot_annotation(title = "Signaling measures", tag_levels = "A")
+#
+# signaling_data_plot_allo_by_sex
+
+
+## alloparenting (dependent var) -------------------------------------------
+
+alloparenting_dep_var_plot <- plot_predictions(malloparenting, condition = c("OlderKids"), vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Frequency of alloparenting effort") +
+  xlab("Number of older children in household")
+alloparenting_dep_var_plot
 
 ## body fat ---------------------------------------------------------------
 
@@ -1114,7 +1242,8 @@ p_bodyfat_tantrum <- plot_predictions(mBFtantrum, condition = "BodyFat", vcov = 
 
 signaling_data_plot_bodyfat <- p_bodyfat_cost + p_bodyfat_crying + p_bodyfat_tantrum +
   plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A")
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.95, .95))
+
 signaling_data_plot_bodyfat
 
 # x <- summary(mBFtantrum)
@@ -1122,11 +1251,20 @@ signaling_data_plot_bodyfat
 # x$coefficients$cond["BodyFat", "Pr(>|z|)"]
 
 
-# tables to extract values from -------------------------------------------
+# tables and dataframes to extract values from ---------------------------------------
+sex_table <- table(modeldf$Sex)
 
 rel_need_table <- table(modeldf$RelativeNeed3)
 
 response_overlap <- table(modeldf$PositiveResponse, modeldf$NegativeResponse)
+
+modeldf_FULLSIG <- modeldf |>
+  dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN))
+
+modeldf_FULLANTHROPOMETRICS <- modeldf |>
+  dplyr::filter(!is.na(SubscapR))
+
+sex_table2 <- table(modeldf_FULLANTHROPOMETRICS$Sex)
 
 # model statistics --------------------------------------------------------
 
@@ -1143,7 +1281,7 @@ mutate(
 ) %>%
 split (.$term)
 }
-models <- list (msadH = msadH, mcryH = mcryH, mtantrumH = mtantrumH, msfH = msfH, mscH = mscH, mmsfH = mmsfH, mBFc = mBFc, mBFtantrum=mBFtantrum)
+models <- list (msadH = msadH, mcryH = mcryH, mtantrumH = mtantrumH, msfH = msfH, mscH = mscH, mmsfH = mmsfH, mBFc = mBFc, mBFcry = mBFcry, mBFtantrum = mBFtantrum, mconflict = mconflict, malloparenting = malloparenting)
 stats <- map (models, tdy)
 stats$mBFc$BodyFat$str
 stats$mBFc$BodyFat$str2
