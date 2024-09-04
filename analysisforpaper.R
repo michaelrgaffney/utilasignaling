@@ -55,7 +55,7 @@ mean2 <- function(..., na.rm = F){
 
 # dataframe prep ----------------------------------------------------------
 
-anthropometricMeans <- anthropometrics |>
+anthropometricMeans0 <- anthropometrics |>
   dplyr::select(
     ChildID,
     AgeAtMeasurement = Age,
@@ -68,11 +68,23 @@ anthropometricMeans <- anthropometrics |>
     .by = ChildID
   ) |>
   mutate(
-    BMI = WeightMean_KG / (HeightMean / 100 )^2
+    BMI = WeightMean_KG / (HeightMean / 100 )^2,
+    Year = year(Date.of.measurement)
   ) |>
+  relocate(measurements, .after = Year)
+
+anthropometricMeans <- anthropometricMeans0 |>
   dplyr::filter(
     measurements == 1 | year(Date.of.measurement) == 2023
   )
+
+# moved below
+# anthropometricMeansWide <- anthropometricMeans0 |>
+#   dplyr::filter(
+#     measurements == 2
+#   ) |>
+#   pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
+#   left_join(d2, by = "ChildID")
 
 anthropometricMeans$WeightZ <- growthRef(AgeAtMeasurement, WeightMean_KG, Sex, anthropometricMeans, type = "Weight", pop = "CDC")
 anthropometricMeans$HeightZ <- growthRef(AgeAtMeasurement, HeightMean, Sex, anthropometricMeans, type = "Height", pop = "CDC")
@@ -89,6 +101,9 @@ anthropometricMeans$SubscapR <- residuals(m3)
 
 m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$BodyFatPercentageR <- residuals(m4)
+
+m5 <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
+anthropometricMeans$FlexedR <- residuals(m5)
 
 anthropometricMeans$Sex <- NULL
 
@@ -496,7 +511,8 @@ signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, ax
   scale_x_discrete(limits = c("Sadness", "Crying", "Tantrums"), expand = c(.2, .05)) +
   ylab("Number of\nchildren") +
   theme_minimal(20) +
-  theme(axis.title.y = element_text(angle = 0, hjust = 1))
+  theme(axis.title.y = element_text(angle = 0, hjust = 1)) +
+  scale_fill_viridis_d()
 
 signal_alluvial_plot
 
@@ -510,8 +526,8 @@ signal_alluvial_plot2 <- ggplot(sfdfsum3, aes(axis1 = Sadness, axis2 = Crying, a
   scale_x_discrete(limits = c("Sadness", "Crying", "Tantrums"), expand = c(.08, .05)) +
   ylab("Number of\nchildren") +
   theme_minimal(20) +
-  theme(axis.title.y = element_text(angle = 0, hjust = 1))
-  # scale_fill_viridis_d(option = "B")
+  theme(axis.title.y = element_text(angle = 0, hjust = 1)) +
+  scale_fill_viridis_d(option = "B")
 
 signal_alluvial_plot2
 
@@ -554,11 +570,11 @@ d2_conflict_filter <- modeldf |>
   )|>
   filter_at(vars(ConflictFreqOF),all_vars(!is.na(.)))
 
-barplot_conflict <- ggplot(d2_conflict_filter, aes(y=ConflictFreq2, fill= Sex)) +
+barplot_conflict <- ggplot(d2_conflict_filter, aes(x=ConflictFreq2, fill= Sex)) +
   geom_bar(position = "stack") +
-  labs(title = "Frequency of conflict") +
+  labs(title = "Conflict") +
   scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
-  labs(x = "Number of children", y = "") +
+  labs(x = "Frequency of conflict (per month)", y = "Number of children") +
   theme_minimal(15)
 barplot_conflict
 
@@ -568,11 +584,11 @@ d2_alloparent_filter <- modeldf |>
   )|>
   filter_at(vars(AlloparentingFreq0),all_vars(!is.na(.)))
 
-barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(y=AlloparentingFreq02, fill= Sex)) +
+barplot_alloparenting <- ggplot(d2_alloparent_filter, aes(x= AlloparentingFreq02, fill = Sex)) +
   geom_bar(position = "stack") +
-  labs(title = "Frequency of child alloparenting") +
+  labs(title = "Alloparenting") +
   scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
-  labs(x = "Number of children", y = "") +
+  labs(x = "Frequency of child alloparenting (per month)", y = "Number of children") +
   theme_minimal(15)
 
 barplot_alloparenting
@@ -675,6 +691,25 @@ msubTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogInco
 summary(msubTantrum)
 plot(allEffects(msubTantrum))
 
+# Flexed residuals
+
+# Tricep residuals
+mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
+summary(mFlexC)
+plot(allEffects(mFlexC))
+
+mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
+summary(mFlexF)
+plot(allEffects(mFlexF))
+
+mcryF <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mcryF)
+plot(allEffects(mcryF))
+
+mtantrumF <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
+summary(mtantrumF)
+plot(allEffects(mtantrumF))
+
 # do we want CurrentHealthMean in these models?
 
 mBFf <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
@@ -708,6 +743,46 @@ plot(allEffects(mtest))
 mtest <- glmmTMB(WeightZ ~ FoodSecurityMean + Sex + (1|householdID), data = d2, family = gaussian())
 summary(mtest)
 plot(allEffects(mtest))
+
+mtest <- glmmTMB(BodyFat ~ FoodSecurityMean*Sex + (1|householdID), data = d2, family = gaussian())
+summary(mtest)
+plot(allEffects(mtest))
+
+mtest <- glmmTMB(FlexedR ~ FoodSecurityMean*Sex + (1|householdID), data = d2, family = gaussian())
+summary(mtest)
+plot(allEffects(mtest))
+
+anthropometricMeansWide <- anthropometricMeans0 |>
+  dplyr::filter(
+    measurements == 2
+  ) |>
+  pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
+  left_join(d2, by = "ChildID")
+
+m <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*Sex + ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m)
+plot(allEffects(m))
+
+# age confound?
+m <- glmmTMB(BMI_2024 ~ BMI_2023 + CryFreqN + Sex + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m)
+plot(allEffects(m))
+
+m <- glmmTMB(GripStrengthMean_2024 ~ GripStrengthMean_2023 + CryFreqN + Sex + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m)
+plot(allEffects(m))
+
+m <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + Sex + ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m)
+plot(allEffects(m))
+
+m <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + Sex  + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m)
+plot(allEffects(m))
+
+m2 <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(m2)
+plot(allEffects(m2))
 
 # ConflictFreqN model -----------------------------------------------------------
 
@@ -888,7 +963,8 @@ p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type 
   guides(color = guide_legend(override.aes = list(linewidth=2.5))) +
   labs(color = "", fill = "") +
   theme_minimal() +
-  theme(legend.position = "top", plot.tag.position = "right")
+  theme(legend.position = "top", plot.tag.position = "right") +
+  ylim(0,1)
 p_need_age_sf
 
 p_need_signalfreq <-
@@ -902,7 +978,7 @@ p_need_signalfreq <-
   theme(plot.tag.position = "right")
 p_need_signalfreq
 
-signaling_plot_need <- (p_need_age_sf + theme(legend.position = "top")) +
+signaling_plot_need <- (p_need_age_sf) +
   (p_need_signalfreq + theme(legend.position = "none", legend.title = element_blank())) +
   plot_layout(ncol = 1, byrow = FALSE, axes = "collect_y") +
   plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
@@ -955,7 +1031,8 @@ p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "gro
   scale_color_viridis_d(option = "B", end = .8) +
   guides(color = guide_legend(override.aes = list(linewidth=1))) +
   theme_minimal() + # theme_minimal needs to come before plot.tag.position
-  theme(legend.position = "top", plot.tag.position = "right")
+  theme(legend.position = "top", plot.tag.position = "right") +
+  ylim(0,1)
 
 p_response_pain <- plot_predictions(mpr, condition = c("DiscomfortPainInjuryIllness", "group"), type = "probs", vcov = ~householdID) +
   xlab("Cause involved discomfort, pain, injury, illness") +
@@ -991,150 +1068,278 @@ signaling_plot_last_signal_response
 
 ## age --------------------------------------------------------------------
 
-p_age_sad <- plot_predictions(msadH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Sadness freq.") +
-  xlab("Child age (years)") +
-  xlim(5,20)
+plot_age <- function(m, ylabel){
+  p <- suppressWarnings(plot_predictions(m, condition = c("ChildAge", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp")) +
+    geom_rug(data = m$frame, aes(x = ChildAge , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123)) +
+    ylab(ylabel) +
+    xlab("Child age (years)") +
+    xlim(5,20) +
+    ylim(0,NA) +
+    scale_color_binary() +
+    scale_fill_binary() +
+    theme_bw(15)
 
-p_age_cry <- plot_predictions(mcryH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Crying freq.") +
-  xlab("Child age (years)") +
-  xlim(5,20)
+  p$layers[[2]]$aes_params$linewidth <- 2
+  return(p)
+}
 
-p_age_tantrum <- plot_predictions(mtantrumH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Tantrum freq.") +
-  xlab("Child age (years)") +
-  xlim(5,20)
-
-p_age_freq <- plot_predictions(msfH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Summed freq.") +
-  xlab("Child age (years)") +
-  xlim(5,20)
-
-p_age_cost <- plot_predictions(mscH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Signal cost") +
-  xlab("Child age (years)") +
-  xlim(5,20)
-
-p_age_freq_max <- plot_predictions(mmsfH, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Max freq.") +
-  xlab("Child age (years)") +
-  xlim(5,20)
+p_age_sad <- plot_age(msadH, "Sadness freq.")
+p_age_cry <- plot_age(mcryH, "Crying freq.")
+p_age_tantrum <- plot_age(msadH, "Tantrum freq.")
+p_age_freq <- plot_age(msadH, "Summed freq.")
+p_age_cost <- plot_age(msadH, "Signal cost")
+p_age_freq_max <- plot_age(msadH, "Max freq.")
 
 signaling_data_plot_age <- p_age_sad + p_age_cry + p_age_tantrum + p_age_freq + p_age_freq_max + p_age_cost +
-  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
+  # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92), legend.position = "top")
+  # plot_annotation(title = "Signaling measures") & theme(legend.position = "top")
+  theme(legend.position = "top")
+
+ggsave("Figures/signaling_data_plot_age.pdf", signaling_data_plot_age, width = 9, height = 9)
 
 signaling_data_plot_age
 
+# model for rugs for plots without functions
+# geom_rug(data = msadH$frame, aes(x = ChildAge , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123))
+
+
+
+# p_age_sad <- plot_predictions(msadH, condition = c("ChildAge", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Sadness freq.") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   scale_color_binary() +
+#   scale_fill_binary() +
+#   geom_rug(data = msadH$frame, aes(x = ChildAge , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123))
+# p_age_sad$layers[[2]]$aes_params$linewidth <- 2
+#
+# p_age_cry <- plot_predictions(mcryH, condition = "ChildAge", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Crying freq.") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_age_tantrum <- plot_predictions(mtantrumH, condition = "ChildAge", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Tantrum freq.") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_age_freq <- plot_predictions(msfH, condition = "ChildAge", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Summed freq.") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_age_cost <- plot_predictions(mscH, condition = "ChildAge", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Signal cost") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_age_freq_max <- plot_predictions(mmsfH, condition = "ChildAge", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Max freq.") +
+#   xlab("Child age (years)") +
+#   xlim(5,20) +
+#   ylim(0,NA) +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+
+
+
 ## conflict (independent var)----------------------------------------------------------
 
-p_conflict_sad <- plot_predictions(msadH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Sadness freq.") +
-  xlab("Conflict freq. (per month)")
+plot_conflict <- function(m, ylabel){
+  p <- suppressWarnings(plot_predictions(m, condition = c("ConflictFreqN", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp")) +
+    geom_rug(data = m$frame, aes(x = ConflictFreqN , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123)) +
+    ylab(ylabel) +
+    xlab("Conflict freq. (per month)") +
+    scale_color_binary() +
+    scale_fill_binary() +
+    theme_bw(15)
 
-p_conflict_cry <- plot_predictions(mcryH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Crying freq.") +
-  xlab("Conflict freq. (per month)")
+  p$layers[[2]]$aes_params$linewidth <- 2
+  return(p)
+}
 
-p_conflict_tantrum <- plot_predictions(mtantrumH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Tantrum freq.") +
-  xlab("Conflict freq. (per month)")
-
-p_conflict_freq <- plot_predictions(msfH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Summed freq.") +
-  xlab("Conflict freq. (per month)")
-
-p_conflict_cost <- plot_predictions(mscH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Signal cost") +
-  xlab("Conflict freq. (per month)")
-
-p_conflict_freq_max <- plot_predictions(mmsfH, condition = "ConflictFreqN", vcov = TRUE, points = .25, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Max freq.") +
-  xlab("Conflict freq. (per month)")
+p_conflict_sad <- plot_conflict(msadH, "Sadness freq.")
+p_conflict_cry <- plot_conflict(mcryH, "Crying freq.")
+p_conflict_tantrum <- plot_conflict(msadH, "Tantrum freq.")
+p_conflict_freq <- plot_conflict(msadH, "Summed freq.")
+p_conflict_cost <- plot_conflict(msadH, "Signal cost")
+p_conflict_freq_max <- plot_conflict(msadH, "Max freq.")
 
 signaling_data_plot_conflict <- p_conflict_sad + p_conflict_cry + p_conflict_tantrum + p_conflict_freq + p_conflict_freq_max + p_conflict_cost +
-  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
+  # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92), legend.position = "none")
+  # plot_annotation(title = "Signaling measures") & theme(legend.position = "none")
+  theme(legend.position = "top")
 
-signaling_data_plot_conflict
+ggsave("Figures/signaling_data_plot_conflict.pdf", signaling_data_plot_conflict, width = 9, height = 9)
+
+# p_conflict_sad <- plot_predictions(msadH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Sadness freq.") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_conflict_cry <- plot_predictions(mcryH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Crying freq.") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_conflict_tantrum <- plot_predictions(mtantrumH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Tantrum freq.") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_conflict_freq <- plot_predictions(msfH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Summed freq.") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_conflict_cost <- plot_predictions(mscH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Signal cost") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_conflict_freq_max <- plot_predictions(mmsfH, condition = "ConflictFreqN", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Max freq.") +
+#   xlab("Conflict freq. (per month)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = ConflictFreqN , y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# signaling_data_plot_conflict <- p_conflict_sad + p_conflict_cry + p_conflict_tantrum + p_conflict_freq + p_conflict_freq_max + p_conflict_cost +
+#   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+#   # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92), legend.position = "none")
+#   plot_annotation(title = "Signaling measures") & theme(legend.position = "none")
+#
+# signaling_data_plot_conflict
 
 ## conflict (dependent var) ------------------------------------------------
-
 p_conflict_dep_var_age <-
-  plot_predictions(mconflict, condition = "ChildAge", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+  plot_predictions(mconflict, condition = c("ChildAge", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Conflict freq. (per month)") +
-  xlab("Child age (years)")
+  xlab("Child age (years)") +
+  scale_color_binary() +
+  scale_fill_binary() +
+  geom_rug(data = mconflict$frame, aes(x = ChildAge , y = 0, color = Sex), position = position_jitter(width = .3, seed = 123), sides = "b") +
+  theme(legend.position = "none")
   #theme(plot.tag.position = "topright")
+p_conflict_dep_var_age$layers[[2]]$aes_params$linewidth <- 2
 
 p_conflict_dep_var_age
 
-p_conflict_dep_var_aCare <- plot_predictions(mconflict, condition = "AdultsChildcare", vcov = TRUE, points = .25, type = "link", transform = "exp") +
+p_conflict_dep_var_aCare <-
+  plot_predictions(mconflict, condition = c("AdultsChildcare", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_bw(15) +
   ylab("Conflict freq. (per month)") +
-  xlab("Number of adults that contribute childcare")
+  xlab("Number of adults that contribute childcare") +
+  scale_color_binary() +
+  scale_fill_binary() +
   #theme(plot.tag.position = "topright")
+  geom_rug(data = mconflict$frame, aes(x = AdultsChildcare , y = 0, color = Sex), position = position_jitter(width = .3, seed = 123), sides = "b") +
+ theme(legend.position = "none")
 
+p_conflict_dep_var_aCare$layers[[2]]$aes_params$linewidth <- 2
 p_conflict_dep_var_aCare
 
 signaling_data_plot_conflict_dep_var <-
   p_conflict_dep_var_age + p_conflict_dep_var_aCare +
-  plot_layout(axes = "collect_y", ncol = 1, byrow = FALSE) +
-  plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.95, .95))
+  plot_layout(axes = "collect_y", ncol = 1, byrow = FALSE, guides = "collect") +
+  plot_annotation(title = "", tag_levels = "A") & theme(plot.tag.position = c(.95, .95)) &
+  theme(legend.position = "top")
 
 signaling_data_plot_conflict_dep_var
 
 
 ## education --------------------------------------------------------------
+plot_education <- function(m, ylabel){
+  p <- suppressWarnings(plot_predictions(m, condition = c("EducationLevelYears", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp")) +
+    geom_rug(data = m$frame, aes(x = EducationLevelYears, y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123)) +
+    ylab(ylabel) +
+    xlab("Caregiver education (years)") +
+    scale_color_binary() +
+    scale_fill_binary() +
+    theme_bw(15)
 
-p_edu_sad <- plot_predictions(msadH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Sadness freq.") +
-  xlab("Caregiver education (years)")
+  p$layers[[2]]$aes_params$linewidth <- 2
+  return(p)
+}
 
-p_edu_cry <- plot_predictions(mcryH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Crying freq.") +
-  xlab("Caregiver education (years)")
+p_education_sad <- plot_education(msadH, "Sadness freq.")
+p_education_cry <- plot_education(mcryH, "Crying freq.")
+p_education_tantrum <- plot_education(msadH, "Tantrum freq.")
+p_education_freq <- plot_education(msadH, "Summed freq.")
+p_education_cost <- plot_education(msadH, "Signal cost")
+p_education_freq_max <- plot_education(msadH, "Max freq.")
 
-p_edu_tantrum <- plot_predictions(mtantrumH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Tantrum freq.") +
-  xlab("Caregiver education (years)")
+signaling_data_plot_education <- p_education_sad + p_education_cry + p_education_tantrum + p_education_freq + p_education_freq_max + p_education_cost +
+  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
+  # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+  #plot_annotation(title = "Signaling measures")
+  theme(legend.position = "top")
 
-p_edu_freq <- plot_predictions(msfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Summed freq.") +
-  xlab("Caregiver education (years)")
+ggsave("Figures/signaling_data_plot_education.pdf", signaling_data_plot_education, width = 9, height = 9)
 
-p_edu_cost <- plot_predictions(mscH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Signal cost") +
-  xlab("Caregiver education (years)")
-
-p_edu_freq_max <- plot_predictions(mmsfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
-  theme_bw(15) +
-  ylab("Max freq.") +
-  xlab("Caregiver education (years)")
-
-signaling_data_plot_edu <- p_edu_sad + p_edu_cry + p_edu_tantrum + p_edu_freq + p_edu_freq_max + p_edu_cost +
-  plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
-  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
-
-signaling_data_plot_edu
+# p_edu_sad <- plot_predictions(msadH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Sadness freq.") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_edu_cry <- plot_predictions(mcryH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Crying freq.") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_edu_tantrum <- plot_predictions(mtantrumH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Tantrum freq.") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_edu_freq <- plot_predictions(msfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Summed freq.") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_edu_cost <- plot_predictions(mscH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Signal cost") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# p_edu_freq_max <- plot_predictions(mmsfH, condition = "EducationLevelYears", vcov = TRUE, points = 0, type = "link", transform = "exp") +
+#   theme_bw(15) +
+#   ylab("Max freq.") +
+#   xlab("Caregiver education (years)") +
+#   geom_rug(data = drop_na(d2, Sex), aes(x = EducationLevelYears , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b")
+#
+# signaling_data_plot_edu <- p_edu_sad + p_edu_cry + p_edu_tantrum + p_edu_freq + p_edu_freq_max + p_edu_cost +
+#   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE) +
+#   # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+#   plot_annotation(title = "Signaling measures")
+#
+# signaling_data_plot_education
 
 ## alloparenting:sex  --------------------------------------------------------------------
 plot_allo <- function(d, ylab){
@@ -1167,11 +1372,12 @@ d_allo_by_sex_cost <- plot_predictions(mscH, condition = c("AlloparentingFreqN",
 p_allo_by_sex_cost <- plot_allo(d_allo_by_sex_cost, "Max freq.")
 
 d_allo_by_sex_freq_max <- plot_predictions(mmsfH, condition = c("AlloparentingFreqN", "Sex"), vcov = TRUE, points = pointsize, type = "link", transform = "exp", draw = FALSE)
-p_allo_by_sex_freq_max <- plot_allo(d_allo_by_sex_freq_max, "Signal cost.")
+p_allo_by_sex_freq_max <- plot_allo(d_allo_by_sex_freq_max, "Signal cost")
 
 signaling_data_plot_allo_by_sex <- p_allo_by_sex_sad + p_allo_by_sex_cry + p_allo_by_sex_tantrum + p_allo_by_sex_freq + p_allo_by_sex_freq_max + p_allo_by_sex_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") +
-  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92))
+  # plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.98, .92), legend.position = "top")
+  plot_annotation(title = "Signaling measures") & theme(legend.position = "top")
 
 signaling_data_plot_allo_by_sex
 
@@ -1230,15 +1436,42 @@ p_bodyfat_cost <- plot_predictions(mBFc, condition = c("BodyFat"), vcov = TRUE, 
   ylab("Signal cost") +
   xlab("Body fat composite")
 
+p_bodyfat_cost2 <- plot_predictions(mBFc, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Signal cost") +
+  xlab("Body fat composite") +
+  scale_color_binary() +
+  scale_fill_binary() +
+  geom_rug(data = mBFc$frame, aes(x = BodyFat , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123))
+p_bodyfat_cost2$layers[[2]]$aes_params$linewidth <- 2
+
 p_bodyfat_crying <- plot_predictions(mBFcry, condition = "BodyFat", vcov = TRUE, points = .25, type = "link", transform = "exp") +
   theme_minimal(15) +
   ylab("Crying freq.") +
   xlab("Body fat composite")
 
+p_bodyfat_crying2 <- plot_predictions(mBFcry, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Signal cost") +
+  xlab("Body fat composite") +
+  scale_color_binary() +
+  scale_fill_binary() +
+  geom_rug(data = mBFcry$frame, aes(x = BodyFat , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123))
+p_bodyfat_crying2$layers[[2]]$aes_params$linewidth <- 2
+
 p_bodyfat_tantrum <- plot_predictions(mBFtantrum, condition = "BodyFat", vcov = TRUE, points = .25, type = "link", transform = "exp") +
   theme_minimal(15) +
   ylab("Tantrum freq.") +
   xlab("Body fat composite")
+
+p_bodyfat_tantrum2 <- plot_predictions(mBFtantrum, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
+  theme_minimal(15) +
+  ylab("Signal cost") +
+  xlab("Body fat composite") +
+  scale_color_binary() +
+  scale_fill_binary() +
+  geom_rug(data = mBFtantrum$frame, aes(x = BodyFat , y = 0, color = Sex), sides = "b", position = position_jitter(width = .3, seed = 123))
+p_bodyfat_tantrum2$layers[[2]]$aes_params$linewidth <- 2
 
 signaling_data_plot_bodyfat <- p_bodyfat_cost + p_bodyfat_crying + p_bodyfat_tantrum +
   plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE) +
@@ -1246,6 +1479,11 @@ signaling_data_plot_bodyfat <- p_bodyfat_cost + p_bodyfat_crying + p_bodyfat_tan
 
 signaling_data_plot_bodyfat
 
+signaling_data_plot_bodyfat2 <- p_bodyfat_cost2 + p_bodyfat_crying2 + p_bodyfat_tantrum2 +
+  plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE, guides = "collect") +
+  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.95, .95))
+
+signaling_data_plot_bodyfat2
 # x <- summary(mBFtantrum)
 # x$coefficients$cond["BodyFat", "Estimate"]
 # x$coefficients$cond["BodyFat", "Pr(>|z|)"]
