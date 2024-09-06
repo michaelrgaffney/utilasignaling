@@ -784,6 +784,22 @@ m2 <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|h
 summary(m2)
 plot(allEffects(m2))
 
+p <- plot_predictions(m2, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
+  geom_rug(data = m2$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
+  scale_color_viridis_d(option = "A", end = .8) +
+  guides(color = guide_legend(reverse = TRUE, title = "Child age (years)"), fill = guide_legend(reverse = TRUE, title = "Child age (years)")) +
+  xlab("Crying freq. (per month)") +
+  ylab("Weight (2024)") +
+  ylim(40, 55) +
+  theme_minimal(15)
+p$layers[[2]]$aes_params$linewidth <- 2
+p$layers[[1]]$aes_params$alpha <- 0
+p
+
+# causality going the other direction (weight causes more crying?)
+
+out <- avg_comparisons(m2, variables = list("CryFreqN" = c(0, 30), "ChildAge" = c(5,14)), cross = TRUE)
+out <- avg_comparisons(m2, variables = list("CryFreqN" = c(0, 8), "ChildAge" = c(5,14)), cross = TRUE)
 # ConflictFreqN model -----------------------------------------------------------
 
 d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
@@ -954,6 +970,8 @@ mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogI
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
+
+
 p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) +
   ylab("Relative need") +
   xlab("Child age (years)") +
@@ -1023,6 +1041,10 @@ table(modeldf$PositiveResponse, modeldf$NegativeResponse)
 
 mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
 summary(mpr)
+out_mpr <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female")))
+out_mpr$estimate[3] # 0.3487553
+
+out_mpr_avg <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1"), by = TRUE)
 
 coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID) +
@@ -1346,7 +1368,7 @@ plot_allo <- function(d, ylab){
   ggplot(d, aes(AlloparentingFreqN, estimate)) +
     geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = Sex), alpha = .25) +
     geom_line(aes(color = Sex)) +
-    geom_rug(data = drop_na(d2, Sex), aes(x = AlloparentingFreqN, y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b") +
+    geom_rug(data = d$frame, aes(x = AlloparentingFreqN, y = 0, color = Sex), position = position_jitter(width = 1, seed = 123), sides = "b") +
     scale_color_binary() +
     scale_fill_binary() +
     xlab("Alloparenting frequency (times per month)") +
@@ -1436,7 +1458,7 @@ p_bodyfat_cost <- plot_predictions(mBFc, condition = c("BodyFat"), vcov = TRUE, 
   ylab("Signal cost") +
   xlab("Body fat composite")
 
-p_bodyfat_cost2 <- plot_predictions(mBFc, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
+p_bodyfat_cost2 <- plot_predictions(mBFc, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp", conf_level = .95) +
   theme_minimal(15) +
   ylab("Signal cost") +
   xlab("Body fat composite") +
@@ -1452,7 +1474,7 @@ p_bodyfat_crying <- plot_predictions(mBFcry, condition = "BodyFat", vcov = TRUE,
 
 p_bodyfat_crying2 <- plot_predictions(mBFcry, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_minimal(15) +
-  ylab("Signal cost") +
+  ylab("Crying freq.") +
   xlab("Body fat composite") +
   scale_color_binary() +
   scale_fill_binary() +
@@ -1466,7 +1488,7 @@ p_bodyfat_tantrum <- plot_predictions(mBFtantrum, condition = "BodyFat", vcov = 
 
 p_bodyfat_tantrum2 <- plot_predictions(mBFtantrum, condition = c("BodyFat", "Sex"), vcov = TRUE, points = 0, type = "link", transform = "exp") +
   theme_minimal(15) +
-  ylab("Signal cost") +
+  ylab("Tantrum freq.") +
   xlab("Body fat composite") +
   scale_color_binary() +
   scale_fill_binary() +
@@ -1479,9 +1501,10 @@ signaling_data_plot_bodyfat <- p_bodyfat_cost + p_bodyfat_crying + p_bodyfat_tan
 
 signaling_data_plot_bodyfat
 
-signaling_data_plot_bodyfat2 <- p_bodyfat_cost2 + p_bodyfat_crying2 + p_bodyfat_tantrum2 +
+signaling_data_plot_bodyfat2 <- (p_bodyfat_cost2 + coord_cartesian(clip = "on", ylim = c(0, 100))) + (p_bodyfat_crying2 + coord_cartesian(clip = "on", ylim = c(0, 25))) + (p_bodyfat_tantrum2 + coord_cartesian(clip = "on", ylim = c(0, 25))) +
   plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE, guides = "collect") +
-  plot_annotation(title = "Signaling measures", tag_levels = "A") & theme(plot.tag.position = c(.95, .95))
+  plot_annotation(title = "Signaling measures") &
+  theme(legend.position = "top")
 
 signaling_data_plot_bodyfat2
 # x <- summary(mBFtantrum)
