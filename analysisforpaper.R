@@ -232,9 +232,9 @@ d <- children |>
       RelativeNeedRecode2,
       ordered = TRUE,
       levels = c("Less", "The same amount", "More")), # change back to "The same" here
-    Currenthealth1 = invert(Currenthealth1),
-    Currenthealth2 = invert(Currenthealth2),
-    Currenthealth3 = Currenthealth3 + 0, # to remove labels
+    IllnessSusceptibility1 = invert(Currenthealth1),
+    IllnessSusceptibility2 = invert(Currenthealth2),
+    IllnessSusceptibility3 = Currenthealth3 + 0, # to remove labels
     Sex = as.factor(Sex),
     ChildAge = as.numeric(ChildAge),
     Age0_2.5 = ifelse(ChildAge < 2.5, 1, 0), #Helfrecht and Meehan 2015 style risk periods
@@ -260,8 +260,8 @@ d <- children |>
     SignalFreq = sum2(SadFreqN, CryFreqN, TantrumFreqN, na.rm = TRUE), # RunawayFreqN removed because interpretation not clear
     SignalFreqMax = max2(SadFreqN, CryFreqN, TantrumFreqN, na.rm = TRUE), # RunawayFreqN removed because interpretation not clear
     SignalCost = sum2(SadFreqN, CryFreqN * 2, TantrumFreqN * 3, na.rm = TRUE), # RunawayFreqN removed because interpretation not clear
-    CurrentHealthSum = sum2(Currenthealth1, Currenthealth2, Currenthealth3, na.rm = TRUE),
-    CurrentHealthMean = mean2(Currenthealth1, Currenthealth2, Currenthealth3, na.rm = TRUE)
+    IllnessSusceptibilitySum = sum2(IllnessSusceptibility1, IllnessSusceptibility2, IllnessSusceptibility3, na.rm = TRUE),
+    IllnessSusceptibilityMean = mean2(IllnessSusceptibility1, IllnessSusceptibility2, IllnessSusceptibility3, na.rm = TRUE)
   ) |>
   ungroup() |>
   left_join(anthropometricMeans, by = "ChildID")
@@ -394,10 +394,10 @@ modeldf <- d2 |>
     ConflictFreqN,
     AlloparentingFreqN,
     EducationLevelYears,
-    Currenthealth1,
-    Currenthealth2,
-    Currenthealth3,
-    CurrentHealthMean,
+    IllnessSusceptibility1,
+    IllnessSusceptibility2,
+    IllnessSusceptibility3,
+    IllnessSusceptibilityMean,
     SadFreqOF,
     CryFreqOF,
     TantrumFreqOF,
@@ -614,7 +614,7 @@ ggplot(caregivers2, aes(y=Neighborhood, fill=ImmigrateUtila)) +
 
 # Correlation matrix of predictor and outcome variables
 
-maincormat <- d2[c("CurrentHealthMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeNeed3", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")] |>
+maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeNeed3", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")] |>
   mutate(
     PartnerStatus = as.numeric(PartnerStatus),
     Sex = as.numeric(Sex),
@@ -628,33 +628,33 @@ ggcorrplot(maincormat, hc.order = TRUE, lab = TRUE)
 # main models ------------------------------------------------
 
 # signal cost
-mscH <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+mscH <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(mscH)
 plot(allEffects(mscH))
 
 # signal frequency
 
-msfH <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+msfH <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(msfH)
 plot(allEffects(msfH))
 
 # frequency of most common signal (running away excluded)
 
-mmsfH <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+mmsfH <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(mmsfH)
 plot(allEffects(mmsfH))
 
 # Signal specific models
 
-msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(msadH)
 plot(allEffects(msadH))
 
-mcryH <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+mcryH <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(mcryH)
 plot(allEffects(mcryH))
 
-mtantrumH <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + (1|householdID),data = d2, family = nbinom2)
+mtantrumH <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(mtantrumH)
 plot(allEffects(mtantrumH))
 
@@ -710,7 +710,7 @@ mtantrumF <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome
 summary(mtantrumF)
 plot(allEffects(mtantrumF))
 
-# do we want CurrentHealthMean in these models?
+# do we want IllnessSusceptibilityMean in these models?
 
 mBFf <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFf)
@@ -772,20 +772,16 @@ m <- glmmTMB(GripStrengthMean_2024 ~ GripStrengthMean_2023 + CryFreqN + Sex + (1
 summary(m)
 plot(allEffects(m))
 
-m <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + Sex + ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
-summary(m)
-plot(allEffects(m))
-
 m <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + Sex  + (1|householdID), data = anthropometricMeansWide, family = gaussian)
 summary(m)
 plot(allEffects(m))
 
-m2 <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
-summary(m2)
-plot(allEffects(m2))
+weight_long_cry <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(weight_long_cry)
+plot(allEffects(weight_long_cry))
 
-p <- plot_predictions(m2, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
-  geom_rug(data = m2$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
+p <- plot_predictions(weight_long_cry, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
+  geom_rug(data = weight_long_cry$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
   scale_color_viridis_d(option = "A", end = .8) +
   guides(color = guide_legend(reverse = TRUE, title = "Child age (years)"), fill = guide_legend(reverse = TRUE, title = "Child age (years)")) +
   xlab("Crying freq. (per month)") +
@@ -796,10 +792,30 @@ p$layers[[2]]$aes_params$linewidth <- 2
 p$layers[[1]]$aes_params$alpha <- 0
 p
 
+height_long_cry <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+summary(height_long_cry)
+plot(allEffects(height_long_cry))
+
+p2 <- plot_predictions(height_long_cry, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
+  geom_rug(data = height_long_cry$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
+  scale_color_viridis_d(option = "A", end = .8) +
+  guides(color = guide_legend(reverse = TRUE, title = "Child age (years)"), fill = guide_legend(reverse = TRUE, title = "Child age (years)")) +
+  xlab("Crying freq. (per month)") +
+  ylab("Height (2024)") +
+  ylim(130, 145) +
+  theme_minimal(15)
+p2$layers[[2]]$aes_params$linewidth <- 2
+p2$layers[[1]]$aes_params$alpha <- 0
+p2
+
+longitudinal_plot <- p + p2 +
+  plot_layout(axes = "collect_x", ncol = 1, byrow = FALSE, guides = "collect") &
+  theme(legend.position = "top")
+
 # causality going the other direction (weight causes more crying?)
 
-out <- avg_comparisons(m2, variables = list("CryFreqN" = c(0, 30), "ChildAge" = c(5,14)), cross = TRUE)
-out <- avg_comparisons(m2, variables = list("CryFreqN" = c(0, 8), "ChildAge" = c(5,14)), cross = TRUE)
+out <- avg_comparisons(height_long_cry, variables = list("CryFreqN" = c(0, 30), "ChildAge" = c(5,14)), cross = TRUE)
+out <- avg_comparisons(height_long_cry, variables = list("CryFreqN" = c(0, 8), "ChildAge" = c(5,14)), cross = TRUE)
 # ConflictFreqN model -----------------------------------------------------------
 
 d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
@@ -950,12 +966,12 @@ plot(allEffects(malloparenting))
 # SignalCost and SignalFreqMax = marginally significant
 
 # SignalFreq model
-mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness + (1|householdID),data = d2, family = nbinom2)
+mSRF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + MeanSiblingRelatedness + (1|householdID),data = d2, family = nbinom2)
 summary(mSRF)
 plot(allEffects(mSRF))
 
 # with YoungerKids*ChildAge
-mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + CurrentHealthMean + MeanSiblingRelatedness*number_adults + YoungerKids*ChildAge + (1|householdID),data = d2, family = nbinom2)
+mSRF3 <- glmmTMB(SignalFreq ~ ChildAge + Sex + OlderKids + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + MeanSiblingRelatedness*number_adults + YoungerKids*ChildAge + (1|householdID),data = d2, family = nbinom2)
 summary(mSRF3)
 plot(allEffects(mSRF3))
 
@@ -965,7 +981,7 @@ plot(allEffects(mSRF3))
 
 # Using preferred model for signal frequency (without partner status)
 # signal Freq and Child age still significant after controlling for education years
-# CurrentHealthMean has no predictive ability when added
+# IllnessSusceptibilityMean has no predictive ability when added
 mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults+ ConflictFreqN + AlloparentingFreqN, d2)
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
@@ -1017,14 +1033,14 @@ p_need_signalcost
 exp(cbind(coef(mN1),(ci)))
 
 # brm
-# mN1b <- brm(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN + CurrentHealthMean + (1|householdID), d2, family = cumulative(link = "logit", threshold = "flexible"))
-# save(mN1b, file = "mN1b.rda")
+#mN1b <- brm(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + AlloparentingFreqN + IllnessSusceptibilityMean + (1|householdID), d2, family = cumulative(link = "logit", threshold = "flexible"))
+#save(mN1b, file = "mN1b.rda")
 load(file = "mN1b.rda")
 summary(mN1b)
 plot_predictions(mN1b, condition = c("ChildAge", "group"), type = "response")
 
 # Using preferred model for signal frequency (with partner status)
-mI <- polr(RelativeMaternalInvestment2 ~ SignalFreq + ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + CurrentHealthMean, d2)
+mI <- polr(RelativeMaternalInvestment2 ~ SignalFreq + ChildAge*Sex + OtherChildrenHH + LogIncome + number_adults + ConflictFreqN + IllnessSusceptibilityMean, d2)
 summary(mI)
 coeftest(mI, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
@@ -1039,12 +1055,39 @@ plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 # note 6 instances of both positive and negative coded as NA
 table(modeldf$PositiveResponse, modeldf$NegativeResponse)
 
+# converted to characters for the purpose of avg_predictions function
+d2$UnwantedTask <- as.character(d2$UnwantedTask)
+d2$DiscomfortPainInjuryIllness <- as.character(d2$DiscomfortPainInjuryIllness)
+#d2$Family2 <- as.numeric(d2$Family2)
+
 mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
 summary(mpr)
 out_mpr <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female")))
-out_mpr$estimate[3] # 0.3487553
+out_mpr$estimate[3] # 0.320612
 
-out_mpr_avg <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1"), by = TRUE)
+# Note: Output is identical with LogIncome = mean(mpr$model$LogIncome) in
+# the call and with it not. This suggests that it correctly handles
+# numeric variables on its own?
+out_mpr_full <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = c("0", "1"), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
+out_mpr_full
+out_mpr_full$estimate[3]
+
+
+# out_mpr_full2 <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = mean(mpr$model$Family2), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
+# out_mpr_full2
+# out_mpr_full2$estimate[3]
+# mean(as.numeric(mpr$model$Family2))
+
+# The factors are almost working correctly based on this:
+# Default estimate for group = 1 when family2 is removed is 0.434,
+# same as family = 0. Same estimate is .310 when family 2 = 1.
+# Mean of this = .372, same as when both are included in the data grid
+# as follows: Family2 = c("0", "1").
+
+# However, family2 = mean(mpr$model$Family2) and family2 = .5, both give
+# slightly different (but very similar answers)
+
+
 
 coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 p_response_punishment <- plot_predictions(mpr, condition = c("Punishment2", "group"), type = "probs", vcov = ~householdID) +
@@ -1546,5 +1589,3 @@ models <- list (msadH = msadH, mcryH = mcryH, mtantrumH = mtantrumH, msfH = msfH
 stats <- map (models, tdy)
 stats$mBFc$BodyFat$str
 stats$mBFc$BodyFat$str2
-
-
