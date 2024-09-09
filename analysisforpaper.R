@@ -1058,22 +1058,24 @@ table(modeldf$PositiveResponse, modeldf$NegativeResponse)
 # converted to characters for the purpose of avg_predictions function
 d2$UnwantedTask <- as.character(d2$UnwantedTask)
 d2$DiscomfortPainInjuryIllness <- as.character(d2$DiscomfortPainInjuryIllness)
-#d2$Family2 <- as.numeric(d2$Family2)
+d2$Family2 <- as.numeric(d2$Family2)
 
 mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
 summary(mpr)
-out_mpr <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female")))
-out_mpr$estimate[3] # 0.320612
+# out_mpr <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female")))
+# out_mpr$estimate[3] # 0.320612
 
 # Note: Output is identical with LogIncome = mean(mpr$model$LogIncome) in
 # the call and with it not. This suggests that it correctly handles
 # numeric variables on its own?
-out_mpr_full <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = c("0", "1"), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
-out_mpr_full
-out_mpr_full$estimate[3]
+# out_mpr_full <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = c("0", "1"), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
+# out_mpr_full
+# out_mpr_full$estimate[3]
 
-
-# out_mpr_full2 <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = mean(mpr$model$Family2), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
+updated_out <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
+updated_out$estimate[3]
+# d2$Family2 <- as.character(d2$Family2)
+# out_mpr_full2 <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = c("0", "1"), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
 # out_mpr_full2
 # out_mpr_full2$estimate[3]
 # mean(as.numeric(mpr$model$Family2))
@@ -1087,6 +1089,11 @@ out_mpr_full$estimate[3]
 # However, family2 = mean(mpr$model$Family2) and family2 = .5, both give
 # slightly different (but very similar answers)
 
+test_grid <- datagrid(model = mpr, Punishment2 = "1", grid_type = "balanced")
+avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
+predictions(mpr, newdata = datagrid(Punishment2 = unique))
+# out_mpr_full
+# out_mpr_full$estimate[3]
 
 
 coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
@@ -1589,3 +1596,9 @@ models <- list (msadH = msadH, mcryH = mcryH, mtantrumH = mtantrumH, msfH = msfH
 stats <- map (models, tdy)
 stats$mBFc$BodyFat$str
 stats$mBFc$BodyFat$str2
+
+
+
+mpr <- polr(RelativeMaternalInvestment2 ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + RelativeNeed3, d2)
+summary(mpr)
+coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
