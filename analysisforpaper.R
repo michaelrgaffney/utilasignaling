@@ -5,6 +5,7 @@
 # note some are no longer used
 library(utiladata2023) # data package
 library(tidyverse)
+library(labelled)
 # library(lme4)
 library(effects)
 library(visreg)
@@ -99,7 +100,9 @@ anthropometricMeans$BodyFatPercentageR <- residuals(m4)
 
 anthropometricMeans$Sex <- NULL
 
-d <- children |>
+d <-
+  children |>
+  remove_labels() |>
   #dplyr::filter(CompleteSurvey) %>%
   mutate(
     YoungerKids = map_int(ChildAge, \(x) sum(x > ChildAge)),
