@@ -55,6 +55,10 @@ mean2 <- function(..., na.rm = F){
 
 # dataframe prep ----------------------------------------------------------
 
+children2 <- children |>
+  dplyr::filter(ChildID != "") |>
+  dplyr::select(ChildID, householdID)
+
 anthropometricMeans0 <- anthropometrics |>
   dplyr::select(
     ChildID,
@@ -76,7 +80,8 @@ anthropometricMeans0 <- anthropometrics |>
 anthropometricMeans <- anthropometricMeans0 |>
   dplyr::filter(
     measurements == 1 | year(Date.of.measurement) == 2023
-  )
+  ) |>
+  left_join(children2) # note that we filter out householdID based on it's column number
 
 # moved below
 # anthropometricMeansWide <- anthropometricMeans0 |>
@@ -89,21 +94,25 @@ anthropometricMeans <- anthropometricMeans0 |>
 anthropometricMeans$WeightZ <- growthRef(AgeAtMeasurement, WeightMean_KG, Sex, anthropometricMeans, type = "Weight", pop = "CDC")
 anthropometricMeans$HeightZ <- growthRef(AgeAtMeasurement, HeightMean, Sex, anthropometricMeans, type = "Height", pop = "CDC")
 anthropometricMeans$BMIZ <- growthRef(AgeAtMeasurement, BMI, Sex, anthropometricMeans, type = "BMI", pop = "CDC")
+anthropometricMeans$Sex2 <- factor(anthropometricMeans$Sex)
 
-m <- mgcv::gam(GripStrengthMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 4), data = anthropometricMeans)
+m <- mgcv::gam(GripStrengthMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 4), data = anthropometricMeans)
 anthropometricMeans$GripR <- residuals(m)
 
-m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex)), data = anthropometricMeans, na.action = na.exclude)
+m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$TricepR <- residuals(m2)
 
-m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
+m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$SubscapR <- residuals(m3)
 
-m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
+m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$BodyFatPercentageR <- residuals(m4)
 
-m5 <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = as.factor(Sex), k = 3), data = anthropometricMeans, na.action = na.exclude)
+m5 <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$FlexedR <- residuals(m5)
+
+m5b <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3) + s(householdID, bs = "re"), data = anthropometricMeans, na.action = na.exclude)
+anthropometricMeans$FlexedRb <- residuals(m5b)
 
 anthropometricMeans$Sex <- NULL
 
@@ -264,14 +273,20 @@ d <- children |>
     IllnessSusceptibilityMean = mean2(IllnessSusceptibility1, IllnessSusceptibility2, IllnessSusceptibility3, na.rm = TRUE)
   ) |>
   ungroup() |>
-  left_join(anthropometricMeans, by = "ChildID")
-
-# add household data to d2
-d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
-                                EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
-                                number_children2, number_adults, UserLanguage, contains("CaregiverMarital"),
-                                contains("SocialSupport"), contains("FoodSecurity")), by = "householdID") |>
+  left_join(anthropometricMeans[-21], by = "ChildID") |>  # removing householdID column
+  left_join(dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
+                             EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
+                             number_children2, number_adults, UserLanguage, contains("CaregiverMarital"),
+                             contains("SocialSupport"), contains("FoodSecurity")), by = "householdID") |>
   left_join(dplyr::select(causes, -householdID, -childHHid, -ChildID, -Sad1), by = "uniqueID")
+
+
+# # add household data to d2
+# d <- left_join(d, dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
+#                                 EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
+#                                 number_children2, number_adults, UserLanguage, contains("CaregiverMarital"),
+#                                 contains("SocialSupport"), contains("FoodSecurity")), by = "householdID") |>
+#   left_join(dplyr::select(causes, -householdID, -childHHid, -ChildID, -Sad1), by = "uniqueID")
 
 # prepare household variables for analyses
 d2 <- d |>
@@ -329,6 +344,10 @@ d2 <- d |>
     Punishment2 = ifelse(Punishment == "Maybe", 0, Punishment),
     Family2 = ifelse(Family == "Maybe", 0, Family),
     OutsideFamily2 = ifelse(OutsideFamily == "Maybe", 0, OutsideFamily),
+    WantNeed2 = ifelse(WantNeed == "Want" | WantNeed == "Need", WantNeed, NA),
+    WantNeedBinary = case_when(
+      WantNeed2 == "Want" ~ 0,
+      WantNeed2 == "Need" ~ 1),
     DeathORIllnessInjuryHarmInOthers2 = ifelse(DeathORIllnessInjuryHarmInOthers == "Maybe", 0, DeathORIllnessInjuryHarmInOthers),
     HouseholdAdversity2 = ifelse(HouseholdAdversity == "Maybe", 0, HouseholdAdversity),
     ExplicitInvestmentDesired2 = ifelse(ExplicitInvestmentDesired == "Maybe", 0, ExplicitInvestmentDesired),
@@ -419,6 +438,7 @@ modeldf <- d2 |>
     TricepMean,
     TricepR,
     BodyFat,
+    FlexedR
 
   ) |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN)))
@@ -693,16 +713,26 @@ plot(allEffects(msubTantrum))
 
 # Flexed residuals
 
-# Tricep residuals
-mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
+mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+#mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
 summary(mFlexC)
 plot(allEffects(mFlexC))
 
-mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
+mFlexCb <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedRb + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+summary(mFlexCb)
+plot(allEffects(mFlexCb))
+
+mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+#mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
 summary(mFlexF)
 plot(allEffects(mFlexF))
 
+mFlexFb <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+summary(mFlexFb)
+plot(allEffects(mFlexFb))
+
 mcryF <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR*Sex + (1|householdID),data = d2, family = nbinom2)
+#mcryF <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR*Sex + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
 summary(mcryF)
 plot(allEffects(mcryF))
 
@@ -1050,6 +1080,32 @@ exp(cbind(coef(mI),(ci)))
 plot_predictions(mI, condition = c("OtherChildrenHH", "group"), type = "probs")
 plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 
+# Want/need models
+summary(table(d2$WantNeed2, d2$CaregiverResponse))
+plot(table(d2$WantNeed2, d2$Sex))
+summary(table(d2$WantNeed2, d2$Sex))
+plot(table(d2$WantNeed2, d2$SadFreqN))
+
+m<- glmmTMB(SadFreqN ~ ChildAge*WantNeed2 + (1|householdID), family = nbinom2, d2)
+summary(m)
+plot(allEffects(m))
+
+m2 <- glmmTMB(CryFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
+summary(m2)
+plot(allEffects(m2))
+
+m3 <- glmmTMB(TantrumFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
+summary(m3)
+plot(allEffects(m3))
+
+mI2 <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + WantNeed2, d2)
+summary(mI2)
+coeftest(mI2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+
+mWantNeed <- glm(WantNeedBinary ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults, data = d2, family = "binomial")
+summary(mWantNeed)
+coeftest(mWantNeed, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+
 # ordinal logistic regression of parental response ------------------------
 
 # note 6 instances of both positive and negative coded as NA
@@ -1122,21 +1178,64 @@ signaling_plot_last_signal_response <- (p_response_punishment + theme(legend.pos
 
 signaling_plot_last_signal_response
 
-# Notes:
+# relative need predicts relative investment ------------------------------
 
-# Survey language as a way to get at differences in culture
-# - Spanish: 322
-# - English: 53
-# - Nothing close to significant in our existing models.
+mpr <- polr(RelativeMaternalInvestment2 ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + RelativeNeed3, d2)
+summary(mpr)
+coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
+mpr_plot_data <- plot_predictions(mpr, condition = c("RelativeNeed3", "group"), type = "probs", vcov = ~householdID, draw = FALSE)
 
+ggplot(mpr_plot_data, aes(RelativeNeed3, estimate, color = group, group = group, ymin = conf.low, ymax = conf.high)) +
+  geom_line(position = position_dodge(width = .2), linewidth = 1.5) +
+  geom_pointrange(position = position_dodge(width = .2)) +
+  theme_minimal(15) +
+  xlab("\nRelative need") +
+  ylab("Proportion of children") +
+  #scico::scale_color_scico_d(palette = "lipari", begin = .3, end = .8) +
+  scale_color_viridis_d(option = "B", begin = .25, end = .85) +
+  guides(color = guide_legend(title = "Relative investment:")) &
+  theme(legend.position = "top")
 
+plot_predictions(mpr, condition = c("OtherChildrenHH", "group"), type = "probs", vcov = ~householdID)
 
+mpr2 <- polr(RelativeMaternalInvestment2 ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + number_adults + RelativeNeed3, d2)
+summary(mpr2)
+coeftest(mpr2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
+mpr_plot_data2 <- plot_predictions(mpr2, condition = c("RelativeNeed3", "group"), type = "probs", vcov = ~householdID, draw = FALSE)
 
+# NOTE error ribbons dip below 0
+plot_predictions(mpr2, condition = c("YoungerKids", "group"), type = "probs", vcov = ~householdID)
+
+plot_predictions(mpr2, condition = c("YoungerKids", "group"), type = "probs", vcov = ~householdID) +
+  ylab("Proportion") +
+  xlab("\nYounger children") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  scale_fill_viridis_d(option = "B", end = .8) +
+  scale_linewidth_ordinal(range = c(5,10)) +
+  guides(color = guide_legend(override.aes = list(linewidth=2.5)), title = "Relative investment:") +
+  labs(color = "", fill = "") +
+  ylim(-.03 ,1) +
+  theme_minimal() &
+  theme(legend.position = "top")
+
+#  2 kids with values for relative need but no other kids in house.
+# Could be due to children elsewhere.
+modeldf2 <- d2 |>
+  dplyr::select(
+    householdID,
+    childHHid,
+    Sex,
+    ChildAge,
+    OtherChildrenHH,
+    LogIncome,
+    number_adults,
+    RelativeNeed3
+  ) |>
+  na.omit()
 
 # plots -------------------------------------------------------
-
 
 ## age --------------------------------------------------------------------
 
@@ -1599,6 +1698,3 @@ stats$mBFc$BodyFat$str2
 
 
 
-mpr <- polr(RelativeMaternalInvestment2 ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + RelativeNeed3, d2)
-summary(mpr)
-coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
