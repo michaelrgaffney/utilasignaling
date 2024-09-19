@@ -233,10 +233,10 @@ vars_c <- c(
   SignalFreq = "Frequency of signals summed (times per month)",
   SignalCost = "Signal cost",
   SignalFreqMax = "Frequency of most common signal (times per month)",
-  IllnessSusceptibility1 = "IllnessSusceptibility1",
-  IllnessSusceptibility2 = "IllnessSusceptibility2",
-  IllnessSusceptibility3 = "IllnessSusceptibility3",
-  IllnessSusceptibilityMean = "Mean of current health measures",
+  # IllnessSusceptibility1 = "Illness Susceptibility1",
+  # IllnessSusceptibility2 = "Illness Susceptibility2",
+  # IllnessSusceptibility3 = "Illness Susceptibility3",
+  IllnessSusceptibilityMean = "Illness avoidance index",
   HeightZ = "Height Z-score (CDC)",
   WeightZ = "Weight Z-score (CDC)",
   BMIZ = "BMI Z-score (CDC)",
@@ -247,7 +247,7 @@ vars_c <- c(
   BodyFat =  "Body fat composite"
 )
 
-kable(custom.summarize(modeldf, vars_c)) %>% kable_styling()
+kable(custom.summarize(modeldf, vars_c, facvar = "Sex")) %>% kable_styling()
 
 #kable(custom.summarize(d2, vars), caption = "Summary statistics for child study variables.") %>% kable_styling()
 
