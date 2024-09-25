@@ -459,7 +459,8 @@ signalfreqdf <- d2 |>
     uniqueID,
     SadFreqOF,
     CryFreqOF,
-    TantrumFreqOF
+    TantrumFreqOF,
+    SignalCost
   ) |>
   rename(
     Sadness = SadFreqOF,
@@ -523,10 +524,21 @@ sfdfsum2 <-
   ) |>
   summarise(
     Freq = n(),
+    MeanSignalCost = mean(SignalCost, na.rm = T),
     .by = c(Sadness, Crying, Tantrums)
   ) |>
+  mutate(
+    CostCategory = cut(
+      MeanSignalCost, 
+      quantile(MeanSignalCost)[-3], # Bottom 1/4, Middle 1/2, Top 1/4
+      labels = c("Low", "Medium", "High"), 
+      include.lowest = T
+    )
+  ) |> 
   arrange(desc(Freq)) |>
   dplyr::filter(Freq > 2)
+
+# sfdfsum2 |> arrange(desc(CostCategory), desc(Freq))
 
 signal_alluvial_plot <- ggplot(sfdfsum2, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
   geom_alluvium(aes(fill = Sadness), color = "black", show.legend = F) +
@@ -810,9 +822,12 @@ m <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + Sex  
 summary(m)
 plot(allEffects(m))
 
-weight_long_cry <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+weight_long_cry <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
 summary(weight_long_cry)
 plot(allEffects(weight_long_cry))
+
+anthropometricMeansWide$weightR <- residuals(weight_long_cry)
+ggplot(anthropometricMeansWide, aes(ChildAge, CryFreqN, colour = weightR)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
 
 p <- plot_predictions(weight_long_cry, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
   geom_rug(data = weight_long_cry$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
@@ -826,9 +841,38 @@ p$layers[[2]]$aes_params$linewidth <- 2
 p$layers[[1]]$aes_params$alpha <- 0
 p
 
-height_long_cry <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
+height_long_cry <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
 summary(height_long_cry)
 plot(allEffects(height_long_cry))
+
+anthropometricMeansWide$heightR <- residuals(height_long_cry)
+ggplot(anthropometricMeansWide, aes(ChildAge, CryFreqN, colour = heightR)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
+
+m <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
+summary(m)
+anthropometricMeansWide$heightR <- residuals(m)
+
+m <- gam(HeightMean_2024 ~ Sex2 + s(HeightMean_2023) + s(ChildAge, by = Sex2, k = 3), data = anthropometricMeansWide, na.action = na.exclude)
+summary(m)
+draw(m)
+anthropometricMeansWide$heightR <- residuals(m)
+
+ggplot(anthropometricMeansWide, aes(SadFreqN, heightR, colour = Sex2)) +
+  geom_jitter(size = 3) + 
+  geom_smooth(method = 'lm') +
+  scale_color_binary()
+  scico::scale_color_scico_d(palette = 'vik', midpoint = 0)
+
+
+m <- glmmTMB(heightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
+summary(m)
+
+m <- gam(HeightMean_2024 ~ Sex2 * SadFreqN + s(HeightMean_2023) + s(ChildAge, by = Sex2, k = 3), data = anthropometricMeansWide, na.action = na.exclude)
+summary(m)
+plot(m, all.terms = T)
+plot_predictions(m, condition = c("SadFreqN", "Sex2"), points = 1) +
+  theme_minimal(15)
+
 
 p2 <- plot_predictions(height_long_cry, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
   geom_rug(data = height_long_cry$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
@@ -850,6 +894,7 @@ longitudinal_plot <- p + p2 +
 
 out <- avg_comparisons(height_long_cry, variables = list("CryFreqN" = c(0, 30), "ChildAge" = c(5,14)), cross = TRUE)
 out <- avg_comparisons(height_long_cry, variables = list("CryFreqN" = c(0, 8), "ChildAge" = c(5,14)), cross = TRUE)
+
 # ConflictFreqN model -----------------------------------------------------------
 
 d2$AdultsNoChildcare <- d2$number_adults - d2$AdultsChildcare
