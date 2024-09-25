@@ -25,6 +25,7 @@ library(kableExtra)
 library(modelsummary)
 library(ggalluvial)
 library(patchwork)
+library(mgcv)
 library(gratia)
 
 source("recode.R")
@@ -898,7 +899,6 @@ ggplot(anthropometricMeansWide, aes(SadFreqN, heightR, colour = Sex2)) +
   geom_jitter(size = 3) + 
   geom_smooth(method = 'lm') +
   scale_color_binary()
-  scico::scale_color_scico_d(palette = 'vik', midpoint = 0)
 
 
 m <- glmmTMB(heightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
