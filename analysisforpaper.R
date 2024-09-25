@@ -25,6 +25,7 @@ library(kableExtra)
 library(modelsummary)
 library(ggalluvial)
 library(patchwork)
+library(gratia)
 
 source("recode.R")
 
@@ -101,8 +102,29 @@ anthropometricMeans$Sex2 <- factor(anthropometricMeans$Sex)
 m <- mgcv::gam(GripStrengthMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 4), data = anthropometricMeans)
 anthropometricMeans$GripR <- residuals(m)
 
+# Result for bodyfat predicitng crying freq changes if k is unspecified
 m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$TricepR <- residuals(m2)
+
+# anthropometricMeans$Sex3 <- as.numeric(anthropometricMeans$Sex2)
+
+# anthropometricMeans_female <- na.omit(anthropometricMeans[anthropometricMeans$Sex == "F", c("ChildID", "AgeAtMeasurement", "Sex", "TricepMean")])
+# anthropometricMeans_male <- na.omit(anthropometricMeans[anthropometricMeans$Sex == "M", c("ChildID", "AgeAtMeasurement", "Sex", "TricepMean")])
+#
+# m2bf <- loess(TricepMean ~ AgeAtMeasurement, data = anthropometricMeans_female, span = 5)
+# plot_predictions(m2bf, condition = c("AgeAtMeasurement"))
+# visreg(m2bf)
+# anthropometricMeans_female$TricepR <- m2bf$residuals
+#
+# m2bm <- loess(TricepMean ~ AgeAtMeasurement, data = anthropometricMeans_male, span = 5)
+# plot_predictions(m2bm, condition = c("AgeAtMeasurement"))
+# visreg(m2bm)
+# anthropometricMeans_male$TricepR <- m2bm$residuals
+#
+# temp <- bind_rows(anthropometricMeans_female, anthropometricMeans_male) |>
+#   dplyr::select(ChildID, TricepR)
+#
+# anthropometricMeans <- dplyr::left_join(anthropometricMeans, temp)
 
 m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
 anthropometricMeans$SubscapR <- residuals(m3)
@@ -588,7 +610,7 @@ barplot_SignalFreq <- ggplot(signaldf_long_sum, aes(N, Signal, fill = fct_rev(Fr
   geom_col(position = "stack", color = "grey") +
   scale_fill_viridis_d(option = "B", direction = -1) +
   labs(x = "Number of children", y = "") +
-  guides(fill = guide_legend("Frequency")) +
+  guides(fill = guide_legend("Times per month:", nrow = 1, reverse = TRUE, position = "top")) +
   theme_minimal(15)
 
 barplot_SignalFreq
@@ -663,10 +685,14 @@ ggcorrplot(maincormat, hc.order = TRUE, lab = TRUE)
 
 # main models ------------------------------------------------
 
+# conflict is a strong predictor. However, signal cost could be influencing frequency of conflict
+# include models without conflict
+
 # signal cost
 mscH <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(mscH)
 plot(allEffects(mscH))
+# OtherChildAlloparents*Sex
 
 # signal frequency
 
@@ -701,7 +727,7 @@ plot(allEffects(mtantrumH))
 
 # GripStrengthMean and GripR are not either (as main effects or interacted with Sex)
 
-# Tricep residuals
+# Tricep residuals data = d2[d2$BodyFat < 6,]
 mtriC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mtriC)
 plot(allEffects(mtriC))
@@ -709,6 +735,10 @@ plot(allEffects(mtriC))
   # Tricep residuals = not a signficant predictor of signal frequency.
   # Effect on cost may be due to its association with tantrum frequency.
   # (Tantrum model below)
+
+mtriCry <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(mtriCry)
+plot(allEffects(mtriCry))
 
 mtriTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + TricepR*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mtriTantrum)
@@ -723,25 +753,30 @@ plot(allEffects(msubC))
   # Effect on cost may be due to its association with tantrum frequency.
   # (Tantrum model below)
 
+msubCry <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + SubscapR*Sex + (1|householdID),data = d2, family = nbinom2)
+summary(msubCry)
+plot(allEffects(msubCry))
+
 msubTantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + SubscapR*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(msubTantrum)
 plot(allEffects(msubTantrum))
 
 # Flexed residuals
 
-mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
 #mFlexC <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
 summary(mFlexC)
 plot(allEffects(mFlexC))
+plot_predictions(mFlexC, condition = "FlexedR", residuals = T, vcov = T, points = 1)
 
-mFlexCb <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedRb + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
+# removing outliers from d2 based on FlexedR = body fat measures no longer being significant predictors
+mFlexCb <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedRb + (1|householdID),data = d2, family = nbinom2)
 summary(mFlexCb)
 plot(allEffects(mFlexCb))
 
-mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
-#mFlexF <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2, family = nbinom2)
-summary(mFlexF)
-plot(allEffects(mFlexF))
+# remember this filter. Filters out children with largest bodyfat. Has impact on results that is worth noting.
+# hist(d2[d2$FlexedR < 10,]$BodyFat)
+# filter out those higher than 5.87100254 (8.33906184 & 8.53234405)
 
 mFlexFb <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + FlexedR + (1|householdID),data = d2[d2$FlexedR < 10,], family = nbinom2)
 summary(mFlexFb)
@@ -765,7 +800,8 @@ plot(allEffects(mBFf))
 mBFfm <- glmmTMB(SignalFreqMax ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFfm)
 plot(allEffects(mBFfm))
-
+# hist(d2[d2$FlexedR < 10,]$BodyFat)
+# filter out those higher than 5.87100254 (8.33906184 & 8.53234405) data = d2[d2$BodyFat < 6,]
 mBFc <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFc)
 plot(allEffects(mBFc))
@@ -778,6 +814,7 @@ mBFcry <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + numb
 summary(mBFcry)
 plot(allEffects(mBFcry))
 
+# BodyFat Estimate: -0.418049  Std. Error 0.227308 z value: -1.839  p: 0.06590
 mBFtantrum <- glmmTMB(TantrumFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat*Sex + (1|householdID),data = d2, family = nbinom2)
 summary(mBFtantrum)
 plot(allEffects(mBFtantrum))
@@ -1025,16 +1062,41 @@ plot(allEffects(mmsf2i))
 
 # child alloparenting effort model ----------------------------------------
 
+# OtherChildAlloparentingFreqN < 121) included due to unrealistic predictions from the model for alloparenting frequency
 d3 <- d2 |>
-  dplyr::filter(YoungerKids > 1, OtherChildAlloparentingFreqN < 121)
+  dplyr::filter(YoungerKids > 1) # , OtherChildAlloparentingFreqN < 121
 
 # model cannot handle high alloparenting family
 
 # care (adult's heavily weighted)
-malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsChildcare + OtherChildAlloparentingFreqN + (1|householdID),data = d3, family = nbinom2)
+malloparenting <- glmmTMB(AlloparentingFreqN ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsChildcare + OtherChildAlloparents + (1|householdID),data = d3, family = nbinom2)
 summary(malloparenting)
 plot(allEffects(malloparenting))
 
+# d3$Sex2 <- as.factor(d3$Sex)
+#
+# m <- mgcv::gam(AlloparentingFreqN ~ ChildAge + Sex2 + s(YoungerKids, k = 3) + s(OlderKids, by = Sex2, k = 3) + LogIncome + AdultsChildcare + s(OtherChildAlloparentingFreqN) + s(householdID, bs = "re"),data = d3, family = quasipoisson)
+# summary(m)
+# visreg(m, scale = "response")
+
+d3$AlloparentingProp <- d3$AlloparentingFreqN/60 # 60 = maximum value
+
+malloparenting2 <- glmmTMB(AlloparentingProp ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + AdultsChildcare + OtherChildAlloparents + (1|householdID),data = d3, family = binomial)
+summary(malloparenting2)
+plot(allEffects(malloparenting2))
+#visreg(malloparenting2, scale = "response")
+
+ggplot(d3, aes(OtherChildAlloparents, AlloparentingFreqN)) + geom_count() + geom_smooth()
+ggplot(d3, aes(OtherChildAlloparents, AlloparentingFreqN, size = CryFreqN, color = CryFreqN)) + geom_jitter() + scale_color_viridis_c(option = "A", begin = .2, end = .9)
+ggplot(drop_na(d3, Sex), aes(size = OtherChildAlloparents, x = AlloparentingFreqN, y = CryFreqN, color = OtherChildAlloparents)) + geom_jitter() + scale_color_viridis_c(option = "A", begin = .2, end = .9) + geom_smooth(method = "lm") + facet_wrap(~Sex)
+
+# Leaning against including these models of alloparenting freq
+# consider putting into our models of signaling vs alloparenting the number of other child alloparents
+# higher numbers of other child alloparents seems to be a protective factor at high alloparenting frequency
+ggplot(drop_na(d3, Sex), aes(size = OtherChildAlloparents, x = AlloparentingFreqN, y = SignalCost, color = OtherChildAlloparents)) + geom_jitter() + scale_color_viridis_c(option = "A", begin = .2, end = .9) + geom_smooth(method = "lm") + facet_wrap(~Sex)
+
+ggplot(d2, aes(SignalCost, color = factor(Sex))) + stat_ecdf()
+ggplot(drop_na(d2, Sex), aes(AlloparentingFreqN, color = factor(Sex))) + stat_ecdf()
 # relatedness within the family -------------------------------------------
 
 # Child relatedness (relatedness relative to every kid in household) = not a significant
@@ -1306,9 +1368,9 @@ plot_age <- function(m, ylabel){
 p_age_sad <- plot_age(msadH, "Sadness freq.")
 p_age_cry <- plot_age(mcryH, "Crying freq.")
 p_age_tantrum <- plot_age(msadH, "Tantrum freq.")
-p_age_freq <- plot_age(msadH, "Summed freq.")
-p_age_cost <- plot_age(msadH, "Signal cost")
-p_age_freq_max <- plot_age(msadH, "Max freq.")
+p_age_freq <- plot_age(msfH, "Summed freq.")
+p_age_cost <- plot_age(mscH, "Signal cost")
+p_age_freq_max <- plot_age(mmsfH, "Max freq.")
 
 signaling_data_plot_age <- p_age_sad + p_age_cry + p_age_tantrum + p_age_freq + p_age_freq_max + p_age_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
@@ -1395,10 +1457,10 @@ plot_conflict <- function(m, ylabel){
 
 p_conflict_sad <- plot_conflict(msadH, "Sadness freq.")
 p_conflict_cry <- plot_conflict(mcryH, "Crying freq.")
-p_conflict_tantrum <- plot_conflict(msadH, "Tantrum freq.")
-p_conflict_freq <- plot_conflict(msadH, "Summed freq.")
-p_conflict_cost <- plot_conflict(msadH, "Signal cost")
-p_conflict_freq_max <- plot_conflict(msadH, "Max freq.")
+p_conflict_tantrum <- plot_conflict(mtantrumH, "Tantrum freq.")
+p_conflict_freq <- plot_conflict(msfH, "Summed freq.")
+p_conflict_cost <- plot_conflict(mscH, "Signal cost")
+p_conflict_freq_max <- plot_conflict(mmsfH, "Max freq.")
 
 signaling_data_plot_conflict <- p_conflict_sad + p_conflict_cry + p_conflict_tantrum + p_conflict_freq + p_conflict_freq_max + p_conflict_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
@@ -1505,10 +1567,10 @@ plot_education <- function(m, ylabel){
 
 p_education_sad <- plot_education(msadH, "Sadness freq.")
 p_education_cry <- plot_education(mcryH, "Crying freq.")
-p_education_tantrum <- plot_education(msadH, "Tantrum freq.")
-p_education_freq <- plot_education(msadH, "Summed freq.")
-p_education_cost <- plot_education(msadH, "Signal cost")
-p_education_freq_max <- plot_education(msadH, "Max freq.")
+p_education_tantrum <- plot_education(mtantrumH, "Tantrum freq.")
+p_education_freq <- plot_education(mscH, "Summed freq.")
+p_education_cost <- plot_education(msfH, "Signal cost")
+p_education_freq_max <- plot_education(mmsfH, "Max freq.")
 
 signaling_data_plot_education <- p_education_sad + p_education_cry + p_education_tantrum + p_education_freq + p_education_freq_max + p_education_cost +
   plot_layout(axes = "collect_x", ncol = 2, byrow = FALSE, guides = "collect") &
@@ -1746,4 +1808,65 @@ stats$mBFc$BodyFat$str
 stats$mBFc$BodyFat$str2
 
 
+maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")] |>
+  mutate(
+    PartnerStatus = as.numeric(PartnerStatus),
+    Sex = as.numeric(Sex),
+    RelativeMaternalInvestment2 = as.numeric(RelativeMaternalInvestment2)
+  ) |>
+  cor( use = "pairwise.complete.obs")
 
+ggcorrplot(maincormat, hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5) +
+  scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9)
+
+smallcormat <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")] |>
+  mutate(
+    Sex = as.numeric(Sex)
+  ) |>
+  cor( use = "pairwise.complete.obs")
+
+signal_corrplot <- ggcorrplot(smallcormat, hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5) +
+  scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9, limits = c(-1, 1)) +
+  guides(fill = guide_colorbar(title = "Correlation coefficients"))
+
+
+
+ggplot(modeldf, aes(ConflictFreqN, SignalCost)) + geom_count() + geom_smooth(method='lm')
+
+
+
+
+
+
+m <- mgcv::gam(HeightMean_2024 ~ Sex2 + s(HeightMean_2023) + s(ChildAge, by = Sex2, k = 3), data = anthropometricMeansWide, na.action = na.exclude)
+summary(m)
+draw(m)
+anthropometricMeansWide$heightR <- residuals(m)
+
+m <- glmmTMB(heightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
+summary(m)
+plot(allEffects(m))
+
+ggplot(drop_na(anthropometricMeansWide, Sex2), aes(SadFreqN, heightR, colour = Sex2)) +
+  geom_jitter(size = 3) +
+  geom_smooth(method = 'lm') +
+  scale_color_binary()
+
+ggplot(anthropometricMeansWide[anthropometricMeansWide$Sex2 == "F",], aes(SadFreqN, heightR)) +
+  geom_jitter(size = 3) +
+  geom_smooth(method = 'lm')
+
+
+m <- mgcv::gam(WeightMean_KG_2024 ~ Sex2 + s(WeightMean_KG_2023) + s(ChildAge, by = Sex2, k = 3), data = anthropometricMeansWide, na.action = na.exclude)
+summary(m)
+draw(m)
+anthropometricMeansWide$WeightR <- residuals(m)
+
+m <- glmmTMB(WeightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
+summary(m)
+plot(allEffects(m))
+
+ggplot(anthropometricMeansWide, aes(SadFreqN, WeightR, colour = Sex2)) +
+  geom_jitter(size = 3) +
+  geom_smooth(method = 'lm') +
+  scale_color_binary()
