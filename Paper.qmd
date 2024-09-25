@@ -3,7 +3,9 @@ title: "Child Signals of Need in Utila, Honduras: An Exploratory Study"
 execute: 
   echo: false
   warning: false
-format: html
+format:
+  html:
+    toc: true
 lightbox: true
 editor: visual
 tbl-cap-location: bottom
@@ -258,11 +260,11 @@ kable(custom.summarize(modeldf, vars_c, facvar = "Sex")) %>% kable_styling()
 #| tbl-cap: Summary statistics for adult and household study variables.
 
 vars_c <- c(
-  CaregiverAge = "Age (years)",
-  EducationLevelYears = "Education level (years)",
+  CaregiverAge = "Caregiver age (years)",
+  EducationLevelYears = "Caregiver education level (years)",
   IncomeCategoryN = "Monthly household income (Lempira)",
   number_adults = "Adults in household",
-  AdultsChildcare = "Adults who provide childcare"
+  AdultsChildcare = "Household adults who provide childcare"
 )
 
 kable(custom.summarize(caregivers, vars_c)) %>% kable_styling()
@@ -273,15 +275,25 @@ kable(custom.summarize(caregivers, vars_c)) %>% kable_styling()
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict
 
-Child sadness, crying, and temper tantrums were common. Caregivers reported that `r sum(na.omit(modeldf$SadFreqN >= 8))` (`r signif(sum((na.omit(modeldf$SadFreqN >= 8)) / sum(!is.na(modeldf$SadFreqN)) * 100), 2)`%) children were sad at least once a week, `r sum(na.omit(modeldf$CryFreqN >= 8))` (`r signif(sum((na.omit(modeldf$CryFreqN >= 8)) / sum(!is.na(modeldf$CryFreqN)) * 100), 2)`%) cried at least more than once a week, and `r sum(na.omit(modeldf$TantrumFreqN >= 8))` (`r signif(sum((na.omit(modeldf$TantrumFreqN >= 8)) / sum(!is.na(modeldf$TantrumFreqN)) * 100), 2)`%) threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily (sadness = `r sum(na.omit(modeldf$SadFreqN >= 30))` children \[`r signif(sum((na.omit(modeldf$SadFreqN >= 30)) / sum(!is.na(modeldf$SadFreqN)) * 100), 2)`%\], crying = `r sum(na.omit(modeldf$CryFreqN >= 30))` children \[`r signif(sum((na.omit(modeldf$CryFreqN >= 30)) / sum(!is.na(modeldf$CryFreqN)) * 100), 2)`%\], and tantrums = `r sum(na.omit(modeldf$TantrumFreqN >= 30))` children \[`r signif(sum((na.omit(modeldf$TantrumFreqN >= 30)) / sum(!is.na(modeldf$TantrumFreqN)) * 100), 2)`%\]). However, many children were reported to never engage in these signals/states (sadness = `r sum(na.omit(modeldf$SadFreqN == 0))` children \[`r signif(sum((na.omit(modeldf$SadFreqN == 00)) / sum(!is.na(modeldf$SadFreqN)) * 100), 2)`%\], crying = `r sum(na.omit(modeldf$CryFreqN == 0))` children \[`r signif(sum((na.omit(modeldf$CryFreqN == 0)) / sum(!is.na(modeldf$CryFreqN)) * 100), 2)`%\], and tantrums = `r sum(na.omit(modeldf$TantrumFreqN == 0))` children \[`r signif(sum((na.omit(modeldf$TantrumFreqN == 0)) / sum(!is.na(modeldf$TantrumFreqN)) * 100), 2)`%\]). See @fig-barplot_SignalFreq for plot showing signaling frequencies and @fig-signal_alluvial_plot for plot showing the number of individuals who engaged in specific combinations of signal frequencies..
+```{r}
+fmt_sum <- function(v){
+  v <- na.omit(v)
+  n <- length(v)
+  thesum <- sum(v)
+  thepct <- 100*signif(thesum/n, 2)
+  str_glue("{thesum} children ({thepct}%)")
+}
+```
 
-Conflict between children and caretakers was also common, with `r sum(na.omit(modeldf$ConflictFreqN >= 8))` children (`r signif(sum((na.omit(modeldf$ConflictFreqN >= 8)) / sum(!is.na(modeldf$ConflictFreqN)) * 100), 2)`%) having conflicts with parents more than once a week. As with the frequencies of various types of signaling, many children (`r sum(na.omit(modeldf$ConflictFreqN == 0))` \[`r signif(sum((na.omit(modeldf$ConflictFreqN == 0)) / sum(!is.na(modeldf$ConflictFreqN)) * 100), 2)`%\]) were described as never having conflicts with parents. See @fig-barplot_ConflictFreq for plot showing the frequencies of conflict between caretakers and children.
+Child sadness, crying, and temper tantrums were common. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)`  were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`;  and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. See @fig-barplot_SignalFreq and @fig-signal_alluvial_plot.
 
-The frequency of alloparenting effort was bimodally distributed, with `r sum(na.omit(modeldf$AlloparentingFreqN == 0))` children (`r signif(sum((na.omit(modeldf$AlloparentingFreqN == 0)) / sum(!is.na(modeldf$AlloparentingFreqN)) * 100), 2)`%) being reported to never engage in it (`r sum(na.omit(modeldf$NumberOfChildren==1))` instances were due to a child being an only child) and `r sum(na.omit(modeldf$AlloparentingFreqN >= 30))` children (`r signif(sum((na.omit(modeldf$AlloparentingFreqN >= 30)) / sum(!is.na(modeldf$AlloparentingFreqN)) * 100), 2)`%) being reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq for plot showing the frequencies child alloparenting effort.
+Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. As with the frequencies of various types of signaling, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq.
+
+The frequency of alloparenting effort was bimodally distributed, with `{r} fmt_sum(modeldf$AlloparentingFreqN == 0)` being reported to never engage in it (`r sum(na.omit(modeldf$NumberOfChildren==1))` instances were due to a child being an only child) and `{r} fmt_sum(modeldf$AlloparentingFreqN >= 30)` being reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq.
 
 ::: {#fig-barplot_SignalFreq}
 ```{r}
-barplot_SignalFreq
+barplot_SignalFreq + guides(fill = guide_legend(title = 'Times/month', nrow = 1, position = 'top', reverse = T))
 ```
 
 Stacked bar plot showing the frequencies of child sadness, crying, and temper tantrums per month as reported by primary caretaker. Frequency key: 0 corresponds to "never," \<=1 corresponds to "once a month or less," 2-3 corresponds to "more than once a month but less than once a week," 4-29 corresponds to "more than once a week but not daily," 30 corresponds to "daily," and \>30 corresponds to "multiple times per day."
