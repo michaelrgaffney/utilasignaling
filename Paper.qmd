@@ -11,7 +11,8 @@ bibliography: signaling.bib
 ---
 
 ```{r setup, include=FALSE}
-source("analysisforpaper.R", local = knitr::knit_global())
+source("dictionaries.R")
+source("analysisforpaper.R", local = knitr::knit_global()) # experiment with taking this away
 
 ```
 
@@ -128,7 +129,7 @@ The survey data for this study come from a larger project run by the Utila Child
 We used 6-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, 2) interpersonal conflict with each participating child, 3) and child alloparenting behavior. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of never if they were the only child within a household.
 
 |                                 |                                                                                                                   |
-|--------------------------|----------------------------------------------|
+|--------------------------|---------------------------------------------|
 | Variable                        | Survey question wording                                                                                           |
 | Crying Frequency                | How often does your child cry?                                                                                    |
 | Sad Frequency                   | How often is your child sad?                                                                                      |
@@ -151,7 +152,7 @@ As these responses reflect frequencies of behavior, we converted these to counts
 | Daily                                            | 30                            |
 | Multiple times per day                           | 60                            |
 
-: The conversions from Likert scale to count value for the frequencies of child behaviors included in this study. Variables created with this scheme include the frequencies of sadness, crying, temper tantrums, conflict with primary caretakers, and child alloparenting effort.
+: The conversions from Likert scale to count value for the frequencies of child behaviors included in this study. Variables created with this scheme include the frequencies of sadness, crying, temper tantrums, conflict with primary caretakers, and child alloparenting effort. {#tbl-convertedfreqs}
 
 From these count variables, we created three additional signaling variables to be used, primarily, as our main dependent variables in analyses. The frequency of signaling was the sum of the frequencies of child sadness, crying, and temper tantrums. Maximum signal frequency was the frequency of the most common of these three signals. Signal cost was the sum of the frequencies of these three signals weighted by their relative costliness (i.e., Signal cost = frequency of sadness + frequency of crying \* 2 + frequency of temper tantrums \* 3). Although we collected data on the frequency of running away, it was not included in the creation of any of these variables due to uncertainty over whether it was likely to be a credible signal due to the relative safety of Utila compared to other areas in which running away has been found to be a successful strategy for children.
 
@@ -162,7 +163,7 @@ We also calculated the summed frequency of child alloparenting contributions by 
 We also used 6-point Likert scales to get parental reports of 1) the relative neediness of each participating child and 2) the relative investment they provide to each participating child compared to the rest of their children. See Table @tbl-relvars for exact wording.
 
 |                     |                                                                                                  |
-|--------------------------|----------------------------------------------|
+|--------------------------|---------------------------------------------|
 | Variable            | Survey question wording                                                                          |
 | Relative Need       | How much time, effort, and resources does this child need compared to your other children?       |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
@@ -180,7 +181,7 @@ From this data, we created a parental response variable, which was coded as 1 fo
 Caretakers were also asked three questions using a five point Likert scale about their child's susceptibility to illness. We inverted the scores on two measures so that a score of 5 corresponded with the lowest susceptibility to illness before we averaged the scores of these to create a mean illness susceptibility variable. In the `r sum((!is.na(modeldf$IllnessSusceptibility2)) & is.na(modeldf$IllnessSusceptibility3))` instance in which we only data for 2 of the measures, we still calculated the mean but used a numerator of 2. See Table @tbl-healthvars for the wording of these variables.
 
 |                        |                                                                                       |
-|--------------------------|----------------------------------------------|
+|--------------------------|---------------------------------------------|
 | Variable               | Survey question wording                                                               |
 | IllnessSusceptibility1 | If an illness is 'going around', my child will get it.                                |
 | IllnessSusceptibility2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
@@ -228,15 +229,15 @@ vars_c <- c(
   SadFreqN = "Sad frequency (times per month)",
   CryFreqN = "Crying frequency (times per month)",
   TantrumFreqN = "Temper tantrum frequency (times per month)",
-  AlloparentingFreqN = "Frequency of child's own alloparetning effort (times per month)",
+  AlloparentingFreqN = "Frequency of child's own alloparenting effort (times per month)",
   ConflictFreqN = "Frequency of conflict with focal caretaker (times per month)",
   SignalFreq = "Frequency of signals summed (times per month)",
   SignalCost = "Signal cost",
   SignalFreqMax = "Frequency of most common signal (times per month)",
-  IllnessSusceptibility1 = "IllnessSusceptibility1",
-  IllnessSusceptibility2 = "IllnessSusceptibility2",
-  IllnessSusceptibility3 = "IllnessSusceptibility3",
-  IllnessSusceptibilityMean = "Mean of current health measures",
+  # IllnessSusceptibility1 = "IllnessSusceptibility1",
+  # IllnessSusceptibility2 = "IllnessSusceptibility2",
+  # IllnessSusceptibility3 = "IllnessSusceptibility3",
+  IllnessSusceptibilityMean = "Illness avoidance index",
   HeightZ = "Height Z-score (CDC)",
   WeightZ = "Weight Z-score (CDC)",
   BMIZ = "BMI Z-score (CDC)",
@@ -420,7 +421,7 @@ r_vars <- c(
   YoungerKids = "Younger children",
   AdultsNoChildcare = "Adults that do not provide childcare",
   AdultsChildcare = "Adults that provide childcare",
-  OtherChildAlloparentingFreqN = "Other household child alloparetning freq."
+  OtherChildAlloparentingFreqN = "Other household child alloparenting freq."
 )
 modelsummary(mconflict, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
@@ -482,7 +483,7 @@ r_vars <- c(
   YoungerKids = "Younger children",
   AdultsNoChildcare = "Adults that do not provide childcare",
   AdultsChildcare = "Adults that provide childcare",
-  OtherChildAlloparentingFreqN = "Other household child alloparetning freq."
+  OtherChildAlloparentingFreqN = "Other household child alloparenting freq."
 )
 modelsummary(malloparenting, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
