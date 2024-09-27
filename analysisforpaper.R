@@ -836,12 +836,50 @@ mtest <- glmmTMB(FlexedR ~ FoodSecurityMean*Sex + (1|householdID), data = d2, fa
 summary(mtest)
 plot(allEffects(mtest))
 
-anthropometricMeansWide <- anthropometricMeans0 |>
+anthropometricMeansWide <- 
+  anthropometricMeans0 |>
   dplyr::filter(
     measurements == 2
   ) |>
   pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
-  left_join(d2, by = "ChildID")
+  left_join(d2, by = "ChildID") |> 
+  dplyr::select(
+    householdID,
+    ChildAge,
+    FoodSecurityMean,
+    Sex,
+    SadFreqN,
+    CryFreqN,
+    TantrumFreqN,
+    contains("2023"),
+    contains("2024"),
+    -contains("Wrist"),
+    -contains("Tricep"),
+    -contains("Subscap"),
+    -contains("Seated")
+  ) |> 
+  dplyr::filter(if_any(SadFreqN:TantrumFreqN, ~!is.na(.x)))
+
+explore_long <- function(signal, outcome){
+  frmla <- str_glue("{outcome}_2024 ~ {outcome}_2023 + {signal} + Sex + ChildAge + FoodSecurityMean + (1|householdID)")
+  glmmTMB(as.formula(frmla), data = anthropometricMeansWide, family = gaussian)
+}
+
+outcomes <- 
+  names(anthropometricMeansWide[8:29]) |> 
+  str_remove("_2023|_2024") |> 
+  unique()
+
+# Commented out for now
+# e <- 
+#   expand_grid(Signal = c("SadFreqN", "CryFreqN", "TantrumFreqN"), Outcome = outcomes) |> 
+#   mutate(
+#     Model = map2(Signal, Outcome, explore_long),
+#     Summary = map(Model, summary),
+#     mainZ = map_dbl(Summary, ~.x$coefficients$cond[3,3]),
+#     interactionZ = map_dbl(Summary, ~.x$coefficients$cond[6,3]),
+#     possible = abs(mainZ) >= 2 | abs(interactionZ) >= 2
+#   )
 
 m <- glmmTMB(WeightMean_KG_2024 ~ WeightMean_KG_2023 + CryFreqN*Sex + ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian)
 summary(m)
