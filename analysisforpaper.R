@@ -552,12 +552,12 @@ sfdfsum2 <-
   ) |>
   mutate(
     CostCategory = cut(
-      MeanSignalCost, 
+      MeanSignalCost,
       quantile(MeanSignalCost)[-3], # Bottom 1/4, Middle 1/2, Top 1/4
-      labels = c("Low", "Medium", "High"), 
+      labels = c("Low", "Medium", "High"),
       include.lowest = T
     )
-  ) |> 
+  ) |>
   arrange(desc(Freq)) |>
   dplyr::filter(Freq > 2)
 
@@ -896,7 +896,7 @@ draw(m)
 anthropometricMeansWide$heightR <- residuals(m)
 
 ggplot(anthropometricMeansWide, aes(SadFreqN, heightR, colour = Sex2)) +
-  geom_jitter(size = 3) + 
+  geom_jitter(size = 3) +
   geom_smooth(method = 'lm') +
   scale_color_binary()
 
@@ -1297,7 +1297,7 @@ coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
 mpr_plot_data <- plot_predictions(mpr, condition = c("RelativeNeed3", "group"), type = "probs", vcov = ~householdID, draw = FALSE)
 
-ggplot(mpr_plot_data, aes(RelativeNeed3, estimate, color = group, group = group, ymin = conf.low, ymax = conf.high)) +
+plot_relative_investment <- ggplot(mpr_plot_data, aes(RelativeNeed3, estimate, color = group, group = group, ymin = conf.low, ymax = conf.high)) +
   geom_line(position = position_dodge(width = .2), linewidth = 1.5) +
   geom_pointrange(position = position_dodge(width = .2)) +
   theme_minimal(15) +
@@ -1308,11 +1308,40 @@ ggplot(mpr_plot_data, aes(RelativeNeed3, estimate, color = group, group = group,
   guides(color = guide_legend(title = "Relative investment:")) &
   theme(legend.position = "top")
 
+p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) +
+  ylab("Relative need") +
+  xlab("Child age (years)") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  scale_fill_viridis_d(option = "B", end = .8) +
+  scale_linewidth_ordinal(range = c(5,10)) +
+  guides(color = guide_legend(override.aes = list(linewidth=2.5))) +
+  labs(color = "", fill = "") +
+  theme_minimal() +
+  theme(legend.position = "top", plot.tag.position = "right") +
+  ylim(0,1)
+
 plot_predictions(mpr, condition = c("OtherChildrenHH", "group"), type = "probs", vcov = ~householdID)
 
 mpr2 <- polr(RelativeMaternalInvestment2 ~ ChildAge + Sex + YoungerKids + OlderKids + LogIncome + number_adults + RelativeNeed3, d2)
 summary(mpr2)
 coeftest(mpr2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+
+plot_predictions(mpr2, condition = c("YoungerKids", "group"), type = "probs", vcov = ~householdID)
+
+plot_relative_investment_kids <- plot_predictions(mpr2, condition = c("YoungerKids", "group"), type = "probs", vcov = ~householdID) +
+  xlab("\nOtherChildrenHH") +
+  ylab("Proportion of children") +
+  scale_color_viridis_d(option = "B", end = .8) +
+  scale_fill_viridis_d(option = "B", end = .8) +
+  scale_linewidth_ordinal(range = c(5,10)) +
+  guides(color = guide_legend(override.aes = list(linewidth=2.5))) +
+  labs(color = "", fill = "") +
+  theme_minimal(15) +
+  theme(legend.position = "top", plot.tag.position = "right") +
+  guides(color = guide_legend(title = "Relative investment:")) +
+  ylim(-.03,1)
+
+plot_relative_investment_kids
 
 mpr_plot_data2 <- plot_predictions(mpr2, condition = c("RelativeNeed3", "group"), type = "probs", vcov = ~householdID, draw = FALSE)
 
@@ -1870,3 +1899,5 @@ ggplot(anthropometricMeansWide, aes(SadFreqN, WeightR, colour = Sex2)) +
   geom_jitter(size = 3) +
   geom_smooth(method = 'lm') +
   scale_color_binary()
+
+  # New comment to test ZED

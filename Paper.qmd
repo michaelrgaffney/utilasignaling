@@ -13,7 +13,7 @@ bibliography: signaling.bib
 ---
 
 ```{r setup, include=FALSE}
-source("dictionaries.R")
+# source("dictionaries.R")
 source("analysisforpaper.R", local = knitr::knit_global()) # experiment with taking this away
 
 ```
@@ -634,6 +634,18 @@ signaling_plot_need
 ```
 
 The likelihood of child being more needy, as needy, or less needy than a caretaker's other children. A: Effect of child age on relative neediness B: Effect of summed signaling frequency on relative neediness.
+:::
+
+## Relative need predicts relative investment
+
+Signals are capable of eliciting better treatment because the information they provide alters the behavior of signal targets in ways the benefit the signaler. For this reason, we tested the association between caretaker perceptions of relative child need within the household and the caretaker's relative investment within the household. Consistent with signaling theory, our model predicts a greater proportion of caretakers investing more in children who they deem needier and a greater proportion of caretakers investing less in children they deem less needy, controlling for the age of the child, and household demographics. See @fig-plot_relative_investment.
+
+::: {#fig-plot_relative_investment}
+```{r, fig.width= 8}
+plot_relative_investment
+```
+
+The proportion of children reported to be given more investment, the same amount of investment, or less investment than other children in the household by the caretaker. Effect of perceived need (in terms of time, effort, and resources). Outcome variable question wording: How much time, effort, and resources do you put into this child compared to your other children?
 :::
 
 ## Caregiver responses to last signal of need
