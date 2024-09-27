@@ -13,8 +13,8 @@ bibliography: signaling.bib
 ---
 
 ```{r setup, include=FALSE}
-# source("dictionaries.R")
-source("analysisforpaper.R", local = knitr::knit_global()) # experiment with taking this away
+source("dictionaries.R", local = knitr::knit_global())
+source("analysisforpaper.R", local = knitr::knit_global())
 
 ```
 
@@ -250,7 +250,8 @@ vars_c <- c(
   BodyFat =  "Body fat composite"
 )
 
-kable(custom.summarize(modeldf, vars_c, facvar = "Sex")) %>% kable_styling()
+#kable(custom.summarize(modeldf, vars_c, facvar = "Sex")) %>% kable_styling()
+kable(custom.summarize(modeldf, longform_dict[1:18])) %>% kable_styling()
 
 #kable(custom.summarize(d2, vars), caption = "Summary statistics for child study variables.") %>% kable_styling()
 
@@ -268,7 +269,7 @@ vars_c <- c(
   AdultsChildcare = "Household adults who provide childcare"
 )
 
-kable(custom.summarize(caregivers, vars_c)) %>% kable_styling()
+kable(custom.summarize(caregivers, longform_dict[19:23])) %>% kable_styling()
 
 #kable(custom.summarize(d2, vars), caption = "Summary statistics for child study variables.") %>% kable_styling()
 
@@ -286,7 +287,7 @@ fmt_sum <- function(v){
 }
 ```
 
-Child sadness, crying, and temper tantrums were common. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)`  were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`;  and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. See @fig-barplot_SignalFreq and @fig-signal_alluvial_plot.
+Child sadness, crying, and temper tantrums were common. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`;  and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. See @fig-barplot_SignalFreq and @fig-signal_alluvial_plot.
 
 Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. As with the frequencies of various types of signaling, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq.
 
@@ -351,7 +352,9 @@ r_vars <- c(
   TantrumFreqN = "Tantrum freq.",
   AlloparentingFreqN = "Child allocare"
 )
-modelsummary(list(Sadness = msadH, Crying = mcryH, Tantrum = mtantrumH, SignalFreq = msfH, SignalCost = mscH, SignalFreqMax = mmsfH), gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+# modelsummary(list(Sadness = msadH, Crying = mcryH, Tantrum = mtantrumH, SignalFreq = msfH, SignalCost = mscH, SignalFreqMax = mmsfH), gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+
+modelsummary(list(Sadness = msadH, Crying = mcryH, Tantrum = mtantrumH, SignalFreq = msfH, SignalCost = mscH, SignalFreqMax = mmsfH), gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ::: {#fig-effect_age}
@@ -435,7 +438,7 @@ r_vars <- c(
   AdultsChildcare = "Adults that provide childcare",
   OtherChildAlloparentingFreqN = "Other household child alloparenting freq."
 )
-modelsummary(mconflict, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(mconflict, gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ## Interaction between child sex and child alloparenting
@@ -497,7 +500,7 @@ r_vars <- c(
   AdultsChildcare = "Adults that provide childcare",
   OtherChildAlloparentingFreqN = "Other household child alloparenting freq."
 )
-modelsummary(malloparenting, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(malloparenting, gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ## Summed signal cost, crying frequency, and tantrum frequency are negatively associated with body fat
@@ -532,7 +535,7 @@ r_vars <- c(
   SubscapR = "Subscapular skinfold (residuals)",
   BodyFat = "BodyFat (composite)"
 )
-modelsummary(list(Sadness = mBFsad, Crying = mBFcry, Tantrum = mBFtantrum, SignalFreq = mBFf, SignalCost = mBFc, SignalFreqMax = mBFfm), gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(list(Sadness = mBFsad, Crying = mBFcry, Tantrum = mBFtantrum, SignalFreq = mBFf, SignalCost = mBFc, SignalFreqMax = mBFfm), gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ::: {#fig-effect_bodyfat}
@@ -581,7 +584,7 @@ r_vars <- c(
   WeightMean_KG_2023 = "2023 weight"
 )
 
-modelsummary(list(Weight2024 = weight_long_cry, Height2024 = height_long_cry), gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(list(Weight2024 = weight_long_cry, Height2024 = height_long_cry), gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ::: {#fig-effect_longitudinal_plot}
@@ -623,7 +626,7 @@ r_vars <- c(
   BodyFat = "BodyFat (composite)",
   RelativeNeed3 = "Relative need (w/in household)"
 )
-modelsummary(list(SignalFreq = mN1, SignalCost = mN2), vcov = vcovCL, type = "HC0", cluster = ~householdID, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(list(SignalFreq = mN1, SignalCost = mN2), vcov = vcovCL, type = "HC0", cluster = ~householdID, gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 # FIX: error ribbons cross 1 and 0
@@ -684,7 +687,7 @@ r_vars <- c(
   DiscomfortPainInjuryIllness = "Discomfort/Pain/Injury/Illness",
   CaregiverResponse = "Caregiver Response"
 )
-modelsummary(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID, gof_map = "nobs", coef_rename = r_vars, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
+modelsummary(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID, gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
 
 ::: {#fig-effect_last_signal_response}

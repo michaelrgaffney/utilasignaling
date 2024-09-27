@@ -866,6 +866,7 @@ plot(allEffects(weight_long_cry))
 
 anthropometricMeansWide$weightR <- residuals(weight_long_cry)
 ggplot(anthropometricMeansWide, aes(ChildAge, CryFreqN, colour = weightR)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
+ggplot(anthropometricMeansWide, aes(ChildAge, weightR, colour = CryFreqN)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
 
 p <- plot_predictions(weight_long_cry, condition = c("CryFreqN", "ChildAge"), vcov = TRUE) +
   geom_rug(data = weight_long_cry$frame, aes(x = CryFreqN , y = 0), position = position_jitter(width = 1, seed = 123), sides = "b") +
@@ -879,12 +880,13 @@ p$layers[[2]]$aes_params$linewidth <- 2
 p$layers[[1]]$aes_params$alpha <- 0
 p
 
-height_long_cry <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
+height_long_cry <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + CryFreqN*ChildAge + Sex + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
 summary(height_long_cry)
 plot(allEffects(height_long_cry))
 
 anthropometricMeansWide$heightR <- residuals(height_long_cry)
 ggplot(anthropometricMeansWide, aes(ChildAge, CryFreqN, colour = heightR)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
+ggplot(anthropometricMeansWide, aes(ChildAge, heightR, colour = CryFreqN)) + geom_jitter(size = 3) + scico::scale_color_scico(palette = 'vik', midpoint = 0)
 
 m <- glmmTMB(HeightMean_2024 ~ HeightMean_2023 + Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
 summary(m)
@@ -1872,9 +1874,11 @@ summary(m)
 draw(m)
 anthropometricMeansWide$heightR <- residuals(m)
 
-m <- glmmTMB(heightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide, family = gaussian, na.action = na.exclude)
-summary(m)
-plot(allEffects(m))
+m2 <- glmmTMB(heightR ~ SadFreqN * Sex2 + (1|householdID), data = anthropometricMeansWide[anthropometricMeansWide$SadFreqN <60,], family = gaussian, na.action = na.exclude)
+summary(m2)
+plot(allEffects(m2))
+
+
 
 ggplot(drop_na(anthropometricMeansWide, Sex2), aes(SadFreqN, heightR, colour = Sex2)) +
   geom_jitter(size = 3) +
