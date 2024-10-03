@@ -30,6 +30,7 @@ longform_dict <-
 shortform_dict <-
   c(
     ChildAge = "Age (years)",
+    Sex = "Sex",
     SexMale = "Sex (male)",
     OtherChildrenHH = "Other children",
     LogIncome = "Income (log)",
@@ -64,6 +65,8 @@ shortform_dict <-
     WeightMean_KG_2024 = "2024 weight (kg)",
     WeightMean_KG_2023 = "2023 weight (kg)"
   )
+
+# shortform_dict[c(1,2,9,10,11,12,14,15,16)]
 
 # kable(custom.summarize(modeldf, c(dict1[1,3], dict2[1,3,5]), facvar = "Sex")) %>% kable_styling()
 
