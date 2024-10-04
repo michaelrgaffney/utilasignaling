@@ -2006,6 +2006,26 @@ modeldf_FULLANTHROPOMETRICS <- modeldf |>
 
 sex_table2 <- table(modeldf_FULLANTHROPOMETRICS$Sex)
 
+response_last_signal <- d2 |>
+  dplyr::select(
+    householdID,
+    childHHid,
+    CaregiverResponse,
+    PositiveResponseBinary,
+    NeutralResponseBinary,
+    NegativeResponseBinary,
+    DiscomfortPainInjuryIllness,
+    Punishment2
+  ) |>
+  mutate(
+    NeutralResponseBinary2 = ifelse((NeutralResponseBinary == 1) & ((PositiveResponseBinary == 1) | (NegativeResponseBinary == 1)), 0, NeutralResponseBinary)
+    # NeutralResponseBinary2 = ifelse(((NeutralResponseBinary = 1) & (PositiveResponseBinary = 1)) | ((NeutralResponseBinary = 1) & (NegativeResponseBinary = 1)), 0, NegativeResponseBinary)
+  ) |>
+  dplyr::filter(!((PositiveResponseBinary == 0) & (NeutralResponseBinary == 0) & (NegativeResponseBinary == 0)))
+
+last_signal_response_tbl_hurt <- table(d2$CaregiverResponse, d2$DiscomfortPainInjuryIllness)
+last_signal_response_tbl_punish <- table(d2$CaregiverResponse, d2$Punishment2)
+
 # model statistics --------------------------------------------------------
 
 library (glue)

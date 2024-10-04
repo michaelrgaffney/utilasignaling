@@ -226,7 +226,7 @@ fmt_sum <- function(v){
 }
 ```
 
-Child sadness, crying, and temper tantrums were common. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. See @fig-barplot_SignalFreq and @fig-signal_alluvial_plot.
+Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot. 
 
 Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq.
 
@@ -244,14 +244,7 @@ Frequencies of child sadness, crying, and temper tantrums per month as reported 
 ```{r}
 signal_corrplot
 ```
-:::
-
-::: {#fig-signal_alluvial_plot}
-```{r}
-signal_alluvial_plot
-```
-
-Combinations of signaling frequencies per month. Alluvium width equals the number of individuals with the same frequencies for the three signals/states. Stratum height equals the count of individuals at a given frequency. Frequency key: Low includes "never" and "once a month or less," medium includes "more than once a month but less than once a week" and "more than once a week but not daily," high includes "daily," and "multiple times per day."
+Correlation matrix of the frequencies of signals/states covered in the study with sex, child age, and the frequency of conflict between children and primary caretakers.
 :::
 
 ::: {#fig-barplot_ConflictFreq}
@@ -299,7 +292,7 @@ The effect of the frequency of conflict with one's primary caretaker on specific
 ## Signaling behavior is negatively associated with caregiver education
 [delete this section if we remove conflict from the main model? or mention on significant when controlling for conflict]
 
-We did not predict relationships between child signaling and our demographic control variables, but we did find statistically significant negative relationships between years of caregiver education and all of our signaling measures except sadness (`{r} stats$msadH$EducationLevelYears$str`). See @stbl-main-models s and @fig-effect_edu.
+We did not predict relationships between child signaling and our demographic control variables, but we did find statistically significant negative relationships between years of caregiver education and all of our signaling measures except sadness (`{r} stats$msadH$EducationLevelYears$str`). See @stbl-main-models and @fig-effect_edu.
 
 ::: {#fig-effect_edu}
 ```{r}
@@ -394,9 +387,12 @@ The effect of perceived need (in terms of time, effort, and resources) relative 
 
 ## Caregiver responses to most recent signal of need
 
+[do we want to mentioned distributions of the actual data?]
+Caretakers were much more likely to respond positively than neutrally or negatively to children when caretakers perceived the cause of signaling to involve a child experiencing discomfort, pain, injury, or illness (`r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NegativeResponseBinary > 0)` negative response). However, they were also more likely to respond in a neutral or negative manner rather than a positive one when caretakers believed signaling came in response to the child being punished (`r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NegativeResponseBinary > 0)` negative responses).
+
 There were `{r} response_overlap[2,2]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
-There were no significant relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were significantly more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness (stat), and significantly less likely to respond positively when they attributed the cause of signaling to child punishment (stat). See @fig-effect_last_signal_response and @stbl-last-signal-model.
+There were no significant relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were significantly more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness (any statistic report here?), and significantly less likely to respond positively when they attributed the cause of signaling to child punishment (any statistic report here?). See @fig-effect_last_signal_response and @stbl-last-signal-model. 
 
 ::: {#fig-effect_last_signal_response}
 ```{r, fig.width= 8}
@@ -532,6 +528,14 @@ NA (Can't remember, refuse to answer, etc)\
 Other: Other \[Text Box\]
 
 ## Figures
+
+::: {#sfig-signal_alluvial_plot}
+```{r}
+signal_alluvial_plot
+```
+
+Combinations of signaling frequencies per month. Alluvium width equals the number of individuals with the same frequencies for the three signals/states. Stratum height equals the count of individuals at a given frequency. Frequency key: Low includes "never" and "once a month or less," medium includes "more than once a month but less than once a week" and "more than once a week but not daily," high includes "daily," and "multiple times per day."
+:::
 
 ::: {#sfig-effect-relativeneed}
 ```{r, fig.width= 10}
