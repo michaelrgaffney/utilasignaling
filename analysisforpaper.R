@@ -699,11 +699,6 @@ ggcorrplot(maincormat, hc.order = TRUE, lab = TRUE)
 
 # model setup -------------------------------------------------------------
 
-make_formula <- function(outcome, predictors){
-  str_glue("{outcome} ~ {predictors} + (1|householdID)") |>
-    as.formula()
-}
-
 signals <- c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")
 std_predictors <- "ChildAge + Sex + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + NeighborhoodQuality + HouseQuality"
 
