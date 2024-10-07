@@ -214,6 +214,20 @@ kable(custom.summarize(modeldf, longform_dict[1:18])) %>% kable_styling()
 kable(custom.summarize(caregivers, longform_dict[19:23])) %>% kable_styling()
 ```
 
+::: {#fig-pca_loadings}
+```{r}
+plot_loadings
+```
+Loadings of PC1 and PC2 on each variable.
+:::
+
+::: {#fig-pca_biplot}
+```{r}
+plot_biplot
+```
+Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable.
+:::
+
 ## Distributions of signaling behavior, alloparenting effort, and conflict
 
 ```{r}

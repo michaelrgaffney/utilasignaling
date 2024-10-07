@@ -2,6 +2,7 @@
 library(glmnet)
 library(hagenutils)
 library(patchwork)
+library(skimr)
 
 out <- skim(modeldf)
 nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
