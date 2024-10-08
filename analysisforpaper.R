@@ -27,6 +27,7 @@ library(ggalluvial)
 library(patchwork)
 library(mgcv)
 library(gratia)
+library(nnet)
 
 source("recode.R")
 source("dictionaries.R")
@@ -1567,7 +1568,6 @@ out <- pvclust(causematrix, method.hclust = "ward.D2")
 x <- cutree(out$hclust, k = 3)
 
 causes2 <- causes |>
-  rowwise() |>
   mutate(
     FamilyConflict = if_any(all_of(names(x)[x == 1]), \(x) x == 1),
     Adversity = if_any(all_of(names(x)[x == 2]), \(x) x == 1),
@@ -1582,68 +1582,113 @@ causes2 <- causes |>
 
 # If the cause categories were not mutually exclusive, transgression received top priority, followed by family conflict.
 
-d2b <- left_join(d2, causes2[c("uniqueID", "CauseType")])
-
-response_last_signal <- d2b |>
-  dplyr::select(
-    householdID,
-    childHHid,
-    ChildAge,
-    Sex,
-    uniqueID,
-    CaregiverResponse,
-    PositiveResponseBinary,
-    NeutralResponseBinary,
-    NegativeResponseBinary,
-    DiscomfortPainInjuryIllness,
-    Punishment2,
-    Family2,
-    CauseType
-  ) |>
+cause_response0 <-
+  d2 |>
+  left_join(causes2[c("uniqueID", "CauseType")]) |>
+  dplyr::filter(!is.na(CauseType), !is.na(CaregiverResponse), !is.na(ChildAge)) |>
   mutate(
-    NeutralResponseBinary2 = ifelse((NeutralResponseBinary == 1) & ((PositiveResponseBinary == 1) | (NegativeResponseBinary == 1)), 0, NeutralResponseBinary),
-    MixedResponse = ifelse(PositiveResponseBinary == 1 & NegativeResponseBinary == 1, 1, 0)
-  ) |>
-  dplyr::filter(
-    !((PositiveResponseBinary == 0) & (NeutralResponseBinary == 0) & (NegativeResponseBinary == 0)),
-    MixedResponse != 1
-    )
+    AgeCategory = ifelse(ChildAge <= 10, "Younger", "Older"), # Median age in this subsample
+    AgeCategory = factor(AgeCategory, c("Younger", "Older")),
+    CaregiverResponse = case_when(
+      CaregiverResponse == -1 ~ "Negative",
+      CaregiverResponse ==  0 ~ "Neutral",
+      CaregiverResponse ==  1 ~ "Positive"
+    ),
+    CaregiverResponse = factor(CaregiverResponse, levels = c("Positive", "Neutral", "Negative"))
+  )
 
-response_last_signal_long <-
-  response_last_signal |>
-  pivot_longer(cols =  c("PositiveResponseBinary", "NeutralResponseBinary2", "NegativeResponseBinary"), names_to = "Response", values_to = "Present") |>
-  mutate(
-    Response = factor(Response, levels = c("PositiveResponseBinary", "NeutralResponseBinary2", "NegativeResponseBinary"), labels = c("Positive", "Neutral", "Negative")),
-    Cause = case_when(
-      Punishment2 == 1 ~ "Punishment",
-      DiscomfortPainInjuryIllness == 1 ~ "Pain",
-      Family2 == 1 ~ "Familial conflict",
-      .default = "Other"
-    )
-  ) |>
-  dplyr::filter(Present != 0)
+cause_response <-
+  cause_response0 |>
+  summarize(
+    N = n(),
+    .by = c(CauseType, CaregiverResponse)
+  )
 
-
-response_last_signal_long_sum <- response_last_signal_long |>
-  mutate(
-    AgeCategory = ifelse(ChildAge < 9, "Younger children", "Older children"),
-    AgeCategory = factor(AgeCategory, levels = c("Younger children", "Older children"))
-  ) |>
-  group_by(AgeCategory, CauseType, Response) |>
-  summarise(N = n())
-
-barplot_CaregiverResponse <- ggplot(response_last_signal_long_sum, aes(N, CauseType, fill = Response)) +
+barplot_CaregiverResponse <-
+  ggplot(cause_response, aes(N, CauseType, fill = CaregiverResponse)) +
   geom_col(position = "stack", color = "grey") +
   scale_fill_viridis_d(option = "B", direction = -1) +
   scale_y_discrete(limits = rev) +
   labs(x = "Number of children", y = "") +
-  guides(fill = guide_legend("Caregiver response:", nrow = 1, reverse = TRUE, position = "top")) +
-  theme_minimal(15) +
-  facet_wrap(~AgeCategory)
-
-# note lack of major sex difference
+  guides(fill = guide_legend("Caregiver response:", nrow = 1, reverse = T, position = "top")) +
+  theme_minimal(15)
 
 barplot_CaregiverResponse
+
+cause_response0$CauseType <- factor(cause_response0$CauseType)
+
+m <- multinom(CauseType ~ ChildAge, cause_response0)
+summary(m)
+plot_predictions(m, type = 'probs', condition = c('ChildAge')) +
+  labs(
+    title = 'Cause of most recent signaling episode',
+    x = 'Child age (years)',
+    y = 'Probability'
+  ) +
+  facet_wrap(~group) +
+  theme_bw(15)
+
+
+# response_last_signal <- d2b |>
+#   dplyr::select(
+#     householdID,
+#     childHHid,
+#     ChildAge,
+#     Sex,
+#     uniqueID,
+#     CaregiverResponse,
+#     PositiveResponseBinary,
+#     NeutralResponseBinary,
+#     NegativeResponseBinary,
+#     DiscomfortPainInjuryIllness,
+#     Punishment2,
+#     Family2,
+#     CauseType
+#   ) |>
+#   mutate(
+#     NeutralResponseBinary2 = ifelse((NeutralResponseBinary == 1) & ((PositiveResponseBinary == 1) | (NegativeResponseBinary == 1)), 0, NeutralResponseBinary),
+#     MixedResponse = ifelse(PositiveResponseBinary == 1 & NegativeResponseBinary == 1, 1, 0)
+#   ) |>
+#   dplyr::filter(
+#     !((PositiveResponseBinary == 0) & (NeutralResponseBinary == 0) & (NegativeResponseBinary == 0)),
+#     MixedResponse != 1
+#     )
+#
+# response_last_signal_long <-
+#   response_last_signal |>
+#   pivot_longer(cols =  c("PositiveResponseBinary", "NeutralResponseBinary2", "NegativeResponseBinary"), names_to = "Response", values_to = "Present") |>
+#   mutate(
+#     Response = factor(Response, levels = c("PositiveResponseBinary", "NeutralResponseBinary2", "NegativeResponseBinary"), labels = c("Positive", "Neutral", "Negative")),
+#     Cause = case_when(
+#       Punishment2 == 1 ~ "Punishment",
+#       DiscomfortPainInjuryIllness == 1 ~ "Pain",
+#       Family2 == 1 ~ "Familial conflict",
+#       .default = "Other"
+#     )
+#   ) |>
+#   dplyr::filter(Present != 0)
+#
+#
+# response_last_signal_long_sum <- response_last_signal_long |>
+#   mutate(
+#     AgeCategory = ifelse(ChildAge <= 10, "Younger children", "Older children"),
+#     AgeCategory = factor(AgeCategory, levels = c("Younger children", "Older children"))
+#   ) |>
+#   group_by(AgeCategory, CauseType, Response) |>
+#   summarise(N = n())
+#
+# barplot_CaregiverResponse <- ggplot(response_last_signal_long_sum, aes(N, CauseType, fill = Response)) +
+#   geom_col(position = "stack", color = "grey") +
+#   scale_fill_viridis_d(option = "B", direction = -1) +
+#   scale_y_discrete(limits = rev) +
+#   labs(x = "Number of children", y = "") +
+#   guides(fill = guide_legend("Caregiver response:", nrow = 1, reverse = TRUE, position = "top")) +
+#   theme_minimal(15) +
+#   facet_wrap(~AgeCategory)
+#
+# # note lack of major sex difference
+#
+# barplot_CaregiverResponse
 
 last_signal_response_tbl_hurt <- table(d2$CaregiverResponse, d2$DiscomfortPainInjuryIllness)
 last_signal_response_tbl_punish <- table(d2$CaregiverResponse, d2$Punishment2)
@@ -1655,17 +1700,17 @@ library (tidyverse)
 library (broom)
 tdy <- function (m) {
   tidy (m, conf.int = T) |>
-mutate(
-  # Adjust string to taste
-  str_old = glue ("$\\beta={signif(estimate, 2)}$ ({signif(conf.low, 2)}, {signif(conf.high, 2)})"),
-  str2 = glue("p = {signif(p.value, 2)}"),
-  str = glue ("$\\beta={signif(estimate, 2)}$, 95% CI:{signif(conf.low, 2)} - {signif(conf.high, 2)}, p = {signif(p.value, 2)}"),
-) %>%
-split (.$term)
+    mutate(
+      # Adjust string to taste
+      str_old = glue ("$\\beta={signif(estimate, 2)}$ ({signif(conf.low, 2)}, {signif(conf.high, 2)})"),
+      str2 = glue("p = {signif(p.value, 2)}"),
+      str = glue ("$\\beta={signif(estimate, 2)}$, 95% CI:{signif(conf.low, 2)} - {signif(conf.high, 2)}, p = {signif(p.value, 2)}"),
+    ) %>%
+    split (.$term)
 }
 
 models <- list (msadH = glmmTMBmodels$Model$SadFreqNillness, mcryH = glmmTMBmodels$Model$CryFreqNillness, mtantrumH = glmmTMBmodels$Model$TantrumFreqNillness, msfH = glmmTMBmodels$Model$SignalFreqillness, mscH = glmmTMBmodels$Model$SignalCostillness, mmsfH = glmmTMBmodels$Model$SignalFreqMaxillness, mBFc = glmmTMBmodels$Model$SignalCostbodyfat, mBFcry = glmmTMBmodels$Model$CryFreqNbodyfat, mBFtantrum = glmmTMBmodels$Model$TantrumFreqNbodyfat, mconflict = glmmTMBmodels$Model$ConflictFreqN, malloparenting = malloparenting)
-stats <- map (models, tdy)
+stats <- map(models, tdy)
 stats$mBFc$BodyFat$str
 stats$mBFc$BodyFat$str2
 
