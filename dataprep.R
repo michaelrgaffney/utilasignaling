@@ -239,11 +239,8 @@ d <-
     NeutralResponseBinary = ifelse(NeutralResponse >= 1, 1, 0),
     NeutralResponseF = as.factor(NeutralResponseBinary),
     NegativeResponseBinary = ifelse(NegativeResponse >= 1, 1, 0),
-<<<<<<< HEAD
     NegativeResponseF = as.factor(NegativeResponseBinary)
-=======
-    NegativeResponseF = as.factor(NegativeResponseBinary),
->>>>>>> 15646fc16f77da6ca697aa502e1607a7ae8b6673
+
   ) |>
   rowwise() |>
   mutate(
