@@ -27,6 +27,7 @@ library(ggalluvial)
 library(patchwork)
 library(mgcv)
 library(gratia)
+library(pvclust)
 
 source("recode.R")
 source("dictionaries.R")

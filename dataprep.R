@@ -235,13 +235,7 @@ d <-
     NeutralResponseBinary = ifelse(NeutralResponse >= 1, 1, 0),
     NeutralResponseF = as.factor(NeutralResponseBinary),
     NegativeResponseBinary = ifelse(NegativeResponse >= 1, 1, 0),
-    NegativeResponseF = as.factor(NegativeResponseBinary),
-    CaregiverResponse = case_when(
-      PositiveResponse > 0 & NegativeResponse == 0 ~ "1",
-      PositiveResponse == 0 & NegativeResponse == 0 ~ "0",
-      PositiveResponse == 0 & NegativeResponse > 0 ~ "-1"
-    ),
-    CaregiverResponse = factor(CaregiverResponse, ordered = TRUE, levels = c("-1", "0", "1"))
+    NegativeResponseF = as.factor(NegativeResponseBinary)
   ) |>
   rowwise() |>
   mutate(
