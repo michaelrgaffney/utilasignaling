@@ -133,7 +133,7 @@ The data for this study were collected as part of the Utila Child Health Project
 We used 6-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
 
 |  |  |
-|--------------------------|----------------------------------------------|
+|----|----|
 | Variable | Survey question wording |
 | Crying Frequency | How often does your child cry? |
 | Sad Frequency | How often is your child sad? |
@@ -153,7 +153,7 @@ We also calculated the summed frequency of child alloparenting contributions by 
 We used 6-point Likert scales for parental reports of 1) the relative neediness of each participating child, and 2) the relative investment they provide to each participating child compared to the rest of their children. See Table @stbl-relvars for exact wording.
 
 |  |  |
-|--------------------------|----------------------------------------------|
+|----|----|
 | Variable | Survey question wording |
 | Relative Need | How much time, effort, and resources does this child need compared to your other children? |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
@@ -240,7 +240,7 @@ fmt_sum <- function(v){
 }
 ```
 
-Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot. 
+Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot.
 
 Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq.
 
@@ -258,6 +258,7 @@ Frequencies of child sadness, crying, and temper tantrums per month as reported 
 ```{r}
 signal_corrplot
 ```
+
 Correlation matrix of the frequencies of signals/states covered in the study with sex, child age, and the frequency of conflict between children and primary caretakers.
 :::
 
@@ -304,7 +305,8 @@ The effect of the frequency of conflict with one's primary caretaker on specific
 :::
 
 ## Signaling behavior is negatively associated with caregiver education
-[delete this section if we remove conflict from the main model? or mention on significant when controlling for conflict]
+
+\[delete this section if we remove conflict from the main model? or mention on significant when controlling for conflict\]
 
 We did not predict relationships between child signaling and our demographic control variables, but we did find statistically significant negative relationships between years of caregiver education and all of our signaling measures except sadness (`{r} stats$msadH$EducationLevelYears$str`). See @stbl-main-models and @fig-effect_edu.
 
@@ -320,7 +322,7 @@ The effect of years of caregiver education on specific signal frequencies, summe
 
 High alloparenting effort by children is associated with conflict with their parents (Syme and Hagen, xx). Across cultures, girls do more alloparenting than boys (xx, yy). We therefore investigated the association of child alloparenting effort and child signaling, with an interaction term for child sex. For each signaling measure, there was also a significant interaction between how often a child cared for their siblings and the sex of the child. The slope of these relationships were positive for girls and flat or slightly negative for boys. In other words, our models predict that as children provide more allocare within their families, the girls’ frequency of signaling increases with increases in their alloparenting effort, and boys’ frequency of signaling remains at the same rate or decreases slightly with increases in their alloparenting effort. See @stbl-main-models and @fig-effect_allo_by_sex.
 
-::::::::::: {#fig-effect_allo_by_sex}
+::: {#fig-effect_allo_by_sex}
 ```{r}
 signaling_data_plot_allo_by_sex
 ```
@@ -372,8 +374,7 @@ The effect of body fat (scaled composite measure of subscapular and tricep skinf
 
 ## Positive associations between child age and signaling frequency and perceptions of child neediness
 
-[add sad freq2]
-Primary caretakers rarely described a child as “much less” `{r} fmt_sum(modeldf$RelativeNeed == "Much less")` or “much more” `{r} fmt_sum(modeldf$RelativeNeed == "Much more")` needy compared to their other children. Therefore, we collapsed “less” and “much less” into a “less” factor and “more” and “much more” into a “more” factor. The end result was `{r} rel_need_table[1]` less needy children, `{r} rel_need_table[2]` children who were as needy as their siblings, and `{r} rel_need_table[3]` more needy children.
+\[add sad freq2\] Primary caretakers rarely described a child as “much less” `{r} fmt_sum(modeldf$RelativeNeed == "Much less")` or “much more” `{r} fmt_sum(modeldf$RelativeNeed == "Much more")` needy compared to their other children. Therefore, we collapsed “less” and “much less” into a “less” factor and “more” and “much more” into a “more” factor. The end result was `{r} rel_need_table[1]` less needy children, `{r} rel_need_table[2]` children who were as needy as their siblings, and `{r} rel_need_table[3]` more needy children.
 
 There were significant positive relationships between perceived relative neediness within the family and both the summed frequency of child signaling and child age. See @fig-effect_relativeneed and @stbl-need-models. There was also a positive relationship between summed signal cost and perceived relative neediness within the family, controlling for the same variables; see @stbl-need-models and @sfig-effect-relativeneed.
 
@@ -401,12 +402,11 @@ The effect of perceived need (in terms of time, effort, and resources) relative 
 
 ## Caregiver responses to most recent signal of need
 
-[do we want to mentioned distributions of the actual data?]
-Caretakers were much more likely to respond positively than neutrally or negatively to children when caretakers perceived the cause of signaling to involve a child experiencing discomfort, pain, injury, or illness (`r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NegativeResponseBinary > 0)` negative response). However, they were also more likely to respond in a neutral or negative manner rather than a positive one when caretakers believed signaling came in response to the child being punished (`r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NegativeResponseBinary > 0)` negative responses).
+\[do we want to mentioned distributions of the actual data?\] Caretakers were much more likely to respond positively than neutrally or negatively to children when caretakers perceived the cause of signaling to involve a child experiencing discomfort, pain, injury, or illness (`r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NegativeResponseBinary > 0)` negative response). However, they were also more likely to respond in a neutral or negative manner rather than a positive one when caretakers believed signaling came in response to the child being punished (`r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NegativeResponseBinary > 0)` negative responses).
 
 There were `{r} response_overlap[2,2]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
-There were no significant relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were significantly more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness (any statistic report here?), and significantly less likely to respond positively when they attributed the cause of signaling to child punishment (any statistic report here?). See @fig-effect_last_signal_response and @stbl-last-signal-model. 
+There were no significant relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were significantly more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness (any statistic report here?), and significantly less likely to respond positively when they attributed the cause of signaling to child punishment (any statistic report here?). See @fig-effect_last_signal_response and @stbl-last-signal-model.
 
 ::: {#fig-effect_last_signal_response}
 ```{r, fig.width= 8}
@@ -499,7 +499,7 @@ Outside of child anthropometric measurements, all data come from caregiver repor
 # Supplementary Information
 
 |  |  |
-|--------------------------|----------------------------------------------|
+|----|----|
 | Variable | Survey question wording |
 | IllnessAvoidance1 | If an illness is 'going around', my child will get it. |
 | IllnessAvoidance2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
@@ -633,16 +633,15 @@ Regression tables for the models examining relative perceptions of child need wi
 
 :::
 
-### Model of relative investment within the household 
+### Model of relative investment within the household
 
 ::: {#stbl-need-investment}
 ```{r}
 modelsummary(polrModels$Model$Invest, vcov = vcovCL, type = "HC0", cluster = ~householdID, gof_map = "nobs", coef_rename = shortform_dict, stars = c('*' = .05, '**' = .01, '***' = .001), coef_omit = "(Intercept)")
 ```
-
 :::
 
-### Model of caregiver response to last signal of need 
+### Model of caregiver response to last signal of need
 
 ::: {#stbl-last-signal-model}
 ```{r}
