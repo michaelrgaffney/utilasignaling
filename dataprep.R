@@ -100,6 +100,10 @@ d <-
   mutate(
     YoungerKids = map_int(ChildAge, \(x) sum(x > ChildAge)),
     OlderKids = map_int(ChildAge, \(x) sum(x < ChildAge)),
+    OlderGirls = map_int(ChildAge, \(x) sum(x < ChildAge & Sex == 'Female')),
+    OlderBoys = map_int(ChildAge, \(x) sum(x < ChildAge & Sex == 'Male')),
+    OneOlderGirl = OlderGirls > 0,
+    OldestChild = ChildAge == max(ChildAge),
     .by = householdID
   ) |>
   mutate(
@@ -326,7 +330,9 @@ d2 <-
 # dataframe for plots -----------------------------------------------------
 
 # filters based on having at least one value of SadFreqN, CryFreqN, or TantrumFreqN
-modeldf <- d2 |>
+modeldf <-
+  d2 |>
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
   dplyr::select(
     householdID,
     childHHid,
@@ -339,6 +345,9 @@ modeldf <- d2 |>
     SignalFreqMax,
     ChildAge,
     OtherChildrenHH,
+    YoungerKids,
+    OlderGirls,
+    OldestChild,
     LogIncome,
     number_adults,
     ConflictFreqN,
@@ -379,7 +388,6 @@ modeldf <- d2 |>
     NeighborhoodQuality,
     HouseQuality
   ) |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
   mutate(
     CaregiverAge = ifelse(is.na(CaregiverAge), mean(CaregiverAge, na.rm = TRUE), CaregiverAge) # imputing age for 1 caretaker where it is missing
   )
