@@ -241,7 +241,6 @@ d <-
     NeutralResponseF = as.factor(NeutralResponseBinary),
     NegativeResponseBinary = ifelse(NegativeResponse >= 1, 1, 0),
     NegativeResponseF = as.factor(NegativeResponseBinary)
-
   ) |>
   rowwise() |>
   mutate(

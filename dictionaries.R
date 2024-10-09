@@ -1,7 +1,7 @@
 # long form dictionary (for use in summary tables)
 longform_dict <-
   c(
-    ChildAge = "Age (years)",
+    ChildAge = "Child age (years)",
     SadFreqN = "Sad frequency (times per month)",
     CryFreqN = "Crying frequency (times per month)",
     TantrumFreqN = "Temper tantrum frequency (times per month)",
@@ -22,21 +22,21 @@ longform_dict <-
     CaregiverAge = "Caregiver age (years)",
     EducationLevelYears = "Caregiver education level (years)",
     IncomeCategoryN = "Monthly household income (Lempira)",
-    number_adults = "Adults in household",
+    number_adults = "Number of adults in household",
     AdultsChildcare = "Household adults who provide childcare" # adults summary table (19:23)
   )
 
 # short form dictionary (for use in regression tables and correlation plots)
 shortform_dict <-
   c(
-    ChildAge = "Age (years)",
-    Sex = "Sex",
+    ChildAge = "Child age (years)",
+    Sex = "Child sex",
     SexMale = "Sex (male)",
     OtherChildrenHH = "Other children",
     LogIncome = "Income (log)",
-    number_adults = "Adults in home",
-    PartnerStatusUnpartnered = "Partner status (single)",
-    EducationLevelYears = "Parent ed. (years)",
+    number_adults = "Number adults in home",
+    PartnerStatusUnpartnered = "Partnered status (single)",
+    EducationLevelYears = "Parent edu. (years)",
     ConflictFreqN = "Conflict freq.",
     SignalFreq = "Signal freq.",
     SignalCost = "Signal cost",
@@ -45,7 +45,7 @@ shortform_dict <-
     SadFreqN = "Sadness freq.",
     CryFreqN = "Crying freq.",
     TantrumFreqN = "Tantrum freq.",
-    AlloparentingFreqN = "Child allocare",
+    AlloparentingFreqN = "Child alloparenting effort",
     TricepR = "Tricep skinfold (residuals)",
     SubscapR = "Subscapular skinfold (residuals)",
     BodyFat = "Body fat index",
@@ -63,7 +63,18 @@ shortform_dict <-
     HeightMean_2024 = "2024 height (cm)",
     HeightMean_2023 = "2023 height (cm)",
     WeightMean_KG_2024 = "2024 weight (kg)",
-    WeightMean_KG_2023 = "2023 weight (kg)"
+    WeightMean_KG_2023 = "2023 weight (kg)",
+    FoodSecurity = "Food insecurity",
+    Neighborhood2 = "Campanado",
+    UserLanguage = "Primary language",
+    NumberOfChildren = " Number of children",
+    ImmigrateUtila = "Immigrant",
+    OlderGirls = "Number of older girls",
+    HouseQuality = "House quality",
+    CaregiverAge = "Caregiver age",
+    NeighborhoodQuality = "Neighborhood quality",
+    OldestChild = "Oldest child",
+    PartnerStatus = "Partnered status"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]

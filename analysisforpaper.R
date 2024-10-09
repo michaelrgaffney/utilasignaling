@@ -29,11 +29,13 @@ library(mgcv)
 library(gratia)
 library(pvclust)
 library(nnet)
+library(skimr)
+library(pvclust)
 
 source("recode.R")
 source("dictionaries.R")
 source("dataprep.R")
-# source("regularize.R") # typo in name
+# source("regularize.R")
 
 # raw data plots  --------------------------------------------------
 
@@ -1148,12 +1150,12 @@ maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChi
 ggcorrplot(maincormat, hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5) +
   scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9)
 
-signal_subset <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")]
+signal_subset <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
 names(signal_subset) <- shortform_dict[names(signal_subset)]
 
 smallcormat <- signal_subset |>
   mutate(
-    Sex = as.numeric(Sex)
+    `Child sex` = as.numeric(`Child sex`)
   ) |>
   cor( use = "pairwise.complete.obs")
 
@@ -1782,3 +1784,60 @@ ggplot(anthropometricMeansWide, aes(SadFreqN, WeightR, colour = Sex2)) +
   scale_color_binary()
 
   # New comment to test ZED
+
+# PCA
+out <- skim(modeldf)
+nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
+nms <- c(nms, "Sex", "UserLanguage", "ImmigrateUtila", "PartnerStatus", "OldestChild")
+mdf2 <-
+  modeldf |>
+  dplyr::select(
+    all_of(nms),
+    -householdID,
+    -childHHid,
+    -NegativeResponse,
+    -PositiveResponse,
+    -IncomeCategoryN,
+    # -ConflictFreqN,
+    -OtherChildrenHH, # omit or keep?
+    -contains('IllnessSusceptibility')
+  ) |>
+  na.omit() |>
+  mutate(
+    Sex = ifelse(Sex == "Female", 0, 1),
+    UserLanguage = ifelse(UserLanguage == "EN", 0, 1),
+    ImmigrateUtila = ifelse(ImmigrateUtila == "No", 0, 1),
+    PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
+    across(-c(1:6), \(x) c(scale(x))),
+    AlloparentingXsex = AlloparentingFreqN * Sex,
+    ChildAgeXsex = ChildAge * Sex,
+    OldestXsex = OldestChild * Sex
+  )
+
+# PCA ---------------------------------------------------------------------
+e <- mdf2 |>
+  dplyr::select(
+    - SignalFreq,
+    - SignalCost,
+    - SignalFreqMax,
+    - OldestChild,
+    - OlderGirls,
+    - PartnerStatus,
+    - CaregiverAge,
+    - YoungerKids,
+    - contains("Xsex")
+  )
+
+e <- set_names(e, shortform_dict[names(e)])
+# names(e) <- shortform_dict[names(e)]
+
+m <- prcomp(e, scale. = T) # Remove composite signaling vars
+plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
+plot_biplot <- pca_biplot(m) + theme_minimal(15)
+
+plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2)) +
+  plot_annotation(tag_levels = "A")
+plot_pca
+
+#female
+d2$test <- ifelse(d2$Sex == "Female", ((d2$BicepMean - pi * d2$TricepMean)^2 /4 * pi) - 6.5, ((d2$BicepMean - pi * d2$TricepMean)^2 / 4 * pi) - 10)
