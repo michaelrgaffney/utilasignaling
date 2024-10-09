@@ -98,12 +98,13 @@ d <-
   remove_labels() |>
   #dplyr::filter(CompleteSurvey) %>%
   mutate(
+    OnlyChild = n() == 1,
     YoungerKids = map_int(ChildAge, \(x) sum(x > ChildAge)),
     OlderKids = map_int(ChildAge, \(x) sum(x < ChildAge)),
     OlderGirls = map_int(ChildAge, \(x) sum(x < ChildAge & Sex == 'Female')),
     OlderBoys = map_int(ChildAge, \(x) sum(x < ChildAge & Sex == 'Male')),
     OneOlderGirl = OlderGirls > 0,
-    OldestChild = ChildAge == max(ChildAge),
+    OldestChild = ChildAge == max(ChildAge) & (!OnlyChild),
     .by = householdID
   ) |>
   mutate(
