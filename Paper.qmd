@@ -200,6 +200,7 @@ The anonymized data used in the study are available at xxxxxxxLINKxxxxxxx. Study
 
 `{r} dplyr::n_distinct(modeldf$householdID)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`, non-binary = `{r} table(caregivers$CaregiverSex)[3]`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. Anthropometric and signaling data exist for `{r} nrow(modeldf_FULLANTHROPOMETRICS)` children, of whom `{r} sex_table2[1]` were female and `{r} sex_table2[2]` were male. For summary statistics of child-level variables see @tbl-sumtab_children. For summary statistics of caretaker and household-level variables see @tbl-sumtab_adults.
 
+<!-- [NOTE: Add categorical variables to the table; combine child and adult variables into 1 table] -->
 ```{r sumtab_children}
 #| label: tbl-sumtab_children
 #| tbl-cap: Summary statistics for child variables.
@@ -214,12 +215,15 @@ kable(custom.summarize(modeldf, longform_dict[1:18])) %>% kable_styling()
 kable(custom.summarize(caregivers, longform_dict[19:23])) %>% kable_styling()
 ```
 
+A PCA of primary study variables found that sociodemographic and ecological variables loaded primarily on PC1, whereas the child signaling, conflict, and child age variables loaded primarily on PC2. Child signaling variables modestly load on PC1 as well in a direction suggesting that greater signaling covaries with more adverse environments. See @fig-PCA.
+
 ::: {#fig-PCA}
 ```{r}
+#| fig-width: 11
 plot_pca
 ```
 
-A) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable. B) Loadings of PC1 and PC2 on each variable.
+A) Loadings of PC1 and PC2 on each variable. B) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable. 
 :::
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict
@@ -236,9 +240,9 @@ fmt_sum <- function(v){
 
 Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot.
 
-Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq.
+Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq. Conflict was also associated with higher signaling frequencies. See @fig-PCA and @fig-signal_corrplot.
 
-The frequency of alloparenting effort was bimodally distributed, with `{r} fmt_sum(modeldf$AlloparentingFreqN == 0)` reported to never engage in it (`r sum(na.omit(modeldf$NumberOfChildren==1))` instances were due to a child being an only child) and `{r} fmt_sum(modeldf$AlloparentingFreqN >= 30)` reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq.
+The frequency of child alloparenting effort, which previous research has linked to parent-child conflict, was bimodally distributed, with `{r} fmt_sum(modeldf$AlloparentingFreqN == 0)` reported to never engage in it (`r sum(na.omit(modeldf$NumberOfChildren==1))` instances were due to a child being an only child) and `{r} fmt_sum(modeldf$AlloparentingFreqN >= 30)` reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq.
 
 ::: {#fig-barplot_SignalFreq}
 ```{r}

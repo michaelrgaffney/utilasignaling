@@ -394,7 +394,7 @@ plot(allEffects(mmsfH))
 
 # Signal specific models
 
-msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
+msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(msadH)
 plot(allEffects(msadH))
 
@@ -1150,12 +1150,12 @@ maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChi
 ggcorrplot(maincormat, hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5) +
   scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9)
 
-signal_subset <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost")]
+signal_subset <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
 names(signal_subset) <- shortform_dict[names(signal_subset)]
 
 smallcormat <- signal_subset |>
   mutate(
-    Sex = as.numeric(Sex)
+    `Child sex` = as.numeric(`Child sex`)
   ) |>
   cor( use = "pairwise.complete.obs")
 
@@ -1815,10 +1815,29 @@ mdf2 <-
   )
 
 # PCA ---------------------------------------------------------------------
+e <- mdf2 |>
+  dplyr::select(
+    - SignalFreq,
+    - SignalCost,
+    - SignalFreqMax,
+    - OldestChild,
+    - OlderGirls,
+    - PartnerStatus,
+    - CaregiverAge,
+    - YoungerKids,
+    - contains("Xsex")
+  )
 
-m <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
+e <- set_names(e, shortform_dict[names(e)])
+# names(e) <- shortform_dict[names(e)]
+
+m <- prcomp(e, scale. = T) # Remove composite signaling vars
 plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
 plot_biplot <- pca_biplot(m) + theme_minimal(15)
 
-plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2))
+plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2)) +
+  plot_annotation(tag_levels = "A")
 plot_pca
+
+#female
+d2$test <- ifelse(d2$Sex == "Female", ((d2$BicepMean - pi * d2$TricepMean)^2 /4 * pi) - 6.5, ((d2$BicepMean - pi * d2$TricepMean)^2 / 4 * pi) - 10)
