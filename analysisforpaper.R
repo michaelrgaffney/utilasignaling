@@ -29,11 +29,13 @@ library(mgcv)
 library(gratia)
 library(pvclust)
 library(nnet)
+library(skimr)
+library(pvclust)
 
 source("recode.R")
 source("dictionaries.R")
 source("dataprep.R")
-source("regularize.R") # typo in name
+# source("regularize.R")
 
 # raw data plots  --------------------------------------------------
 
@@ -392,7 +394,7 @@ plot(allEffects(mmsfH))
 
 # Signal specific models
 
-msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
+msadH <- glmmTMB(SadFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
 summary(msadH)
 plot(allEffects(msadH))
 
@@ -1782,3 +1784,41 @@ ggplot(anthropometricMeansWide, aes(SadFreqN, WeightR, colour = Sex2)) +
   scale_color_binary()
 
   # New comment to test ZED
+
+# PCA
+out <- skim(modeldf)
+nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
+nms <- c(nms, "Sex", "UserLanguage", "ImmigrateUtila", "PartnerStatus", "OldestChild")
+mdf2 <-
+  modeldf |>
+  dplyr::select(
+    all_of(nms),
+    -householdID,
+    -childHHid,
+    -NegativeResponse,
+    -PositiveResponse,
+    -IncomeCategoryN,
+    # -ConflictFreqN,
+    -OtherChildrenHH, # omit or keep?
+    -contains('IllnessSusceptibility')
+  ) |>
+  na.omit() |>
+  mutate(
+    Sex = ifelse(Sex == "Female", 0, 1),
+    UserLanguage = ifelse(UserLanguage == "EN", 0, 1),
+    ImmigrateUtila = ifelse(ImmigrateUtila == "No", 0, 1),
+    PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
+    across(-c(1:6), \(x) c(scale(x))),
+    AlloparentingXsex = AlloparentingFreqN * Sex,
+    ChildAgeXsex = ChildAge * Sex,
+    OldestXsex = OldestChild * Sex
+  )
+
+# PCA ---------------------------------------------------------------------
+
+m <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
+plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
+plot_biplot <- pca_biplot(m) + theme_minimal(15)
+
+plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2))
+plot_pca

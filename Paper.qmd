@@ -214,18 +214,12 @@ kable(custom.summarize(modeldf, longform_dict[1:18])) %>% kable_styling()
 kable(custom.summarize(caregivers, longform_dict[19:23])) %>% kable_styling()
 ```
 
-::: {#fig-pca_loadings}
+::: {#fig-PCA}
 ```{r}
-plot_loadings
+plot_pca
 ```
-Loadings of PC1 and PC2 on each variable.
-:::
 
-::: {#fig-pca_biplot}
-```{r}
-plot_biplot
-```
-Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable.
+A) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable. B) Loadings of PC1 and PC2 on each variable.
 :::
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict
@@ -402,7 +396,17 @@ The effect of perceived need (in terms of time, effort, and resources) relative 
 
 ## Caregiver responses to most recent signal of need
 
-\[do we want to mentioned distributions of the actual data?\] Caretakers were much more likely to respond positively than neutrally or negatively to children when caretakers perceived the cause of signaling to involve a child experiencing discomfort, pain, injury, or illness (`r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NegativeResponseBinary > 0)` negative response). However, they were also more likely to respond in a neutral or negative manner rather than a positive one when caretakers believed signaling came in response to the child being punished (`r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NegativeResponseBinary > 0)` negative responses).
+```{r}
+# \[do we want to mentioned distributions of the actual data?\] Caretakers were much more likely to respond positively than neutrally or negatively to children when caretakers perceived the cause of signaling to involve a child experiencing discomfort, pain, injury, or illness (`r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$DiscomfortPainInjuryIllness == 1,]$NegativeResponseBinary > 0)` negative response). However, they were also more likely to respond in a neutral or negative manner rather than a positive one when caretakers believed signaling came in response to the child being punished (`r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$PositiveResponseBinary > 0)` positive responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NeutralResponseBinary > 0)` neutral responses vs. `r sum(response_last_signal[response_last_signal$Punishment2 == 1,]$NegativeResponseBinary > 0)` negative responses).
+```
+
+::: {#fig-effect_last_signal_all_responses}
+```{r}
+barplot_CaregiverResponse
+```
+
+Cap to add.
+:::
 
 There were `{r} response_overlap[2,2]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
