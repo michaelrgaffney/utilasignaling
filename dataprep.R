@@ -452,12 +452,22 @@ SignalVars <- d2 |>
   dplyr::select(
     householdID,
     childHHid,
+    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost,
     all_of(signalvars$Var)
     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
     # OldestChild, Does not seem to add much beyond age + number of children.X
     # PartnerStatus, Does this add much beyond the number of adults in the household without better data on adult-child relatedness?
     # HouseQuality, Does this add much beyond neighborhood variables?
-    )
+    ) |>
+  mutate(
+    across(starts_with("Lifestyle"), \(x) ifelse(x == "No", 0, 1)),
+    Sex = ifelse(Sex == "Female", 0, 1),
+    UserLanguage = ifelse(UserLanguage == "EN", 0, 1),
+    ImmigrateUtila = ifelse(ImmigrateUtila == "No", 0, 1),
+    # PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
+    AlloparentingXsex = AlloparentingFreqN * Sex,
+  ) |>
+  na.omit()
 
 conflict_vars_temp <-
   "ChildAge:Younger children have more needs they cannot address on their own, something which can lead to conflict. Older children are more likely to have conflicts with parents over investment within vs. outside the family.X

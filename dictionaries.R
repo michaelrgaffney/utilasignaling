@@ -74,7 +74,23 @@ shortform_dict <-
     CaregiverAge = "Caregiver age",
     NeighborhoodQuality = "Neighborhood quality",
     OldestChild = "Oldest child",
-    PartnerStatus = "Partnered status"
+    PartnerStatus = "Partnered status",
+    LifestyleReality_1 = "Possession: Motor vehicle",
+    LifestyleReality_2 = "Possession: Bicycle",
+    LifestyleReality_3 = "Possession: TV with cable",
+    LifestyleReality_4 = "Possession: Smartphone",
+    LifestyleReality_5 = "Possession: Washing machine",
+    LifestyleReality_6 = "Possession: Refrigerator",
+    LifestyleReality_7 = "Possession: Home",
+    LifestyleReality_8 = "Possession: Credit card",
+    StayAtHomeMom = "Stay at home mom",
+    HomeInstability_1 = "Move frequently",
+    HomeInstability_2 = "Wishes for household stability",
+    HomeInstability_3 = "Worry about forced moves",
+    HomeInstability_4 = "Household turnover",
+    AlloparentingXsex = "Alloparenting X sex",
+    MedicalProblemsMean = "Medical problems",
+    AdultsHousework = "Adults helping"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]

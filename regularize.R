@@ -8,6 +8,7 @@ library(pvclust)
 library(ggcorrplot)
 library(tidymodels)
 library(poissonreg)
+library(marginaleffects)
 
 out <- skim(modeldf)
 nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
@@ -128,7 +129,7 @@ glmnet2 <- function(d, signal, indices, alpha = 1){
   lmbda <- coefs$lambda[which.min(abs(coefs$lambda - lambda.mean))]
   print(lmbda)
   coefs <- coefs |> dplyr::filter(lambda == lmbda)
-  names(coefs$estimate) <- coefs$term
+  names(coefs$estimate) <- shortform_dict[coefs$term]
 
   p <-
     hagenutils::ggdotchart(coefs$estimate[-1]) +
@@ -137,8 +138,17 @@ glmnet2 <- function(d, signal, indices, alpha = 1){
   return(list(model = m2, coefs = coefs, coefplot = p))
 }
 
-out <- glmnet2(mdf2, "CryFreqN", 8:22, alpha = 0)
-plot_predictions(out$model, condition = 'ChildAge', newdata = mdf2)
+params <- expand_grid(Signal = c("SadFreqN", "CryFreqN", "TantrumFreqN"), alpha = c(0, 1))
+params$out <- map2(params$Signal, params$alpha, function(x, y) glmnet2(SignalVars, x, 8:ncol(SignalVars), alpha = y))
+
+
+(params$out[[1]]$coefplot+ggtitle("Sad, Ridge") + params$out[[2]]$coefplot+ggtitle("Sad, Lasso")) /
+(params$out[[3]]$coefplot+ggtitle("Cry, Ridge") + params$out[[4]]$coefplot+ggtitle("Cry, Lasso")) /
+(params$out[[5]]$coefplot+ggtitle("Tantrum, Ridge") + params$out[[6]]$coefplot+ggtitle("Tantrum, Lasso"))
+
+out <- glmnet2(SignalVars, "SadFreqN", 8:ncol(SignalVars), alpha = 0.5)
+out$coefplot
+plot_predictions(params$out[[4]]$model, condition = 'LifestyleReality_5', newdata = SignalVars)
 
 # Clustering --------------------------------------------------------------
 
