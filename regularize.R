@@ -6,6 +6,8 @@ library(patchwork)
 library(skimr)
 library(pvclust)
 library(ggcorrplot)
+library(tidymodels)
+library(poissonreg)
 
 out <- skim(modeldf)
 nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
@@ -92,49 +94,51 @@ glmnetSignal <- function(signal, alpha = 0, relax = T, s = "lambda.min"){
 
 p1 <- glmnetSignal("SadFreqN", alpha = 0.0, relax = T, s = "lambda.min")
 p2 <- glmnetSignal("CryFreqN", alpha = 1.0, relax = F, s = "lambda.min")
-p2p3 <- glmnetSignal("TantrumFreqN", alpha = 0.0, relax = T, s = "lambda.min")
+p3 <- glmnetSignal("TantrumFreqN", alpha = 0.0, relax = T, s = "lambda.min")
 
 p1/p2/p3 + plot_layout(axes = 'collect')
 
 
 # Plot predictions
 
-m <- cv.glmnet(
-  as.matrix(mdf2[8:nvar]),
-  mdf2[["CryFreqN"]],
-  alpha = 1, # alpha = 0: ridge; alpha = 1: lasso
-  relax = F,
-  standardize = T,
-  family =  quasipoisson() # MASS::negative.binomial(3) #
-)
-
-
-m2 <- glmnet(
-  as.matrix(mdf2[8:nvar]),
-  mdf2[["CryFreqN"]],
-  alpha = 1, # alpha = 0: ridge; alpha = 1: lasso
-  lambda = m$lambda.min,
-  relax = F,
-  standardize = T,
-  family =  quasipoisson() # MASS::negative.binomial(3) #
-)
-
 # library(tidymodels)
 
-fit <-
-  poisson_reg(mixture = 1, penalty = m$lambda.min) %>%
-  set_engine("glmnet", family = quasipoisson) %>%
-  fit(CryFreqN ~ ., data = mdf2[c(2, 8:22)])
+glmnet2 <- function(d, signal, indices, alpha = 1){
+  lambdas <- c()
+  for (i in 1:20){
+    m <- cv.glmnet(
+      as.matrix(d[indices]),
+      d[[signal]],
+      alpha = alpha, # 0: ridge; 1: lasso
+      relax = F,
+      standardize = T,
+      family = quasipoisson() # MASS::negative.binomial(0.4) #quasipoisson()
+    )
+    lambdas <- c(lambdas, m$lambda.min)
+  }
+  lambda.mean <- mean(lambdas)
+  print(lambda.mean)
 
-tdy <- tidy(fit) |> dplyr::filter(lambda == m$lambda.min)
-est <- tdy$estimate[-1]
-names(est) <- tdy$term[-1]
-ggdotchart(est)
+  m2 <-
+    poisson_reg(mixture = alpha, penalty = lambda.mean) %>%
+    set_engine("glmnet", family = quasipoisson) %>% # MASS::negative.binomial(0.4)
+    fit_xy(d[indices], d[[signal]])
 
-nd <- datagrid(ChildAge = seq(-1.6, 2.5, 0.01), Sex = rep(c(-1, 1), nrow(mdf2)), newdata=mdf2[8:22])
-out <- predictions(fit, type = "numeric", newdata = nd)
-ggplot(out, aes(ChildAge, estimate, color = factor(Sex))) + geom_line()
+  coefs <- tidy(m2)
+  lmbda <- coefs$lambda[which.min(abs(coefs$lambda - lambda.mean))]
+  print(lmbda)
+  coefs <- coefs |> dplyr::filter(lambda == lmbda)
+  names(coefs$estimate) <- coefs$term
 
+  p <-
+    hagenutils::ggdotchart(coefs$estimate[-1]) +
+    geom_vline(xintercept = 0, linetype = 'dotted')
+
+  return(list(model = m2, coefs = coefs, coefplot = p))
+}
+
+out <- glmnet2(mdf2, "CryFreqN", 8:22, alpha = 0)
+plot_predictions(out$model, condition = 'ChildAge', newdata = mdf2)
 
 # Clustering --------------------------------------------------------------
 
