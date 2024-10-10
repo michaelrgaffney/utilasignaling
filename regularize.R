@@ -6,6 +6,8 @@ library(patchwork)
 library(skimr)
 library(pvclust)
 library(ggcorrplot)
+library(tidymodels)
+library(poissonreg)
 
 out <- skim(modeldf)
 nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
@@ -92,7 +94,7 @@ glmnetSignal <- function(signal, alpha = 0, relax = T, s = "lambda.min"){
 
 p1 <- glmnetSignal("SadFreqN", alpha = 0.0, relax = T, s = "lambda.min")
 p2 <- glmnetSignal("CryFreqN", alpha = 1.0, relax = F, s = "lambda.min")
-p2p3 <- glmnetSignal("TantrumFreqN", alpha = 0.0, relax = T, s = "lambda.min")
+p3 <- glmnetSignal("TantrumFreqN", alpha = 0.0, relax = T, s = "lambda.min")
 
 p1/p2/p3 + plot_layout(axes = 'collect')
 

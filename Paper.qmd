@@ -170,7 +170,7 @@ Caretakers were also asked three questions using a five point Likert scale about
 
 ### Demographic questions
 
-The survey also included many demographic questions about the caretakers and their households. Those used in this study included the (1) ages of those in the household, (2) sexes of those in the household, (3) partnership status of the primary caregiver, (4) number of adults who provide childcare within the household, (5) highest level of education of the primary caregiver, (5) immigration status (in regards to Utila), and (6) monthly household income. These data allowed us to calculate the number of children (total, younger, and older) and adults within the household.
+The survey also included many demographic questions about the caretakers and their households. Those used in this study included the (1) ages of those in the household, (2) sexes of those in the household, (3) partnership status of the primary caregiver, (4) number of adults who provide childcare within the household, (5) highest level of education of the primary caregiver, (5) immigration status (in regards to Utila), and (6) monthly household income. These data allowed us to calculate the number of children (total, younger, and older) and adults within the household. We also imputed data for caregiver age by setting the missing value to the mean. For the data used in analyses, this amounted to imputing data for one mother which affected two children.
 
 ## Child anthropometrics
 

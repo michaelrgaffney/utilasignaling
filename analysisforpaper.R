@@ -632,7 +632,7 @@ summary(m)
 
 m <- gam(HeightMean_2024 ~ Sex2 * SadFreqN + s(HeightMean_2023) + s(ChildAge, by = Sex2, k = 3), data = anthropometricMeansWide, na.action = na.exclude)
 summary(m)
-plot(m, all.terms = T)
+# plot(m, all.terms = T)
 plot_predictions(m, condition = c("SadFreqN", "Sex2"), points = 1) +
   theme_minimal(15)
 
