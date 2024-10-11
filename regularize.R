@@ -104,51 +104,59 @@ p1/p2/p3 + plot_layout(axes = 'collect')
 
 # library(tidymodels)
 
-glmnet2 <- function(d, signal, indices, alpha = 1){
+glmnet2 <- function(d, outcome, indices, alpha = 1){
+  # Scale numeric vars by 2 SD, leave binary vars alone
+  # d[indices] <- apply(d[indices], MARGIN = 2, FUN = \(x) if (length(unique(x)) == 2) return (x) else return(c(scale(x)/2)))
+  d[indices] <- scale(d[indices])
   lambdas <- c()
   for (i in 1:20){
     m <- cv.glmnet(
       as.matrix(d[indices]),
-      d[[signal]],
+      d[[outcome]],
       alpha = alpha, # 0: ridge; 1: lasso
       relax = F,
-      standardize = T,
+      standardize = F,
       family = quasipoisson() # MASS::negative.binomial(0.4) #quasipoisson()
     )
     lambdas <- c(lambdas, m$lambda.min)
   }
   lambda.mean <- mean(lambdas)
-  print(lambda.mean)
+  # print(lambda.mean)
 
   m2 <-
     poisson_reg(mixture = alpha, penalty = lambda.mean) %>%
     set_engine("glmnet", family = quasipoisson) %>% # MASS::negative.binomial(0.4)
-    fit_xy(d[indices], d[[signal]])
+    fit_xy(d[indices], d[[outcome]])
 
   coefs <- tidy(m2)
   lmbda <- coefs$lambda[which.min(abs(coefs$lambda - lambda.mean))]
-  print(lmbda)
+  # print(lmbda)
   coefs <- coefs |> dplyr::filter(lambda == lmbda)
   names(coefs$estimate) <- shortform_dict[coefs$term]
 
   p <-
     hagenutils::ggdotchart(coefs$estimate[-1]) +
-    geom_vline(xintercept = 0, linetype = 'dotted')
+    geom_vline(xintercept = 0, linetype = 'dotted') +
+    ggtitle(outcome)
 
-  return(list(model = m2, coefs = coefs, coefplot = p))
+  return(list(data = d, åmodel = m2, coefs = coefs, coefplot = p))
 }
 
-params <- expand_grid(Signal = c("SadFreqN", "CryFreqN", "TantrumFreqN"), alpha = c(0, 1))
-params$out <- map2(params$Signal, params$alpha, function(x, y) glmnet2(SignalVars, x, 8:ncol(SignalVars), alpha = y))
+params <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
+names(params$Outcome) <- str_c(params$Outcome, params$alpha)
+params$out <- map2(params$Outcome, params$alpha, \(x, y) glmnet2(SignalVars, x, 9:ncol(SignalVars), alpha = y), .progress = T)
 
+(params$out$SadFreqN1$coefplot + params$out$CryFreqN1$coefplot) / (params$out$TantrumFreqN1$coefplot + params$out$SignalFreq1$coefplot) / (params$out$SignalCost1$coefplot + plot_spacer())
+plot_predictions(params$out$CryFreqN1$model, condition = c('ChildAge', 'Sex'), newdata = SignalVars)
 
-(params$out[[1]]$coefplot+ggtitle("Sad, Ridge") + params$out[[2]]$coefplot+ggtitle("Sad, Lasso")) /
-(params$out[[3]]$coefplot+ggtitle("Cry, Ridge") + params$out[[4]]$coefplot+ggtitle("Cry, Lasso")) /
-(params$out[[5]]$coefplot+ggtitle("Tantrum, Ridge") + params$out[[6]]$coefplot+ggtitle("Tantrum, Lasso"))
-
-out <- glmnet2(SignalVars, "SadFreqN", 8:ncol(SignalVars), alpha = 0.5)
-out$coefplot
-plot_predictions(params$out[[4]]$model, condition = 'LifestyleReality_5', newdata = SignalVars)
+SignalVars2 <-
+  SignalVars |>
+  mutate(
+    AlloparentingXage = c(scale(AlloparentingFreqN) * scale(ChildAge))
+  )
+params <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 1))
+names(params$Outcome) <- str_c(params$Outcome, params$alpha)
+params$out <- map2(params$Outcome, params$alpha, \(x, y) glmnet2(SignalVars2, x, 9:ncol(SignalVars2), alpha = y), .progress = T)
 
 # Clustering --------------------------------------------------------------
 

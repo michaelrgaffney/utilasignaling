@@ -448,11 +448,11 @@ signalvars <- data.frame(signal_vars_temp) |>
   )
 
 SignalVars <- d2 |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
   dplyr::select(
     householdID,
     childHHid,
-    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost,
+    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN,
     all_of(signalvars$Var)
     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
     # OldestChild, Does not seem to add much beyond age + number of children.X
@@ -491,7 +491,8 @@ conflict_vars_temp <-
 
 conflictvars <- data.frame(conflict_vars_temp) |>
   separate_rows(conflict_vars_temp, sep = "X") |>
-  separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale"))
+  separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
+  mutate(Var = str_trim(Var))
 
 # one option is to just use signaling vars as parents might see signaling as conflict
 ConflictVars <- d2 |>
