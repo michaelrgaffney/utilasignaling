@@ -1841,3 +1841,8 @@ plot_pca
 
 #female
 d2$test <- ifelse(d2$Sex == "Female", ((d2$BicepMean - pi * d2$TricepMean)^2 /4 * pi) - 6.5, ((d2$BicepMean - pi * d2$TricepMean)^2 / 4 * pi) - 10)
+
+
+mtantrumH <- glmmTMB(CryFreqN ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + StayAtHomeMom + LifestyleReality_5 + (1|householdID),data = d2, family = nbinom2)
+summary(mtantrumH)
+plot(allEffects(mtantrumH))

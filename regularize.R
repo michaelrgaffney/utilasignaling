@@ -157,7 +157,7 @@ SignalVars2 <-
 params <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 1))
 names(params$Outcome) <- str_c(params$Outcome, params$alpha)
 params$out <- map2(params$Outcome, params$alpha, \(x, y) glmnet2(SignalVars2, x, 9:ncol(SignalVars2), alpha = y), .progress = T)
-
+params$out$SadFreqN1$coefplot
 # Clustering --------------------------------------------------------------
 
 mdf3 <-
