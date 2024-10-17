@@ -98,6 +98,41 @@ plotpredictions <- function(params, outcome, condition, title = NULL){
 plotpredictions(signalparams, "CryFreqN1", c("ChildAge", "LifestyleReality_5"), "Crying")
 plotpredictions(conflictparams, "ConflictFreqN1", c("ChildAge", "Sex"))
 
+
+plotpredictions2 <- function(params, cond, title = NULL){
+  # model <- params$out[[outcome]]$model
+  # data <- params$out[[outcome]]$data
+
+  d <-
+    map(params$out, \(x) plot_predictions(x$model, condition = cond, newdata = x$data, draw = F)) |>
+    list_rbind(names_to = 'Outcome') |>
+    dplyr::filter(str_ends(Outcome, '1') & Outcome != 'SignalCost1') |>
+    mutate(Outcome = shortform_dict[str_remove(Outcome, '1')])
+
+  ggplot(d, aes_string(cond, 'estimate', color = 'Outcome')) +
+    geom_line(linewidth = 2) +
+    ylim(0, 40) +
+    labs(x = shortform_dict[cond], y = "Frequency per month") +
+    theme_minimal(15)
+}
+
+# Protective factors (negative coefficients)
+signal_effecs_plot <-
+  plotpredictions2(signalparams, 'ChildAge', 'Adjusted signaling frequencies') +
+  plotpredictions2(signalparams, 'NeighborhoodQuality', 'Adjusted signaling frequencies') +
+  plotpredictions2(signalparams, 'AdultsChildcare', 'Adjusted signaling frequencies') +
+  plotpredictions2(signalparams, 'LogIncome', 'Adjusted signaling frequencies') +
+  plotpredictions2(signalparams, 'EducationLevelYears', 'Adjusted signaling frequencies') +
+  plotpredictions2(signalparams, 'MedicalProblemsMean', 'Adjusted signaling frequencies') +
+  plot_layout(ncol = 2, guides = 'collect', axes = 'collect_y') + plot_annotation(title = "Adjusted signaling frequencies")
+signal_effecs_plot
+
+# Need to plot this by sex
+plotpredictions2(signalparams, 'AlloparentingXsex', 'Adjusted signaling frequencies')
+
+# Risk factors for signaling
+
+
 # plot_predictions(signalparams$out$CryFreqN1$model, condition = c('ChildAge', 'Sex'), newdata = signalparams$out$CryFreqN1$data)
 # plot_predictions(conflictparams$out$ConflictFreqN1$model, condition = c('ChildAge', 'Sex'), newdata = conflictparams$out$ConflictFreqN1$data)
 
@@ -393,7 +428,7 @@ g3params <-
     id = paste(to, from),
     Correlation = ifelse(weight < 0, 'Negative', 'Positive'),
     weight2 = abs(weight),
-    weight = 1 - weight2
+    weight = 1 - weight2 # distance
     ) |>
   dplyr::select(id, weight, Correlation, weight2)
 
@@ -402,28 +437,42 @@ g3edges$id <- NULL
 
 g3 <- tbl_graph(nodes = g3nodes, edges = g3edges, directed = F)
 
+graph_plot <- function(g, weights = NULL, layout = 'stress', title = NULL){
+
+  p <- ggraph(g, layout = layout)
+
+  if (is.null(weights)) p <- p + geom_edge_link(aes(color = Correlation), linewidth = 2)
+  else p <- p + geom_edge_link(aes(color = Correlation, linewidth = .data[[weights]]))
+
+  p +
+    geom_node_point(size = 5) +
+    geom_node_text(aes(label = name), repel = T, max.overlaps = Inf) +
+    scale_edge_color_manual(values = viridisLite::magma(2, begin = 0.2, end = 0.8)) +
+    ggtitle(title) +
+    theme_graph()
+}
+
 # Plot full graph
-ggraph(g3, layout = 'stress') +
-  # annotate("rect", xmin = 12.4, xmax = 14.5, ymin = -0.75, ymax = 3.75, colour = 'red', fill = NA, linewidth = 2) +
-  geom_edge_link(aes(color = Correlation), linewidth = 2) +
-  geom_node_point(size = 5) +
-  geom_node_text(aes(label = name), repel = T) +
-  scale_edge_color_manual(values = viridisLite::magma(2, begin = 0.2, end = 0.8)) +
-  theme_graph()
+plot_full_graph <- graph_plot(g3, layout = 'stress', title = "Bayesian graphical model", weights = 'weight2')
+plot_full_graph
 
 # Three options for MST:
-# algorithm: weighted (prim) or unweighted;
-# can also use weights = 1.
-# weights = rep(1, times = igraph::gsize(g3))
-algo <- "prim" # algo <- "unweighted"
-plot_mst <-
-  ggraph(igraph::mst(g3, algorithm = algo), layout = 'stress') +
-  # annotate("rect", xmin = 12.4, xmax = 14.5, ymin = -0.75, ymax = 3.75, colour = 'red', fill = NA, linewidth = 2) +
-  geom_edge_link(aes(color = Correlation), linewidth = 2) +
-  geom_node_point(size = 5) +
-  geom_node_text(aes(label = name), repel = T) +
-  scale_edge_color_manual(values = viridisLite::magma(2, begin = 0.2, end = 0.8)) +
-  ggtitle(algo) +
-  theme_graph()
+# algorithm: unweighted, weighted (prim), weights = 1
+# weights = 1: rep(1, times = igraph::gsize(g3))
+
+mst_weighted <- igraph::mst(g3, algorithm = 'prim')
+plot_mst <- graph_plot(mst_weighted, weights = 'weight2', title = 'MST (weighted)')
 plot_mst
+
+mst_unweighted <- igraph::mst(g3, algorithm = 'unweighted')
+plot_mst_uw <- graph_plot(mst_unweighted, title = 'MST (unweighted)')
+plot_mst_uw
+
+mst_unit <- igraph::mst(g3, algorithm = 'prim', weights = rep(1, times = igraph::gsize(g3)))
+plot_mst_unit <- graph_plot(mst_unit, title = 'MST (unit weights)')
+plot_mst_unit
+
+# annotate("rect", xmin = 12.4, xmax = 14.5, ymin = -0.75, ymax = 3.75, colour = 'red', fill = NA, linewidth = 2) +
+
+
 ggsave('plot_mst.svg', plot_mst)

@@ -93,7 +93,9 @@ shortform_dict <-
     AdultsHousework = "Adults helping",
     Fullsibs = "Full-siblings",
     Halfsibs = "Half-siblings",
-    Stepsibs = "Step-siblings"
+    Stepsibs = "Step-siblings",
+    MeanChildRelatedness = "Child relatedness",
+    MeanSiblingRelatedness = "Sibling relatedness"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]
