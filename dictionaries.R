@@ -90,7 +90,10 @@ shortform_dict <-
     HomeInstability_4 = "Household turnover",
     AlloparentingXsex = "Alloparenting X sex",
     MedicalProblemsMean = "Medical problems",
-    AdultsHousework = "Adults helping"
+    AdultsHousework = "Adults helping",
+    Fullsibs = "Full-siblings",
+    Halfsibs = "Half-siblings",
+    Stepsibs = "Step-siblings"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]

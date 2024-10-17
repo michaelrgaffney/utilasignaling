@@ -9,7 +9,9 @@ library(ggcorrplot)
 library(tidymodels)
 library(poissonreg)
 library(marginaleffects)
-
+library(easybgm)
+library(tidygraph)
+library(ggraph)
 
 # Regularized regression --------------------------------------------------
 
@@ -144,9 +146,13 @@ mdf2 <-
 
 # PCA ---------------------------------------------------------------------
 
-m <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
-plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
-plot_biplot <- pca_biplot(m) + theme_minimal(15)
+pca1 <- prcomp(SignalVars[-c(1,2)], scale. = T)
+plot_loadings1 <- pca_loadings_plot(pca1)
+plot_biplot1 <- pca_biplot(pca1)
+
+pca2 <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
+plot_loadings2 <- pca_loadings_plot(pca2, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
+plot_biplot2 <- pca_biplot(pca2) + theme_minimal(15)
 
 plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2))
 plot_pca
@@ -340,3 +346,84 @@ glmmTMBmodels <- tibble(
   Model = map(glmmTMBformulas, \(f) glmmTMB(as.formula(f), family = nbinom2, data = d2)),
   AIC = map_dbl(Model, AIC)
 )
+
+# Graphical models ---------------------------------------------------------
+
+library(BDgraph)
+
+# possessions <- SignalVars |> dplyr::select(starts_with("Lifestyle"))
+#
+# m <- bdgraph(data = possessions, method = "gcgm", g.prior = 0.1, iter = 10000, burnin = 7000)
+# msum <- summary(m)
+
+discrete_vars0 <-
+  SignalVars |>
+  summarize(discrete = across(everything(), \(x) length(unique(x)) <= 3)) |>
+  dplyr::select(discrete)
+discrete_vars <- as.integer(discrete_vars0$discrete)
+names(discrete_vars) <- names(discrete_vars0$discrete)
+
+# m2 <- bdgraph(data = SignalVars[-c(1,2)], method = "gcgm", not.cont = x2[-c(1,2)], g.prior = 0.1, cores = 'all', iter = 50000, burnin = 7000)
+# m2sum <- summary(m2)
+
+m3 <- easybgm(SignalVars[-c(1,2)], type = 'mixed', not_cont = discrete_vars[-c(1,2)], iter = 50000, package = 'BDgraph', g.prior = 0.05)
+plot_network(m3, layout = "spring", vsize = 4, label.cex = 1)
+plot_structure(m3, vsize = 4, label.cex = 1)
+plot_structure_probabilities(m3, as_BF = F)
+# plot_parameterHDI(m3) # need to have save = T
+
+g3nodes <-
+  as_tbl_graph(m3$structure) |>
+  activate(nodes) |>
+  data.frame() |>
+  mutate(name = shortform_dict[name])
+
+g3struct <-
+  as_tbl_graph(m3$structure) |>
+  activate(edges) |>
+  data.frame() |>
+  mutate(id = paste(to, from)) |>
+  dplyr::select(-weight)
+
+g3params <-
+  as_tbl_graph(as.matrix(m3$parameters)) |>
+  activate(edges) |>
+  data.frame() |>
+  mutate(
+    id = paste(to, from),
+    Correlation = ifelse(weight < 0, 'Negative', 'Positive'),
+    weight2 = abs(weight),
+    weight = 1 - weight2
+    ) |>
+  dplyr::select(id, weight, Correlation, weight2)
+
+g3edges <- left_join(g3struct, g3params, by = 'id')
+g3edges$id <- NULL
+
+g3 <- tbl_graph(nodes = g3nodes, edges = g3edges, directed = F)
+
+# Plot full graph
+ggraph(g3, layout = 'stress') +
+  # annotate("rect", xmin = 12.4, xmax = 14.5, ymin = -0.75, ymax = 3.75, colour = 'red', fill = NA, linewidth = 2) +
+  geom_edge_link(aes(color = Correlation), linewidth = 2) +
+  geom_node_point(size = 5) +
+  geom_node_text(aes(label = name), repel = T) +
+  scale_edge_color_manual(values = viridisLite::magma(2, begin = 0.2, end = 0.8)) +
+  theme_graph()
+
+# Three options for MST:
+# algorithm: weighted (prim) or unweighted;
+# can also use weights = 1.
+# weights = rep(1, times = igraph::gsize(g3))
+algo <- "prim" # algo <- "unweighted"
+plot_mst <-
+  ggraph(igraph::mst(g3, algorithm = algo), layout = 'stress') +
+  # annotate("rect", xmin = 12.4, xmax = 14.5, ymin = -0.75, ymax = 3.75, colour = 'red', fill = NA, linewidth = 2) +
+  geom_edge_link(aes(color = Correlation), linewidth = 2) +
+  geom_node_point(size = 5) +
+  geom_node_text(aes(label = name), repel = T) +
+  scale_edge_color_manual(values = viridisLite::magma(2, begin = 0.2, end = 0.8)) +
+  ggtitle(algo) +
+  theme_graph()
+plot_mst
+ggsave('plot_mst.svg', plot_mst)
