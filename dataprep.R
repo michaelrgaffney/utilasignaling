@@ -452,7 +452,7 @@ SignalVars <- d2 |>
   dplyr::select(
     householdID,
     childHHid,
-    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN, # Fullsibs, Halfsibs, Stepsibs,
+    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN, MeanChildRelatedness, # Fullsibs, Halfsibs, Stepsibs,
     all_of(signalvars$Var)
     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
     # OldestChild, Does not seem to add much beyond age + number of children.X
