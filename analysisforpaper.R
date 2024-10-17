@@ -377,9 +377,15 @@ summary(mscH)
 plot(allEffects(mscH))
 # OtherChildAlloparents*Sex
 
-mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus  + AlloparentingFreqN*Sex + EducationLevelYears + Neighborhood2 + (1|householdID),data = d2, family = nbinom2)
+mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome*MeanChildRelatedness + number_adults + PartnerStatus  + AlloparentingFreqN*Sex + EducationLevelYears + Neighborhood2 + (1|householdID),data = d2, family = nbinom2)
 summary(mscH2)
 plot(allEffects(mscH2))
+
+mscH3 <- glmmTMB(SignalCost ~ ChildAge + Sex + Fullsibs + Halfsibs + NonSibs + LogIncome + number_adults + PartnerStatus  + AlloparentingFreqN*Sex + EducationLevelYears + Neighborhood2 + (1|householdID),data = d2, family = nbinom2)
+summary(mscH3)
+plot(allEffects(mscH3))
+
+
 # signal frequency
 
 msfH <- glmmTMB(SignalFreq ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
@@ -666,6 +672,14 @@ mconflict <- glmmTMB(ConflictFreqN ~ ChildAge + Sex + OlderKids + YoungerKids + 
 summary(mconflict)
 plot(allEffects(mconflict))
 
+mc2 <- glmmTMB(ConflictFreqN ~ ChildAge + Sex + Fullsibs + Halfsibs + NonSibs + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + (1|householdID),data = d2, family = nbinom2)
+summary(mc2)
+plot(allEffects(mc2))
+
+mc3 <- glmmTMB(ConflictFreqN ~ ChildAge + Sex + Fullsibs + Halfsibs + NonSibs + LogIncome + AdultsNoChildcare + AdultsChildcare + PartnerStatus + AlloparentingFreqN*Sex + EducationLevelYears + StayAtHomeMom + (1|householdID),data = d2, family = nbinom2)
+summary(mc3)
+plot(allEffects(mc3))
+
 conflict_scatterplot <- ggplot(modeldf, aes(ConflictFreqN, SignalCost)) + geom_count() + geom_smooth(method='lm')
 
 # RunawayFreqN model ------------------------------------------------------
@@ -685,17 +699,16 @@ plot(allEffects(mrunawayH))
 
 # note childcare measure often not significant wihtout BodyFat in the model
 
-
 #Signal Cost
 table(d2$AdultsNoChildcare)
 
 mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
 summary(mscH2)
-plot(allEffects(mscH2))
+# plot(allEffects(mscH2))
 
 mscH2 <- glmmTMB(SignalCost ~ ChildAge + Sex + OtherChildrenHH + LogIncome + AdultsNoChildcare + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + BodyFat + OtherChildAlloparentingFreqN + AdultsChildcare + (1|householdID),data = d2, family = nbinom2)
 summary(mscH2)
-plot(allEffects(mscH2))
+# plot(allEffects(mscH2))
 
 modeldf2 <- d2 |>
   dplyr::select(
@@ -1053,7 +1066,7 @@ updated_out$estimate[3]
 
 test_grid <- datagrid(model = mpr, Punishment2 = "1", grid_type = "balanced")
 avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
-predictions(mpr, newdata = datagrid(Punishment2 = unique))
+predictions(mpr, newdata = datagrid(Punishment2 = unique, grid_type = "balanced"))
 # out_mpr_full
 # out_mpr_full$estimate[3]
 

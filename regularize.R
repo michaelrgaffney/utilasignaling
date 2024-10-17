@@ -427,3 +427,5 @@ plot_mst <-
   theme_graph()
 plot_mst
 ggsave('plot_mst.svg', plot_mst)
+
+ggsave("Figures/plot_mst.pdf", plot_mst, width = 9, height = 9)

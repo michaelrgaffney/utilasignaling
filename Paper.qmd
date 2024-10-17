@@ -260,6 +260,14 @@ signal_corrplot
 Correlation matrix of the frequencies of signals/states covered in the study with sex, child age, and the frequency of conflict between children and primary caretakers.
 :::
 
+::: {#fig-mst}
+```{r}
+include_graphics("Figures/plot_mst.pdf")
+```
+
+Minimum spanning tree of child signaling and variables thought to cause differences in signaling strategies. Blue edges = negative [do we want more detail here? e.g., partial correlations or w/e the proper Bayesian way to word that is] correlations between variables. Red edges = positive correlations between variables. Edge lengths represent [check that this is right and if more specificity is needed] distances between variables. Line weights represent(1 - correlation coefficient)
+:::
+
 ::: {#fig-barplot_ConflictFreq}
 ```{r}
 barplot_conflict
