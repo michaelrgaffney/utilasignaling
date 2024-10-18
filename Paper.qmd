@@ -25,7 +25,7 @@ crossref:
 ```{r setup, include=FALSE}
 source("dictionaries.R", local = knitr::knit_global())
 source("analysisforpaper.R", local = knitr::knit_global())
-
+# source("regularize.R")
 ```
 
 # Introduction
@@ -133,7 +133,7 @@ The data for this study were collected as part of the Utila Child Health Project
 We used 6-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
 
 |  |  |
-|----|----|
+|------------------------------------|------------------------------------|
 | Variable | Survey question wording |
 | Crying Frequency | How often does your child cry? |
 | Sad Frequency | How often is your child sad? |
@@ -153,7 +153,7 @@ We also calculated the summed frequency of child alloparenting contributions by 
 We used 6-point Likert scales for parental reports of 1) the relative neediness of each participating child, and 2) the relative investment they provide to each participating child compared to the rest of their children. See Table @stbl-relvars for exact wording.
 
 |  |  |
-|----|----|
+|------------------------------------|------------------------------------|
 | Variable | Survey question wording |
 | Relative Need | How much time, effort, and resources does this child need compared to your other children? |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
@@ -188,6 +188,8 @@ For our independent variables of skinfold thickness, flexed bicep circumference,
 
 All statistical analyses were exploratory and involved fitting many models with different combinations of independent and dependent variables. Whereas confirmatory studies test prespecified hypotheses, exploratory analyses prioritize discovery: they risk overfitting the data, generating false positives, but can reveal unexpected yet potentially important relationships that warrant future investigation [@tukey1977].
 
+The overall structure of study variables was analyzed with principle components analysis (PCA) and Bayesian graphical models (BGM) and minimum spanning trees (MST).
+
 Child signaling frequencies and signaling costs, which were overdispersed count variables, were analyzed using generalized linear mixed models with a negative binomial error family, fit in R with the glmmTMB package [@brooks2017]. Unless otherwise noted, explanatory variables included child age, child sex,, child illness avoidance, caretaker education, caretaker partner status, household income, the number of other children in the household, the number of the adults in the household, the frequency of conflict between the primary caretaker and the child, and an interaction between the frequency of child alloparenting effort and child sex.. A household random effect was included in all models.
 
 Parental responses to child signaling, their perceptions of child need, and their reported investment in the child were coded as three-level ordinal variables, either negative, neutral or positive; or less than other children, same as other children, or more than other children. We analyzed these outcomes using ordinal logistic regression, fit in R using the polr function in the MASS package [@venables2002], with clustered standard errors by household [@zeileis2002].
@@ -201,6 +203,7 @@ The anonymized data used in the study are available at xxxxxxxLINKxxxxxxx. Study
 `{r} dplyr::n_distinct(modeldf$householdID)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`, non-binary = `{r} table(caregivers$CaregiverSex)[3]`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. Anthropometric and signaling data exist for `{r} nrow(modeldf_FULLANTHROPOMETRICS)` children, of whom `{r} sex_table2[1]` were female and `{r} sex_table2[2]` were male. For summary statistics of child-level variables see @tbl-sumtab_children. For summary statistics of caretaker and household-level variables see @tbl-sumtab_adults.
 
 <!-- [NOTE: Add categorical variables to the table; combine child and adult variables into 1 table] -->
+
 ```{r sumtab_children}
 #| label: tbl-sumtab_children
 #| tbl-cap: Summary statistics for child variables.
@@ -218,12 +221,17 @@ kable(custom.summarize(caregivers, longform_dict[19:23])) %>% kable_styling()
 A PCA of primary study variables found that sociodemographic and ecological variables loaded primarily on PC1, whereas the child signaling, conflict, and child age variables loaded primarily on PC2. Child signaling variables modestly load on PC1 as well in a direction suggesting that greater signaling covaries with more adverse environments. See @fig-PCA.
 
 ::: {#fig-PCA}
-```{r}
-#| fig-width: 11
-plot_pca
-```
+![](Figures/plot_pca.svg)
 
-A) Loadings of PC1 and PC2 on each variable. B) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable. 
+A)  Loadings of PC1 and PC2 on each variable. B) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable.
+:::
+
+We then estimated a BGM for all study variables, extracting the MST, which revealed that signaling variables clustered together, conflict was positively associated with signal cost, and child age negatively associated with crying frequency. See @fig-mst.
+
+::: {#fig-mst}
+![](Figures/plot_mst_uw.svg)
+
+Minimum spanning tree of child signaling and variables thought to cause differences in signaling strategies. Blue edges = negative \[do we want more detail here? e.g., partial correlations or w/e the proper Bayesian way to word that is\] correlations between variables. Red edges = positive correlations between variables. Edge lengths represent \[check that this is right and if more specificity is needed\] distances between variables. Line weights represent(1 - correlation coefficient)
 :::
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict
@@ -260,14 +268,6 @@ signal_corrplot
 Correlation matrix of the frequencies of signals/states covered in the study with sex, child age, and the frequency of conflict between children and primary caretakers.
 :::
 
-::: {#fig-mst}
-```{r}
-include_graphics("Figures/plot_mst.pdf")
-```
-
-Minimum spanning tree of child signaling and variables thought to cause differences in signaling strategies. Blue edges = negative [do we want more detail here? e.g., partial correlations or w/e the proper Bayesian way to word that is] correlations between variables. Red edges = positive correlations between variables. Edge lengths represent [check that this is right and if more specificity is needed] distances between variables. Line weights represent(1 - correlation coefficient)
-:::
-
 ::: {#fig-barplot_ConflictFreq}
 ```{r}
 barplot_conflict
@@ -284,83 +284,32 @@ barplot_alloparenting
 Frequency of a child's alloparenting effort (per month) as reported by primary caretaker. Color corresponds to sex of the child. Frequency key: 0 corresponds to "never," \<=1 corresponds to "once a month or less," 2-3 corresponds to "more than once a month but less than once a week," 4-29 corresponds to "more than once a week but not daily," 30 corresponds to "daily," and \>30 corresponds to "multiple times per day."
 :::
 
-## Signaling behavior is negatively associated with age
+## Predictors of signaling frequency and conflict frequency
 
-As children mature, they are more capable of fulfilling their own needs, more able to ask others for what they need, and are less vulnerable to threats. We therefore expected signaling frequencies to decrease with age. For every signaling measure except sadness (which also has non-signaling functions), there was a statistically significant negative relationship between the age of the child and the frequency of signaling. See @stbl-main-models and @fig-effect_age.
+Using lasso regression, we explored all potential predictors of each child signal frequency, as well as of conflict frequency. See @fig-lasso.
 
-Age had the largest effect on crying (`{r} stats$mcryH$ChildAge$str`), with the model predicting that by age 8 crying frequency drops to half of its value at age 5 (visual inspection). The effect of age on temper tantrums (`{r} stats$mtantrumH$ChildAge$str`) was smaller with a more linear slope.
+::: {#fig-lasso}
+![](Figures/plot_lasso.svg)
 
-::: {#fig-effect_age}
-```{r}
-signaling_data_plot_age
-```
-
-The effect of age on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior, all per month. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Rug corresponds to actual values of child age with a small amount of jitter to reveal overlapped values. See @stbl-main-models for the corresponding regression table.
+Lasso regression models of each child signaling frequency and conflict frequency. Variables whose coefficient values were shrunk to 0 are not displayed. Models fit uins using quasi-Poisson regression.
 :::
 
-## Signaling behavior is positively associated with conflict with primary caretakers
+The effects of particularly large risk or protective factors for child signaling are shown in @fig-signal-effects.
 
-Costly signals of need are necessary when there are conflicts of interest. There were statistically significant positive relationships between the frequency of conflict between a child and their primary caretaker and all of our signaling measures (although frequent signaling might cause caretaker perceptions of conflict; see the Discussion section). See @stbl-main-models and @fig-effect_conflict.
+::: {#fig-signal-effects}
+![](Figures/signal_effects_plot.svg)
 
-::: {#fig-effect_conflict}
-```{r}
-signaling_data_plot_conflict
-```
-
-The effect of the frequency of conflict with one's primary caretaker on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and signal cost, all per month. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Rug corresponds to actual values of the frequency of conflict between child and primary caretaker with a small amount of jitter to reveal overlapped values. See @stbl-main-models for the corresponding regression table.
+Selected predictors of child signaling frequencies.
 :::
 
-## Signaling behavior is negatively associated with caregiver education
+The effects of particularly large risk or protective factors for conflict frequency are shown in @fig-conflict-effects.
 
-\[delete this section if we remove conflict from the main model? or mention on significant when controlling for conflict\]
+::: {#fig-conflict-effects}
+![](Figures/conflict_effects_plot.svg)
 
-We did not predict relationships between child signaling and our demographic control variables, but we did find statistically significant negative relationships between years of caregiver education and all of our signaling measures except sadness (`{r} stats$msadH$EducationLevelYears$str`). See @stbl-main-models and @fig-effect_edu.
-
-::: {#fig-effect_edu}
-```{r}
-signaling_data_plot_education
-```
-
-The effect of years of caregiver education on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and signal cost, all per month. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Rug corresponds to actual values of primary caretaker education (years) with a small amount of jitter to reveal overlapped values. See @stbl-main-models for the corresponding regression table.
+Selected predictors of child-parent conflict frequencies.
 :::
 
-## Signaling behavior and child alloparenting effort by sex
-
-High alloparenting effort by children is associated with conflict with their parents (Syme and Hagen, xx). Across cultures, girls do more alloparenting than boys (xx, yy). We therefore investigated the association of child alloparenting effort and child signaling, with an interaction term for child sex. For each signaling measure, there was also a significant interaction between how often a child cared for their siblings and the sex of the child. The slope of these relationships were positive for girls and flat or slightly negative for boys. In other words, our models predict that as children provide more allocare within their families, the girls’ frequency of signaling increases with increases in their alloparenting effort, and boys’ frequency of signaling remains at the same rate or decreases slightly with increases in their alloparenting effort. See @stbl-main-models and @fig-effect_allo_by_sex.
-
-::: {#fig-effect_allo_by_sex}
-```{r}
-signaling_data_plot_allo_by_sex
-```
-
-The effect of an alloparenting effort by sex interaction on specific signal frequencies, summed signal frequency, the frequency of a child's most common signal, and the summed cost of signaling behavior, all per month. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Rug corresponds to actual values of child alloparenting frequency with a small amount of jitter to reveal overlapped values. See @stbl-conflict-dep-var for the corresponding regression table.
-:::
-
-## Predictors of conflict between children and caretakers
-
-Because caretaker perceptions of conflict predicted child signaling frequency, we investigated predictors of conflict. The frequency of conflict between children and caretakers is negatively associated with child age (`{r} stats$mconflict$ChildAge$str`) and the number of adults who provide childcare in a household (`{r} stats$mconflict$AdultsChildcare$str`) when controlling for the sex of the child, household demographics, the number of adults who provide and do not contribute to childcare, an alloparenting effort by sex interaction, and the summed frequency of alloparenting from all other children in the household. See @stbl-conflict-dep-var and @fig-effect_conflict_dep_var.
-
-::: {#fig-effect_conflict_dep_var}
-```{r}
-signaling_data_plot_conflict_dep_var
-```
-
-The effect of A) child age and B) the number of adults in the household that contribute to childcare on the frequency of conflict between caretaker and child. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Rug corresponds to actual values of A) child age and B) the number of adults in the household that contribute to childcare with a small amount of jitter to reveal overlapped values. See @stbl-conflict-dep-var for the corresponding regression table.
-:::
-
-## Negative association between child alloparenting effort and number of older children
-
-\[DELETE THIS SECTION OR MOVE TO SI???\]
-
-Because child allparenting effort was associated with child signaling, we investigated predictors of child alloparenting effort. We expected that children’s alloparenting effort would be positively associated with their age, female sex, and the number of younger siblings, and negatively with the number of older siblings and the total alloparenting effort of others in the household. Initial linear modeling of child alloparenting effort revealed that a few households with exceptionally high levels of total child alloparenting effort produced models that predicted extremely unrealistic levels of child alloparenting effort. We therefore removed `{r}`r sum(d2$OtherChildAlloparentingFreqN > 121, na.rm = TRUE)` outliers (`{r} `r sum(d2$OtherChildAlloparentingFreqN == 360, na.rm = TRUE)`of which had a value of 360 times per month and`{r} `r sum(d2$OtherChildAlloparentingFreqN == 420, na.rm = TRUE)` of which had a value of 420 timers per month) despite expecting these values to not be outliers in the broader Utilian community.
-
-::: {#fig-effect_alloparenting_dep_var_plot}
-```{r}
-alloparenting_dep_var_plot
-```
-
-The effect of the number of older children in the household on the frequency of a child's alloparenting effort. Shaded areas are 95% CIs (only taking the uncertainty of fixed-effect parameters into account). Each dot is 1 child. Overlapping points are represented by the transparency of the point (lower transparency equals more values at a given coordinate). See @stbl-alloparenting-dep-var for the corresponding regression table.
-:::
 
 ## Anthropometric predictors of child signaling
 
@@ -440,10 +389,9 @@ We found no significant associations between sex and child signaling behavior ou
 
 *Negative association between age and child signaling (all signaling measures)*
 
-As seen in Western cultures [@zeifman2013; @potegal2003; @koch2003] (check for others), the frequencies of crying and temper tantrums decreased with age. One possibility is that older children have greater ability to satisfy one's desires and behave in ways which match cultural expectations of teenagers and adults. Another is that since one's reproductive value increases as one survives periods of high mortality risk in childhood, the intensity of conflicts of interest with parents decreases since these children are likely to reach adulthood and require less investment to reach adulthood than younger children, current or future [@daly1995]. For this reason, less costly signals may be more likely to work to increase investment, all else being equal\[\[4\]\]. That said, all else may often not be equal if investment in older children is costlier, something which may be reflected in caretakers seeing older children as relatively needy. The decrease in crying and tantrum frequencies with age may also result from the potential for greater reputational costs, something which may also increase the credibility of such signals among older children as previously mentioned. 
+As seen in Western cultures [@zeifman2013; @potegal2003; @koch2003] (check for others), the frequencies of crying and temper tantrums decreased with age. One possibility is that older children have greater ability to satisfy one's desires and behave in ways which match cultural expectations of teenagers and adults. Another is that since one's reproductive value increases as one survives periods of high mortality risk in childhood, the intensity of conflicts of interest with parents decreases since these children are likely to reach adulthood and require less investment to reach adulthood than younger children, current or future [@daly1995]. For this reason, less costly signals may be more likely to work to increase investment, all else being equal\[\[4\]\]. That said, all else may often not be equal if investment in older children is costlier, something which may be reflected in caretakers seeing older children as relatively needy. The decrease in crying and tantrum frequencies with age may also result from the potential for greater reputational costs, something which may also increase the credibility of such signals among older children as previously mentioned.
 
-There was also a negative association between child sadness and age. However, interpretation of this finding is more difficult due to the fact that, unlike crying and temper tantrums, sadness is thought to have important non-signaling functions including drawing one’s attention to a problem, motivating deeper analysis of one’s situation, and causing withdrawal from situations with low fitness prospects [@nesse2019; @nettle2009; @allen2003; @hagen2011]. By asking about sadness as a whole, our measure was unable to disentangle information caretakers gleaned from cues from information that came from signals. 
-- difference in sadness or a difference in facial sadness?
+There was also a negative association between child sadness and age. However, interpretation of this finding is more difficult due to the fact that, unlike crying and temper tantrums, sadness is thought to have important non-signaling functions including drawing one’s attention to a problem, motivating deeper analysis of one’s situation, and causing withdrawal from situations with low fitness prospects [@nesse2019; @nettle2009; @allen2003; @hagen2011]. By asking about sadness as a whole, our measure was unable to disentangle information caretakers gleaned from cues from information that came from signals. - difference in sadness or a difference in facial sadness?
 
 -   add in depression over the lifecourse?
 
@@ -459,7 +407,7 @@ We found evidence of an interaction between how often a child cared for their si
 
 Evidence for conflicts similar to the one hypothesized here has been reported by multiple researchers working with the Chuukese. Lowe found that both male and female children reported conflict with their families over their desires to invest financial resources in their own status enhancing opportunities rather than in the household [@lowe2003]. In an analysis of conflict among Chuukese-Americans, Syme and Hagen found that severe conflicts were more likely with greater numbers of siblings and when conflicts involved a child spending time away from home or evading family responsibilities [@syme2023a], findings which would be consistent with parents pressuring older children into investing more in the household among other explanations. In response to such conflicts, participants reported using a wide range strategies as children including, deception, withholding cooperation, running away, and seeking the assistance of others. Through these means, participants were often able to resolve conflicts in their favor despite their lower status in the household and community.
 
-However, child alloparenting effort was negatively associated with caregiver reports of child conflict. One potential reason for this is since parents presumably value the child alloparenting within the family, they see their relationships with children who invest more in the household as less conflictual. In line with this reasoning, we found evidence of a child alloparenting effort by child age interaction, with our model predicting increased levels of conflict for older children with greater alloparenting. Ideally, we could control for signaling behavior to test this. However, the bidirectional relationship between child signaling and conflict with caretakers prevents this (explain better). It is also possible that our hypothesis about conflict over investment in the household is incorrect. 
+However, child alloparenting effort was negatively associated with caregiver reports of child conflict. One potential reason for this is since parents presumably value the child alloparenting within the family, they see their relationships with children who invest more in the household as less conflictual. In line with this reasoning, we found evidence of a child alloparenting effort by child age interaction, with our model predicting increased levels of conflict for older children with greater alloparenting. Ideally, we could control for signaling behavior to test this. However, the bidirectional relationship between child signaling and conflict with caretakers prevents this (explain better). It is also possible that our hypothesis about conflict over investment in the household is incorrect.
 
 *Body fat discussion*
 
@@ -516,7 +464,7 @@ Outside of child anthropometric measurements, all data come from caregiver repor
 # Supplementary Information
 
 |  |  |
-|----|----|
+|------------------------------------|------------------------------------|
 | Variable | Survey question wording |
 | IllnessAvoidance1 | If an illness is 'going around', my child will get it. |
 | IllnessAvoidance2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
@@ -667,7 +615,6 @@ modelsummary(polrModels$Model$Response, vcov = vcovCL, type = "HC0", cluster = ~
 
 Regression table for the model examining responses to the last time a child was sad or cried.
 :::
-
 
 ### OLD Discussion
 

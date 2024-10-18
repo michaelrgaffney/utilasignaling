@@ -95,7 +95,8 @@ shortform_dict <-
     Halfsibs = "Half-siblings",
     Stepsibs = "Step-siblings",
     MeanChildRelatedness = "Child relatedness",
-    MeanSiblingRelatedness = "Sibling relatedness"
+    MeanSiblingRelatedness = "Sibling relatedness",
+    `Possession score` = "Possession score"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]

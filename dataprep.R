@@ -469,6 +469,42 @@ SignalVars <- d2 |>
   ) |>
   na.omit()
 
+SignalVarsAnthro0 <-
+  anthropometricMeans0 |>
+  dplyr::filter(
+    measurements == 2
+  ) |>
+  pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
+  left_join(d2[c("householdID", "childHHid", "ChildID")], by = 'ChildID') |>
+  dplyr::filter(!is.na(householdID) & !is.na(childHHid))
+
+SignalVarsAnthro <-
+  SignalVars |>
+  left_join(SignalVarsAnthro0) |>
+  dplyr::filter(!is.na(HeightMean_2024))
+
+# out <- skim(anthropometricMeans)
+# nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
+
+tmp <- left_join(anthropometricMeans, d2[c("childHHid", "ChildID")], by = 'ChildID')
+SignalVarsAnthro2 <-
+  left_join(SignalVars, tmp) |>
+  dplyr::select(
+    -AgeAtMeasurement,
+    -Year,
+    -measurements,
+    -Date.of.measurement,
+    -Sex2,
+    -ChildID,
+    -FlexedRb,
+    -HeightMean,
+    -WeightMean_KG,
+    -BMI,
+    -BodyFatPercentageMean,
+    -GripStrengthMean
+    ) |>
+  na.omit()
+
 conflict_vars_temp <-
   "ChildAge:Younger children have more needs they cannot address on their own, something which can lead to conflict. Older children are more likely to have conflicts with parents over investment within vs. outside the family.X
   Sex:The sexes differ in the adversity they face and their ability to bargain for increased support outside of signals of need. These differences can lead to differences in conflict frequency. These differences may be small or nonexistent in young children.X
@@ -489,39 +525,39 @@ conflict_vars_temp <-
   ImmigrateUtila:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict.X
   UserLanguage:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict."
 
-conflictvars <- data.frame(conflict_vars_temp) |>
-  separate_rows(conflict_vars_temp, sep = "X") |>
-  separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
-  mutate(Var = str_trim(Var))
-
-# one option is to just use signaling vars as parents might see signaling as conflict
-ConflictVars <- d2 |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
-  dplyr::select(
-    householdID,
-    childHHid,
-    ChildAge,
-    Sex,
-    IllnessSusceptibilityMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function. This can favor signaling, which parents see as conflict.
-    MedicalProblemsMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. This can favor signaling, which parents see as conflict.
-    AlloparentingFreqN,
-    # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.
-    # OldestChild, Does not seem to add much beyond age + number of children.
-    CaregiverAge,
-    StayAtHomeMom,
-    # PartnerStatus, Does this add much beyond the number of adults in the househld?
-    EducationLevelYears,
-    AdultsChildcare,
-    number_adults,
-    NumberOfChildren,
-    OtherChildAlloparentingFreqN,
-    LogIncome,
-    HomeInstabilityMean,
-    NeighborhoodQuality,
-    Neighborhood2,
-    # HouseQuality, Does this add much?X
-    # FoodSecurity Children may be more likely to signal for more food when it is hard to come by. This can be seen as conflict by caretakers.
-    ImmigrateUtila,
-    UserLanguage
-  )
+# conflictvars <- data.frame(conflict_vars_temp) |>
+#   separate_rows(conflict_vars_temp, sep = "X") |>
+#   separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
+#   mutate(Var = str_trim(Var))
+#
+# # one option is to just use signaling vars as parents might see signaling as conflict
+# ConflictVars <- d2 |>
+#   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
+#   dplyr::select(
+#     householdID,
+#     childHHid,
+#     ChildAge,
+#     Sex,
+#     IllnessSusceptibilityMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function. This can favor signaling, which parents see as conflict.
+#     MedicalProblemsMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. This can favor signaling, which parents see as conflict.
+#     AlloparentingFreqN,
+#     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.
+#     # OldestChild, Does not seem to add much beyond age + number of children.
+#     CaregiverAge,
+#     StayAtHomeMom,
+#     # PartnerStatus, Does this add much beyond the number of adults in the househld?
+#     EducationLevelYears,
+#     AdultsChildcare,
+#     number_adults,
+#     NumberOfChildren,
+#     OtherChildAlloparentingFreqN,
+#     LogIncome,
+#     HomeInstabilityMean,
+#     NeighborhoodQuality,
+#     Neighborhood2,
+#     # HouseQuality, Does this add much?X
+#     # FoodSecurity Children may be more likely to signal for more food when it is hard to come by. This can be seen as conflict by caretakers.
+#     ImmigrateUtila,
+#     UserLanguage
+#   )
 
