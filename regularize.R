@@ -294,20 +294,110 @@ anthroparams$out <- map2(anthroparams$Outcome, anthroparams$alpha, \(x, y) glmne
 
 # Predicting signals
 
-anthro2params <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
-names(anthro2params$Outcome) <- str_c(anthro2params$Outcome, anthro2params$alpha)
-anthro2params$out <- map2(anthro2params$Outcome, anthro2params$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
+# anthro2params <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
+# names(anthro2params$Outcome) <- str_c(anthro2params$Outcome, anthro2params$alpha)
+# anthro2params$out <- map2(anthro2params$Outcome, anthro2params$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
 
-conflictAnthroparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 1))
+conflictAnthroparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 0.5, 1))
 names(conflictAnthroparams$Outcome) <- str_c(conflictAnthroparams$Outcome, conflictAnthroparams$alpha)
 conflictAnthroparams$out <- map2(conflictAnthroparams$Outcome, conflictAnthroparams$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
 
-plot_anthro_ridge <-
-  conflictAnthroparams$out$SadFreqN0$coefplot + conflictAnthroparams$out$CryFreqN0$coefplot +
-  conflictAnthroparams$out$TantrumFreqN0$coefplot + conflictAnthroparams$out$SignalFreq0$coefplot +
-  conflictAnthroparams$out$SignalCost0$coefplot + conflictAnthroparams$out$ConflictFreqN0$coefplot +
-  plot_layout(axis_titles = 'collect', ncol = 2)
-plot_anthro_lasso
+
+# Ordinal regressions -----------------------------------------------------
+
+library(ordinalNet)
+
+causematrix <-
+  causes |>
+  mutate(
+    across(Family:StatusConcerns, \(x) ifelse(x == "Maybe" | x == 'maybe', "0", x)),
+    across(Family:StatusConcerns, as.numeric)
+  ) |>
+  dplyr::select(householdID, childHHid, Family:StatusConcerns) |>
+  na.omit()
+
+cause_count <- map_int(causematrix[-c(1:5)], \(x) sum(x, na.rm = T))
+cause_vars <- names(cause_count[cause_count > 4])
+
+SignalVars3 <-
+  left_join(SignalVars, d2[c("householdID", "childHHid", "CaregiverResponse")]) |>
+  left_join(causematrix[c("householdID", "childHHid", cause_vars)]) |>
+  relocate(CaregiverResponse, .after = childHHid) |>
+  mutate(
+    across(-c(1:3), as.numeric),
+    across(SadFreqN:StatusConcerns, \(x) c(scale(x)))
+    ) |>
+  na.omit()
+
+out <- ordinalNetCV(
+  as.matrix(SignalVars3[-c(1:3)]),
+  SignalVars3[[3]],
+  standardize = F,
+  alpha = 1.0,
+  family = "cumulative",
+  link = "logit",
+  lambdaMinRatio = 1e-04,
+  printProgress = T
+)
+summary(out)
+colMeans(summary(out))
+# coef(out$fit, matrix = TRUE, whichLambda = 1)
+ggdotchart(coef(out$fit)[-c(1:2)])
+
+# newdat <- datagrid(NeighborhoodQuality = seq(-2.5, 1.5, 0.1), newdata = SignalVars3[-c(1:3)])
+
+
+ordinal_plot <- function(fit, predictor, data, title){
+  x <- predict(fit, type = 'response')
+  d <- data |>
+    mutate(
+      Negative = x[,1],
+      Neutral = x[,2],
+      Positive = x[,3],
+      {{predictor}} := ifelse({{predictor}} < 0, 0, 1)
+    ) |>
+    dplyr::select(
+      {{predictor}}, Negative:Positive
+    ) |>
+    pivot_longer(Negative:Positive)
+  ggplot(d, aes({{predictor}}, value, colour = name)) +
+    geom_count(position = position_dodge(width = 0.1)) +
+    geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
+    scale_x_continuous(breaks = c(0, 1)) +
+    scale_color_viridis_d(option = 'B', end = 0.8) +
+    guides(color = guide_legend("Response", reverse = T)) +
+    ylim(0, NA) +
+    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
+    theme_minimal(15)
+}
+
+sv3 <-
+  SignalVars3 |>
+  mutate(
+    P1 = x[,1],
+    P2 = x[,2],
+    P3 = x[,3]
+  ) |>
+  dplyr::select(
+    Punishment, P1:P3
+  ) |>
+  pivot_longer(P1:P3)
+
+ggplot(sv3, aes(Punishment, value, colour = name)) +
+  geom_count(position = position_dodge(width = 0.1)) +
+  geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
+  theme_minimal(15)
+
+# Hacking polr
+AIC.polr <- function(x, k = 2){
+  dev <- x$deviance
+  nparams <- x$edf
+  dev + k*nparams
+}
+
+library(MASS)
+m <- polr(CaregiverResponse ~ ., data = SignalVars3[-c(1,2)])
+m2 <- stepAIC(m)
 
 # Old code ----------------------------------------------------------------
 
