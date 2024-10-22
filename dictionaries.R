@@ -111,8 +111,8 @@ shortform_dict <-
     "HeightZ" = "HeightZ",
     "BMIZ" = "BMIZ",
     "GripR" = "GripR",
-    "TricepR" = "TricepR",
-    "SubscapR" = "SubscapR",
+    #"TricepR" = "TricepR",
+    #"SubscapR" = "SubscapR",
     "BodyFatPercentageR" = "BodyFatPercentageR",
     "FlexedR" = "FlexedR"
   )
