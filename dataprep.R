@@ -487,9 +487,12 @@ SignalVarsAnthro <-
 # nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
 
 tmp <- left_join(anthropometricMeans, d2[c("childHHid", "ChildID")], by = 'ChildID')
+
 SignalVarsAnthro2 <-
   left_join(SignalVars, tmp) |>
   dplyr::select(
+    -c(IllnessSusceptibilityMean:AlloparentingXsex),
+    -MeanChildRelatedness,
     -AgeAtMeasurement,
     -Year,
     -measurements,
@@ -497,6 +500,9 @@ SignalVarsAnthro2 <-
     -Sex2,
     -ChildID,
     -FlexedRb,
+    -FlexedMean,
+    -TricepMean,
+    -SubscapMean,
     -HeightMean,
     -WeightMean_KG,
     -BMI,

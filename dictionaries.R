@@ -96,7 +96,25 @@ shortform_dict <-
     Stepsibs = "Step-siblings",
     MeanChildRelatedness = "Child relatedness",
     MeanSiblingRelatedness = "Sibling relatedness",
-    `Possession score` = "Possession score"
+    `Possession score` = "Possession score",
+    "BicepMean" = "Bicep",
+    "FlexedMean" = "Flexed bicep",
+    "WristMean" = "Wrist",
+    "ShoulderMean" = "Shoulder",
+    "WaistMean" = "Waist",
+    "HipMean" = "Hip",
+    "TricepMean" = "Tricep",
+    "SubscapMean" = "Subscap",
+    "SeatedHeightMean" = "SeatedHeight",
+    "ChestStrengthMean" = "ChestStrength",
+    "WeightZ" = "WeightZ",
+    "HeightZ" = "HeightZ",
+    "BMIZ" = "BMIZ",
+    "GripR" = "GripR",
+    "TricepR" = "TricepR",
+    "SubscapR" = "SubscapR",
+    "BodyFatPercentageR" = "BodyFatPercentageR",
+    "FlexedR" = "FlexedR"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]
