@@ -874,6 +874,10 @@ mN1 <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogI
 summary(mN1)
 coeftest(mN1, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
+mN1b <- polr(RelativeNeed3 ~ SignalFreq + ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + AlloparentingFreqN*Sex + NeighborhoodQuality, d2)
+summary(mN1b)
+coeftest(mN1b, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+
 p_need_age_sf <- plot_predictions(mN1, condition = c("ChildAge", "group"), type = "probs", vcov = ~householdID) +
   ylab("Relative need") +
   xlab("Child age (years)") +
