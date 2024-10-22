@@ -65,7 +65,7 @@ shortform_dict <-
     WeightMean_KG_2024 = "2024 weight (kg)",
     WeightMean_KG_2023 = "2023 weight (kg)",
     FoodSecurity = "Food insecurity",
-    Neighborhood2 = "Campanado",
+    Neighborhood2 = "Camponado",
     UserLanguage = "Primary language",
     NumberOfChildren = " Number of children",
     ImmigrateUtila = "Immigrant",
