@@ -307,6 +307,121 @@ conflictAnthroparams$out <- map2(conflictAnthroparams$Outcome, conflictAnthropar
 
 library(ordinalNet)
 
+# For binary predictors
+ordinal_plot <- function(fit, predictor, data, title){
+  x <- predict(fit, type = 'response')
+  d <- data |>
+    mutate(
+      Negative = x[,1],
+      Neutral = x[,2],
+      Positive = x[,3],
+      {{predictor}} := ifelse({{predictor}} < 0, 0, 1)
+    ) |>
+    dplyr::select(
+      {{predictor}}, Negative:Positive
+    ) |>
+    pivot_longer(Negative:Positive)
+  ggplot(d, aes({{predictor}}, value, colour = name)) +
+    geom_count(position = position_dodge(width = 0.1)) +
+    geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
+    scale_x_continuous(breaks = c(0, 1)) +
+    scale_color_viridis_d(option = 'B', end = 0.8) +
+    guides(color = guide_legend("Response", reverse = T)) +
+    ylim(0, NA) +
+    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
+    theme_minimal(15)
+}
+
+# For continuous predictors
+ordinal_plot2 <- function(fit, predictor, data, title){
+  x <- predict(fit, type = 'response')
+  d <- data |>
+    mutate(
+      Less = x[,1],
+      Equal = x[,2],
+      More = x[,3]
+      # {{predictor}} := ifelse({{predictor}} < 0, 0, 1)
+    ) |>
+    summarise(
+      Less = mean(Less),
+      Equal = mean(Equal),
+      More = mean(More),
+      .by = {{predictor}}
+      # {{predictor}} := ifelse({{predictor}} < 0, 0, 1)
+    ) |>
+    pivot_longer(Less:More) |>
+    mutate(name = factor(name, levels = c("Less", "Equal", "More")))
+
+  ggplot(d, aes({{predictor}}, value, colour = name)) +
+    # geom_smooth(se = F, linewidth = 2) +
+    geom_line(linewidth = 2) +
+    scale_color_viridis_d(option = 'B', end = 0.8) +
+    guides(color = guide_legend("Response", reverse = T)) +
+    ylim(0, NA) +
+    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
+    theme_minimal(15)
+}
+
+# Perceived need
+
+SignalVars4 <-
+  left_join(SignalVars, d2[c("householdID", "childHHid", "RelativeNeed3")]) |>
+  relocate(RelativeNeed3, .after = 'childHHid') |>
+  mutate(
+    across(-c(1:3), as.numeric),
+    across(SadFreqN:AlloparentingXsex, \(x) c(scale(x)))
+  ) |>
+  na.omit()
+
+out <- ordinalNetCV(
+  as.matrix(SignalVars4[-c(1:3)]),
+  SignalVars4[[3]],
+  standardize = F,
+  alpha = 1.0,
+  family = "cumulative",
+  link = "logit",
+  lambdaMinRatio = 1e-04,
+  printProgress = T
+)
+summary(out)
+colMeans(summary(out))
+# coef(out$fit, matrix = TRUE, whichLambda = 1)
+plot_need_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+plot_need_coefs
+plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
+plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
+
+# Relative investment
+
+SignalVars5 <-
+  left_join(SignalVars, d2[c("householdID", "childHHid", "RelativeMaternalInvestment2", "RelativeNeed3")]) |>
+  relocate(RelativeMaternalInvestment2, .after = 'childHHid') |>
+  mutate(
+    across(-c(1:3), as.numeric),
+    across(SadFreqN:RelativeNeed3, \(x) c(scale(x)))
+  ) |>
+  na.omit()
+
+out <- ordinalNetCV(
+  as.matrix(SignalVars5[-c(1:3)]),
+  SignalVars5[[3]],
+  standardize = F,
+  alpha = 1.0,
+  family = "cumulative",
+  link = "logit",
+  lambdaMinRatio = 1e-04,
+  printProgress = T
+)
+summary(out)
+colMeans(summary(out))
+# coef(out$fit, matrix = TRUE, whichLambda = 1)
+plot_invest_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+plot_invest_coefs
+plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment')
+
+
+# Caregiver response
+
 causematrix <-
   causes |>
   mutate(
@@ -342,34 +457,11 @@ out <- ordinalNetCV(
 summary(out)
 colMeans(summary(out))
 # coef(out$fit, matrix = TRUE, whichLambda = 1)
-ggdotchart(coef(out$fit)[-c(1:2)])
+plot_caregiverresponse_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
 
 # newdat <- datagrid(NeighborhoodQuality = seq(-2.5, 1.5, 0.1), newdata = SignalVars3[-c(1:3)])
-
-
-ordinal_plot <- function(fit, predictor, data, title){
-  x <- predict(fit, type = 'response')
-  d <- data |>
-    mutate(
-      Negative = x[,1],
-      Neutral = x[,2],
-      Positive = x[,3],
-      {{predictor}} := ifelse({{predictor}} < 0, 0, 1)
-    ) |>
-    dplyr::select(
-      {{predictor}}, Negative:Positive
-    ) |>
-    pivot_longer(Negative:Positive)
-  ggplot(d, aes({{predictor}}, value, colour = name)) +
-    geom_count(position = position_dodge(width = 0.1)) +
-    geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
-    scale_x_continuous(breaks = c(0, 1)) +
-    scale_color_viridis_d(option = 'B', end = 0.8) +
-    guides(color = guide_legend("Response", reverse = T)) +
-    ylim(0, NA) +
-    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
-    theme_minimal(15)
-}
 
 sv3 <-
   SignalVars3 |>
@@ -389,15 +481,15 @@ ggplot(sv3, aes(Punishment, value, colour = name)) +
   theme_minimal(15)
 
 # Hacking polr
-AIC.polr <- function(x, k = 2){
-  dev <- x$deviance
-  nparams <- x$edf
-  dev + k*nparams
-}
-
-library(MASS)
-m <- polr(CaregiverResponse ~ ., data = SignalVars3[-c(1,2)])
-m2 <- stepAIC(m)
+# AIC.polr <- function(x, k = 2){
+#   dev <- x$deviance
+#   nparams <- x$edf
+#   dev + k*nparams
+# }
+#
+# library(MASS)
+# m <- polr(CaregiverResponse ~ ., data = SignalVars3[-c(1,2)])
+# m2 <- stepAIC(m)
 
 # Old code ----------------------------------------------------------------
 

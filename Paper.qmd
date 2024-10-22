@@ -337,7 +337,8 @@ There were significant positive relationships between perceived relative needine
 
 ::: {#fig-effect_relativeneed}
 ```{r, fig.width= 10}
-signaling_plot_need_freq
+# signaling_plot_need_freq
+plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "A")
 ```
 
 The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children. A: Effect of child age on relative neediness B: Effect of summed signaling frequency on relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
@@ -349,7 +350,8 @@ Signals are capable of eliciting better treatment because the information they p
 
 ::: {#fig-plot_relative_investment}
 ```{r, fig.width= 8}
-plot_relative_investment
+# plot_relative_investment
+plot_invest_need
 ```
 
 The effect of perceived need (in terms of time, effort, and resources) relative investment within the household. Outcome variable question wording: How much time, effort, and resources do you put into this child compared to your other children?
@@ -375,7 +377,8 @@ There were no significant relationships between, child age, child sex, the numbe
 
 ::: {#fig-effect_last_signal_response}
 ```{r, fig.width= 8}
-signaling_plot_last_signal_response
+# signaling_plot_last_signal_response
+plot_caregiver_punish / plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 ```
 
 The likelihood of positive, neutral, and negative responses to the last time a child became sad or cried. A: Effect of punishment being implicated in the cause (0 = no punishment, 1 = punishment.) B: Effect of discomfort, pain, injury, or illness being implicated in the cause (0 = discomfort, pain, injury, or illness, 1 = discomfort, pain, injury, or illness.) Legend key: -1 = negative response, 0 = neutral response, 1 = positive response (all from child's perspective).
