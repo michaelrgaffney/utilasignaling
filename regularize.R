@@ -298,9 +298,9 @@ anthroparams$out <- map2(anthroparams$Outcome, anthroparams$alpha, \(x, y) glmne
 # names(anthro2params$Outcome) <- str_c(anthro2params$Outcome, anthro2params$alpha)
 # anthro2params$out <- map2(anthro2params$Outcome, anthro2params$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
 
-conflictAnthroparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 0.5, 1))
-names(conflictAnthroparams$Outcome) <- str_c(conflictAnthroparams$Outcome, conflictAnthroparams$alpha)
-conflictAnthroparams$out <- map2(conflictAnthroparams$Outcome, conflictAnthroparams$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
+# conflictAnthroparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 0.5, 1))
+# names(conflictAnthroparams$Outcome) <- str_c(conflictAnthroparams$Outcome, conflictAnthroparams$alpha)
+# conflictAnthroparams$out <- map2(conflictAnthroparams$Outcome, conflictAnthroparams$alpha, \(x, y) glmnet2(SignalVarsAnthro2, x, 9:ncol(SignalVarsAnthro2), alpha = y), .progress = T)
 
 
 # Ordinal regressions -----------------------------------------------------
@@ -391,6 +391,10 @@ plot_need_coefs
 plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
 plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
 
+plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "A")
+ggsave("Figures/plot_need_combined.pdf", plot_need_combined, width = 12, height = 12)
+ggsave("Figures/plot_need_combined.svg", plot_need_combined, width = 12, height = 12)
+
 # Relative investment
 
 SignalVars5 <-
@@ -418,7 +422,8 @@ colMeans(summary(out))
 plot_invest_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_invest_coefs
 plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment')
-
+ggsave("Figures/plot_invest_need.pdf", plot_invest_need, width = 12, height = 12)
+ggsave("Figures/plot_invest_need.svg", plot_invest_need, width = 12, height = 12)
 
 # Caregiver response
 
@@ -460,25 +465,29 @@ colMeans(summary(out))
 plot_caregiverresponse_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_response_combined <- plot_caregiver_punish / plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
+
+ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_response_combined.svg", plot_caregiver_response_combined, width = 12, height = 12)
 
 # newdat <- datagrid(NeighborhoodQuality = seq(-2.5, 1.5, 0.1), newdata = SignalVars3[-c(1:3)])
 
-sv3 <-
-  SignalVars3 |>
-  mutate(
-    P1 = x[,1],
-    P2 = x[,2],
-    P3 = x[,3]
-  ) |>
-  dplyr::select(
-    Punishment, P1:P3
-  ) |>
-  pivot_longer(P1:P3)
-
-ggplot(sv3, aes(Punishment, value, colour = name)) +
-  geom_count(position = position_dodge(width = 0.1)) +
-  geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
-  theme_minimal(15)
+# sv3 <-
+#   SignalVars3 |>
+#   mutate(
+#     P1 = x[,1],
+#     P2 = x[,2],
+#     P3 = x[,3]
+#   ) |>
+#   dplyr::select(
+#     Punishment, P1:P3
+#   ) |>
+#   pivot_longer(P1:P3)
+#
+# ggplot(sv3, aes(Punishment, value, colour = name)) +
+#   geom_count(position = position_dodge(width = 0.1)) +
+#   geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
+#   theme_minimal(15)
 
 # Hacking polr
 # AIC.polr <- function(x, k = 2){
