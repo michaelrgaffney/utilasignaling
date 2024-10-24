@@ -183,7 +183,7 @@ Caregivers were asked various questions about their home, which we used to creat
 
 Caregiver perceptions of neighborhood quality were measured using ten questions on a five point Likert scale relating to the costs and benefits associated with living in one's neighborhood. The mean of these values was used in analyses as a neighborhood quality index. See @stbl-Neighborhood-Quality for variable wording.
 
-Levels of home instability were measured with four questions covering the degree to which the caregiver's family had/has to move homes and whether people move in and out of their homes frequently. All questions invovled five point Likert scales. See @stbl-Home-Instability for variable wording.
+Levels of home instability were measured with four questions covering the degree to which the caregiver's family had/has to move homes and whether people move in and out of their homes frequently. All questions involved five point Likert scales. See @stbl-Home-Instability for variable wording.
 
 We used a modified version of the USDA Food Security Questionnaire [@blumberg1999] to measure food insecurity, with the most significant changes being converting of the measures to a five point Likert scale and averaging them for a food insecurity index. See @stbl-Food-Security for the wording of these variables.
 
