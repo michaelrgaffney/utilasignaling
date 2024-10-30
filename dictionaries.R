@@ -2,15 +2,28 @@
 longform_dict <-
   c(
     ChildAge = "Child age (years)",
+    CaregiverAge = "Caregiver age (years)",
     SadFreqN = "Sad frequency (times per month)",
     CryFreqN = "Crying frequency (times per month)",
     TantrumFreqN = "Temper tantrum frequency (times per month)",
     AlloparentingFreqN = "Frequency of child's own alloparenting effort (times per month)",
+    OtherChildAlloparentingFreqN = "Frequency of other child alloparenting (times per month)",
     ConflictFreqN = "Frequency of conflict with focal caretaker (times per month)",
     SignalFreq = "Frequency of signals summed (times per month)",
     SignalCost = "Signal cost",
     SignalFreqMax = "Frequency of most common signal (times per month)",
-    IllnessSusceptibilityMean = "Illness avoidance index",
+    NumberOfChildren = "Children in household",
+    MeanChildRelatedness = "Child relatedness",
+    number_adults = "Number of adults in household",
+    AdultsChildcare = "Household adults who provide childcare",
+    AdultsHousework = "Household adults who provide, food, housework, and othe neccesities",
+    EducationLevelYears = "Caregiver education level (years)",
+    IncomeCategoryN = "Monthly household income (Lempira)",
+    FoodSecurity = "Household food insecurity",
+    NeighborhoodQuality = "Neighborhood quality index",
+    HouseQuality = "House quality index",
+    MedicalProblemsMean = "Child medical problems index",
+    IllnessSusceptibilityMean = "Child illness avoidance index",
     HeightZ = "Height Z-score (CDC)",
     WeightZ = "Weight Z-score (CDC)",
     BMIZ = "BMI Z-score (CDC)",
@@ -18,13 +31,30 @@ longform_dict <-
     SubscapR = "Subscapular skinfold residuals",
     TricepMean = "Tricep skinfold thickness (mm)",
     TricepR = "Tricep skinfold residuals",
-    BodyFat =  "Body fat composite", # child summary stats end here (1:18)
-    CaregiverAge = "Caregiver age (years)",
-    EducationLevelYears = "Caregiver education level (years)",
-    IncomeCategoryN = "Monthly household income (Lempira)",
-    number_adults = "Number of adults in household",
-    AdultsChildcare = "Household adults who provide childcare" # adults summary table (19:23)
+    BodyFat =  "Body fat composite",
+    Sex = "Child sex",
+    UserLanguage = "Primary language",
+    ImmigrateUtila = "Immigrant",
+    PartnerStatus = "Partnered status",
+    RelativeNeed = "Relative need (w/in household)",
+    RelativeMaternalInvestment = "Relative caretaker investment (w/in household)",
+    Neighborhood2F = "Residence in Camponado",
+    StayAtHomeMomF = "Stay at home mother",
+    HomeInstability_1 = "Family moves frequently",
+    HomeInstability_2 = "Wishes for household stability",
+    HomeInstability_3 = "Worry about forced moves",
+    HomeInstability_4 = "Household turnover",
+    LifestyleReality_1 = "Possession: Motor vehicle",
+    LifestyleReality_2 = "Possession: Bicycle",
+    LifestyleReality_3 = "Possession: TV with cable",
+    LifestyleReality_4 = "Possession: Smartphone",
+    LifestyleReality_5 = "Possession: Washing machine",
+    LifestyleReality_6 = "Possession: Refrigerator",
+    LifestyleReality_7 = "Possession: Home",
+    LifestyleReality_8 = "Possession: Credit card"
   )
+# needs causes
+# caregiver responses?
 
 # short form dictionary (for use in regression tables and correlation plots)
 shortform_dict <-

@@ -321,6 +321,8 @@ ordinal_plot <- function(fit, predictor, data, title){
       {{predictor}}, Negative:Positive
     ) |>
     pivot_longer(Negative:Positive)
+  # x_axis_name <- shortform_dict[deparse(substitute(predictor))]
+  # print(x_axis_name)
   ggplot(d, aes({{predictor}}, value, colour = name)) +
     geom_count(position = position_dodge(width = 0.1)) +
     geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
@@ -388,6 +390,9 @@ colMeans(summary(out))
 # coef(out$fit, matrix = TRUE, whichLambda = 1)
 plot_need_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_need_coefs
+ggsave("Figures/plot_need_coefs.pdf", plot_need_coefs, width = 12, height = 12)
+ggsave("Figures/plot_need_coefs.svg", plot_need_coefs, width = 12, height = 12)
+
 plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
 plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
 
@@ -421,6 +426,9 @@ colMeans(summary(out))
 # coef(out$fit, matrix = TRUE, whichLambda = 1)
 plot_invest_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_invest_coefs
+ggsave("Figures/plot_invest_coefs.pdf", plot_invest_coefs, width = 12, height = 12)
+ggsave("Figures/plot_invest_coefs.svg", plot_invest_coefs, width = 12, height = 12)
+
 plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment')
 ggsave("Figures/plot_invest_need.pdf", plot_invest_need, width = 12, height = 12)
 ggsave("Figures/plot_invest_need.svg", plot_invest_need, width = 12, height = 12)
@@ -463,6 +471,10 @@ summary(out)
 colMeans(summary(out))
 # coef(out$fit, matrix = TRUE, whichLambda = 1)
 plot_caregiverresponse_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+plot_caregiverresponse_coefs
+ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
+ggsave("Figures/plot_caregiverresponse_coefs.svg", plot_caregiverresponse_coefs, width = 12, height = 12)
+
 plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_response_combined <- plot_caregiver_punish / plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
