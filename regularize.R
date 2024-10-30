@@ -21,9 +21,7 @@ glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
   reg <- ifelse(fam == 'quasipoisson', poisson_reg, linear_reg)
   fam <- ifelse(fam == 'quasipoisson', quasipoisson, gaussian)
 
-    # Scale numeric vars by 2 SD, leave binary vars alone
-  # d[indices] <- apply(d[indices], MARGIN = 2, FUN = \(x) if (length(unique(x)) == 2) return (x) else return(c(scale(x)/2)))
-  d[indices] <- scale(d[indices]) # Scale all vars
+  d[indices] <- scale(d[indices]) # Scale all predictor vars
   cvm <- list()
   for (i in 1:20){
     m <- cv.glmnet(
@@ -59,7 +57,7 @@ glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
     xlab("Coefficients") +
     ggtitle(shortform_dict[outcome])
 
-  return(list(data = d, model = m2, coefs = coefs, coefplot = p))
+  return(list(data = d, lambda.min = lambda.min, model = m2, coefs = coefs, coefplot = p))
 }
 
 signalparams <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
@@ -85,7 +83,10 @@ plotpredictions2 <- function(params, cond, title = NULL, plot = T){
     map(params$out, \(x) plot_predictions(x$model, condition = cond, newdata = x$data, draw = F)) |>
     list_rbind(names_to = 'Outcome') |>
     dplyr::filter(str_ends(Outcome, '1') & Outcome != 'SignalCost1') |>
-    mutate(Outcome = shortform_dict[str_remove(Outcome, '1')])
+    mutate(
+      Outcome = shortform_dict[str_remove(Outcome, '1')],
+      Outcome = factor(Outcome, levels = c("Signal freq.", "Tantrum freq.", "Crying freq.", "Sadness freq."))
+      )
 
   if (!plot) return(d)
 
@@ -114,6 +115,31 @@ signal_effects_plot &
 ggsave("Figures/signal_effects_plot.pdf", signal_effects_plot, width = 12, height = 9)
 ggsave("Figures/signal_effects_plot.svg", signal_effects_plot, width = 12, height = 9)
 
+
+# Alloparenting special case
+
+e <- SignalVars |>
+  dplyr::select(-householdID, -childHHid, -c(SadFreqN:SignalFreq), -ConflictFreqN, -AlloparentingXsex) |>
+  relocate(AlloparentingFreqN, .after = SignalCost)
+e[-1] <- scale(e[-1])
+
+f <- paste(names(e[-c(1,2)]), collapse = " + ")
+f <- as.formula(paste("SignalCost ~ ", "AlloparentingFreqN*Sex +", f))
+
+m_alloparent <-
+  poisson_reg(mixture = 1, penalty = signalparams$out$SignalCost1$lambda.min) |>
+  set_engine("glmnet", family = quasipoisson) |>
+  fit(f, data = e)
+
+plot_alloparenting_cost <-
+plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newdata = e) +
+  scale_color_binary(labels = c("Female", "Male")) +
+  ylim(0, NA) +
+  labs(x = "Alloparenting Frequency (standardized)", y = "Signal cost") +
+  theme_minimal(15)
+
+plot_alloparenting_cost$layers[[1]]$aes_params$linewidth <- 2
+plot_alloparenting_cost
 
 # Conflict effects plot
 
@@ -194,8 +220,12 @@ names(discrete_vars) <- names(discrete_vars0$discrete)
 # m2 <- bdgraph(data = SignalVars[-c(1,2)], method = "gcgm", not.cont = x2[-c(1,2)], g.prior = 0.1, cores = 'all', iter = 50000, burnin = 7000)
 # m2sum <- summary(m2)
 
-m3 <- easybgm(SignalVars[-c(1,2)], type = 'mixed', not_cont = discrete_vars[-c(1,2)], iter = 50000, package = 'BDgraph', g.prior = 0.05)
-plot_network(m3, layout = "spring", vsize = 4, label.cex = 1)
+# Very long run time
+# set.seed(456)
+# m3 <- easybgm(SignalVars[-c(1,2,3,4,5)], type = 'mixed', not_cont = discrete_vars[-c(1,2,3,4,5)], iter = 1000000, package = 'BDgraph', g.prior = 0.05)
+# save(m3, file = 'm3_1e6_cost_freq.rda')
+load("m3_1e6_cost_freq.rda")
+plot_network(m3, layout = "spring", vsize = 4, label.cex = 1, exc_prob = 0.9)
 plot_structure(m3, vsize = 4, label.cex = 1)
 plot_structure_probabilities(m3, as_BF = F)
 # plot_parameterHDI(m3) # need to have save = T
