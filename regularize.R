@@ -506,9 +506,8 @@ causematrix <-
   ) |>
   dplyr::select(householdID, childHHid, Family:StatusConcerns) |>
   na.omit()
-
-cause_count <- map_int(causematrix[-c(1:5)], \(x) sum(x, na.rm = T))
-cause_vars <- names(cause_count[cause_count > 4])
+cause_count <- map_int(causematrix[-c(1:2)], \(x) sum(x, na.rm = T))
+cause_vars <- names(cause_count[cause_count > 5])
 
 SignalVars3 <-
   left_join(SignalVars, d2[c("householdID", "childHHid", "CaregiverResponse")]) |>
@@ -516,7 +515,7 @@ SignalVars3 <-
   relocate(CaregiverResponse, .after = childHHid) |>
   mutate(
     across(-c(1:3), as.numeric),
-    across(SadFreqN:StatusConcerns, \(x) c(scale(x)))
+    across(SadFreqN:SeparationAttentionSeeking, \(x) c(scale(x))) # changed StatusConcerns to SeparationAttentionSeeking
     ) |>
   na.omit()
 
@@ -538,12 +537,18 @@ plot_caregiverresponse_coefs
 ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
 ggsave("Figures/plot_caregiverresponse_coefs.svg", plot_caregiverresponse_coefs, width = 12, height = 12)
 
+plot_caregiver_familyconflict <- ordinal_plot(out$fit, Family, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_loss <- ordinal_plot(out$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')
-plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
-plot_caregiver_response_combined <- plot_caregiver_punish / plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 
+plot_caregiver_response_combined <- plot_caregiver_familyconflict + plot_caregiver_loss + ggtitle("") + plot_caregiver_trangsression + ggtitle("") + plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)
 ggsave("Figures/plot_caregiver_response_combined.svg", plot_caregiver_response_combined, width = 12, height = 12)
+
+plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
+ggsave("Figures/plot_caregiver_punish.pdf", plot_caregiver_response_combined, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_punish.svg", plot_caregiver_response_combined, width = 12, height = 12)
 
 # want to add relativeneed and relativeinvestment but code does not work
 

@@ -147,7 +147,11 @@ shortform_dict <-
     #"SubscapR" = "SubscapR",
     "BodyFatPercentageR" = "BodyFatPercentageR",
     "FlexedR" = "FlexedR",
-    RelativeMaternalInvestment2 = "Relative investment (w/in household)"
+    RelativeMaternalInvestment2 = "Relative investment (w/in household)",
+    Family = "Family conflict",
+    TransgressionMade = "Transgression made",
+    LossOfPrivlegesOrItem = "Loss of privleges or item"
+
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]
