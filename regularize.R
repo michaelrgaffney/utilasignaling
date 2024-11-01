@@ -116,7 +116,7 @@ ggsave("Figures/signal_effects_plot.pdf", signal_effects_plot, width = 12, heigh
 ggsave("Figures/signal_effects_plot.svg", signal_effects_plot, width = 12, height = 9)
 
 
-# Alloparenting special case
+# Alloparenting special case (SignalCost)
 
 e <- SignalVars |>
   dplyr::select(-householdID, -childHHid, -c(SadFreqN:SignalFreq), -ConflictFreqN, -AlloparentingXsex) |>
@@ -140,6 +140,39 @@ plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newda
 
 plot_alloparenting_cost$layers[[1]]$aes_params$linewidth <- 2
 plot_alloparenting_cost
+
+# Alloparenting special case (TantrumFreq)
+
+e2 <- SignalVars |>
+  dplyr::select(-householdID, -childHHid, -c(SadFreqN:CryFreqN), -c(SignalFreq:SignalCost), -ConflictFreqN, -AlloparentingXsex) |>
+  relocate(AlloparentingFreqN, .after = TantrumFreqN)
+e2[-1] <- scale(e2[-1])
+
+f2 <- paste(names(e2[-c(1,2)]), collapse = " + ")
+f2 <- as.formula(paste("TantrumFreqN ~ ", "AlloparentingFreqN*Sex +", f2))
+
+m_alloparent2 <-
+  poisson_reg(mixture = 1, penalty = signalparams$out$TantrumFreqN1$lambda.min) |>
+  set_engine("glmnet", family = quasipoisson) |>
+  fit(f2, data = e2)
+
+plot_alloparenting_cost_tantrum <-
+  plot_predictions(m_alloparent2, condition = c("AlloparentingFreqN", "Sex"), newdata = e2) +
+  scale_color_binary(labels = c("Female", "Male")) +
+  ylim(0, NA) +
+  labs(x = "Alloparenting Frequency (standardized)", y = "Tantrums (per month)") +
+  theme_minimal(15)
+
+plot_alloparenting_cost_tantrum$layers[[1]]$aes_params$linewidth <- 2
+plot_alloparenting_cost_tantrum
+
+plot_alloparentingXsex <- plot_alloparenting_cost / plot_alloparenting_cost_tantrum +
+  plot_layout(guides = "collect", axes = "collect") &
+  theme_bw(15)
+plot_alloparentingXsex
+
+ggsave("Figures/plot_alloparentingXsex.pdf", plot_alloparentingXsex, width = 12, height = 9)
+ggsave("Figures/plot_alloparentingXsex.svg", plot_alloparentingXsex, width = 12, height = 9)
 
 # Conflict effects plot
 
@@ -511,6 +544,29 @@ plot_caregiver_response_combined <- plot_caregiver_punish / plot_caregiver_pain 
 
 ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)
 ggsave("Figures/plot_caregiver_response_combined.svg", plot_caregiver_response_combined, width = 12, height = 12)
+
+# want to add relativeneed and relativeinvestment but code does not work
+
+SignalVars6 <- SignalVars5 |>
+  mutate(RelativeMaternalInvestment2 = as.numeric(RelativeMaternalInvestment2)) |>
+  dplyr::select(-matches("Xsex|Old|Kids|Max|childHH|householdID"))
+
+# code breaks when inserting 550:552 in here
+plot_fullcorrmat <- ggcorrplot(
+  cor(
+    SignalVars6|>
+      set_names(nm = shortform_dict[names(SignalVars6)])
+    ,
+    use = 'pairwise.complete.obs'),
+  hc.order = T,
+  hc.method = 'ward.D2'
+) +
+  scico::scale_fill_scico(palette = 'vik', midpoint = 0)
+plot_fullcorrmat
+
+ggsave("Figures/plot_fullcorrmat.pdf", plot_fullcorrmat, width = 12, height = 12)
+ggsave("Figures/plot_fullcorrmat.svg", plot_fullcorrmat, width = 12, height = 12)
+
 
 # newdat <- datagrid(NeighborhoodQuality = seq(-2.5, 1.5, 0.1), newdata = SignalVars3[-c(1:3)])
 

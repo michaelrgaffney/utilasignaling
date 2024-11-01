@@ -99,7 +99,7 @@ shortform_dict <-
     FoodSecurity = "Food insecurity",
     Neighborhood2 = "Camponado",
     UserLanguage = "Primary language",
-    NumberOfChildren = " Number of children",
+    NumberOfChildren = "Number of children",
     ImmigrateUtila = "Immigrant",
     OlderGirls = "Number of older girls",
     HouseQuality = "House quality",
@@ -146,7 +146,8 @@ shortform_dict <-
     #"TricepR" = "TricepR",
     #"SubscapR" = "SubscapR",
     "BodyFatPercentageR" = "BodyFatPercentageR",
-    "FlexedR" = "FlexedR"
+    "FlexedR" = "FlexedR",
+    RelativeMaternalInvestment2 = "Relative investment (w/in household)"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]
