@@ -501,10 +501,10 @@ ggsave("Figures/plot_invest_need.svg", plot_invest_need, width = 12, height = 12
 causematrix <-
   causes |>
   mutate(
-    across(Family:StatusConcerns, \(x) ifelse(x == "Maybe" | x == 'maybe', "0", x)),
-    across(Family:StatusConcerns, as.numeric)
+    across(ConflictFamily:StatusConcerns, \(x) ifelse(x == "Maybe" | x == 'maybe', "0", x)),
+    across(ConflictFamily:StatusConcerns, as.numeric)
   ) |>
-  dplyr::select(householdID, childHHid, Family:StatusConcerns) |>
+  dplyr::select(householdID, childHHid, ConflictFamily:StatusConcerns) |>
   na.omit()
 cause_count <- map_int(causematrix[-c(1:2)], \(x) sum(x, na.rm = T))
 cause_vars <- names(cause_count[cause_count > 5])
@@ -537,7 +537,7 @@ plot_caregiverresponse_coefs
 ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
 ggsave("Figures/plot_caregiverresponse_coefs.svg", plot_caregiverresponse_coefs, width = 12, height = 12)
 
-plot_caregiver_familyconflict <- ordinal_plot(out$fit, Family, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_familyconflict <- ordinal_plot(out$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_loss <- ordinal_plot(out$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')

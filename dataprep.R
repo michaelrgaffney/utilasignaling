@@ -258,7 +258,7 @@ d <-
                           EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                           number_children2, number_adults, UserLanguage, CurrentJob, contains("CaregiverMarital"), NeighborhoodQuality, HouseQuality,
                           contains("SocialSupport"), contains("FoodSecurity"), contains("HomeInstability_"), contains("Reality_")), by = "householdID") |>
-  left_join(dplyr::select(causes, -householdID, -childHHid, -ChildID, -Sad1), by = "uniqueID")
+  left_join(dplyr::select(causes, -householdID, -childHHid, -text), by = "uniqueID")
 
 # prepare household variables for analyses
 d2 <-
@@ -282,12 +282,12 @@ d2 <-
     NeighborhoodF = as.factor(Neighborhood),
     OtherChildrenHH = number_children2 - 1,
     Punishment2 = ifelse(Punishment == "Maybe", 0, Punishment),
-    Family2 = ifelse(Family == "Maybe", 0, Family),
-    OutsideFamily2 = ifelse(OutsideFamily == "Maybe", 0, OutsideFamily),
-    WantNeed2 = ifelse(WantNeed == "Want" | WantNeed == "Need", WantNeed, NA),
-    WantNeedBinary = case_when(
-      WantNeed2 == "Want" ~ 0,
-      WantNeed2 == "Need" ~ 1),
+    ConflictFamily2 = ifelse(ConflictFamily == "Maybe", 0, ConflictFamily),
+    ConflictOutsideFamily2 = ifelse(ConflictOutsideFamily == "Maybe", 0, ConflictOutsideFamily),
+    # WantNeed2 = ifelse(WantNeed == "Want" | WantNeed == "Need", WantNeed, NA),
+    # WantNeedBinary = case_when(
+    #   WantNeed2 == "Want" ~ 0,
+    #   WantNeed2 == "Need" ~ 1),
     DeathORIllnessInjuryHarmInOthers2 = ifelse(DeathORIllnessInjuryHarmInOthers == "Maybe", 0, DeathORIllnessInjuryHarmInOthers),
     HouseholdAdversity2 = ifelse(HouseholdAdversity == "Maybe", 0, HouseholdAdversity),
     ExplicitInvestmentDesired2 = ifelse(ExplicitInvestmentDesired == "Maybe", 0, ExplicitInvestmentDesired),

@@ -240,13 +240,13 @@ ggplot(caregivers2, aes(y=Neighborhood, fill=ImmigrateUtila)) +
 
 # Correlation matrix of predictor and outcome variables
 
-maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeNeed3", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost", "Family2")] |>
+maincormat <- d2[c("IllnessSusceptibilityMean", "EducationLevelYears", "OtherChildrenHH", "LogIncome", "ConflictFreqN", "number_adults", "PartnerStatus", "AlloparentingFreqN", "Sex", "ChildAge", "RelativeNeed3", "RelativeMaternalInvestment2", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalFreqMax", "SignalCost", "ConflictFamily2")] |>
   mutate(
     PartnerStatus = as.numeric(PartnerStatus),
     Sex = as.numeric(Sex),
     RelativeNeed3 = as.numeric(RelativeNeed3),
     RelativeMaternalInvestment2 = as.numeric(RelativeMaternalInvestment2),
-    Family2 = as.numeric(Family2),
+    ConflictFamily2 = as.numeric(ConflictFamily2),
   ) |>
   cor( use = "pairwise.complete.obs")
 
@@ -273,7 +273,7 @@ glmmTMBmodels <- tibble(
 
 polrNeedFormulas <- str_glue("RelativeNeed3 ~ {signals} + {std_predictors} + OtherChildrenHH + IllnessSusceptibilityMean")
 polrInvestFormula <- paste0("RelativeMaternalInvestment2 ~ ", std_predictors, "+ OtherChildrenHH + IllnessSusceptibilityMean + RelativeNeed3")
-polrResponseFormula <- paste0("CaregiverResponse ~ ", std_predictors, "+ OtherChildrenHH + IllnessSusceptibilityMean + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness")
+polrResponseFormula <- paste0("CaregiverResponse ~ ", std_predictors, "+ OtherChildrenHH + IllnessSusceptibilityMean + UnwantedTask + Punishment2 + ConflictFamily2 + DiscomfortPainInjuryIllness")
 
 polrFormulas <- c(polrNeedFormulas, polrInvestFormula, polrResponseFormula)
 names(polrFormulas) <- c(paste0("Need", signals), "Invest", "Response")
@@ -347,9 +347,9 @@ polrModels$Test$Response
 # Unique: RelativeNeed3
 
 # response to last signal
-# mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + UnwantedTask + IllnessSusceptibilityMean + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
+# mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + UnwantedTask + IllnessSusceptibilityMean + Punishment2 + ConflictFamily2 + DiscomfortPainInjuryIllness, d2)
 # Not universal: OtherChildrenHH + number_adults + IllnessSusceptibilityMean
-# Unique: UnwantedTask + IllnessSusceptibilityMean + Punishment2 + Family2 + DiscomfortPainInjuryIllness
+# Unique: UnwantedTask + IllnessSusceptibilityMean + Punishment2 + ConflictFamily2 + DiscomfortPainInjuryIllness
 
 # Models of signaling (6 measures) report effects of age, conflict, caregiver education (depends upon conflict being in the model), alloparenting*sex
 
@@ -970,42 +970,42 @@ plot_predictions(mI, condition = c("OtherChildrenHH", "group"), type = "probs")
 plot_predictions(mI, condition = c("ChildAge", "group"), type = "probs")
 
 # Want/need models
-summary(table(d2$WantNeed2, d2$CaregiverResponse))
-plot(table(d2$WantNeed2, d2$Sex))
-summary(table(d2$WantNeed2, d2$Sex))
-plot(table(d2$WantNeed2, d2$SadFreqN))
-
-m<- glmmTMB(SadFreqN ~ ChildAge*WantNeed2 + (1|householdID), family = nbinom2, d2)
-summary(m)
-plot(allEffects(m))
-
-m2 <- glmmTMB(CryFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
-summary(m2)
-plot(allEffects(m2))
-
-m3 <- glmmTMB(TantrumFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
-summary(m3)
-plot(allEffects(m3))
-
-mI2 <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + WantNeed2, d2)
-summary(mI2)
-coeftest(mI2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
-
-mWantNeed <- glm(WantNeedBinary ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults, data = d2, family = "binomial")
-summary(mWantNeed)
-coeftest(mWantNeed, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+# summary(table(d2$WantNeed2, d2$CaregiverResponse))
+# plot(table(d2$WantNeed2, d2$Sex))
+# summary(table(d2$WantNeed2, d2$Sex))
+# plot(table(d2$WantNeed2, d2$SadFreqN))
+#
+# m<- glmmTMB(SadFreqN ~ ChildAge*WantNeed2 + (1|householdID), family = nbinom2, d2)
+# summary(m)
+# plot(allEffects(m))
+#
+# m2 <- glmmTMB(CryFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
+# summary(m2)
+# plot(allEffects(m2))
+#
+# m3 <- glmmTMB(TantrumFreqN ~ ChildAge + WantNeed2 + (1|householdID), family = nbinom2, d2)
+# summary(m3)
+# plot(allEffects(m3))
+#
+# mI2 <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + WantNeed2, d2)
+# summary(mI2)
+# coeftest(mI2, vcov = vcovCL, type = "HC0", cluster = ~householdID)
+#
+# mWantNeed <- glm(WantNeedBinary ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults, data = d2, family = "binomial")
+# summary(mWantNeed)
+# coeftest(mWantNeed, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
 # ordinal logistic regression of parental response ------------------------
 
 # note 6 instances of both positive and negative coded as NA
 table(modeldf$PositiveResponse, modeldf$NegativeResponse)
 
-# mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
+# mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + PartnerStatus + ConflictFreqN + AlloparentingFreqN*Sex + EducationLevelYears + IllnessSusceptibilityMean + UnwantedTask + Punishment2 + ConflictFamily2 + DiscomfortPainInjuryIllness, d2)
 # summary(mpr)
 # coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
 polrModels$Test$Response
-mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + Family2 + DiscomfortPainInjuryIllness, d2)
+mpr <- polr(CaregiverResponse ~ ChildAge + Sex + OtherChildrenHH + LogIncome + number_adults + UnwantedTask + Punishment2 + ConflictFamily2 + DiscomfortPainInjuryIllness, d2)
 summary(mpr)
 coeftest(mpr, vcov = vcovCL, type = "HC0", cluster = ~householdID)
 
@@ -1039,7 +1039,7 @@ signaling_plot_last_signal_response
 # converted to characters for the purpose of avg_predictions function
 # d2$UnwantedTask <- as.character(d2$UnwantedTask)
 # d2$DiscomfortPainInjuryIllness <- as.character(d2$DiscomfortPainInjuryIllness)
-# d2$Family2 <- as.numeric(d2$Family2)
+# d2$ConflictFamily2 <- as.numeric(d2$ConflictFamily2)
 
 # out_mpr <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female")))
 # out_mpr$estimate[3] # 0.320612
@@ -1051,8 +1051,8 @@ signaling_plot_last_signal_response
 # out_mpr_full
 # out_mpr_full$estimate[3]
 
-updated_out <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
-updated_out$estimate[3]
+# updated_out <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
+# updated_out$estimate[3]
 # d2$Family2 <- as.character(d2$Family2)
 # out_mpr_full2 <- avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", Sex = c("Male", "Female"), Family2 = c("0", "1"), DiscomfortPainInjuryIllness = c("0", "1"), UnwantedTask = c("0", "1"), LogIncome = mean(mpr$model$LogIncome)))
 # out_mpr_full2
@@ -1068,10 +1068,10 @@ updated_out$estimate[3]
 # However, family2 = mean(mpr$model$Family2) and family2 = .5, both give
 # slightly different (but very similar answers)
 
-test_grid <- datagrid(model = mpr, Punishment2 = "1", grid_type = "balanced")
-avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
-predictions(mpr, newdata = datagrid(Punishment2 = unique, grid_type = "balanced"))
-# out_mpr_full
+# test_grid <- datagrid(model = mpr, Punishment2 = "1", grid_type = "balanced")
+# avg_predictions(mpr, newdata = datagrid(Punishment2 = "1", grid_type = "balanced"))
+# predictions(mpr, newdata = datagrid(Punishment2 = unique, grid_type = "balanced"))
+# # out_mpr_full
 # out_mpr_full$estimate[3]
 
 # relative need predicts relative investment ------------------------------
@@ -1577,9 +1577,9 @@ sex_table2 <- table(modeldf_FULLANTHROPOMETRICS$Sex)
 causematrix <-
   causes |>
   mutate(
-    across(Family:StatusConcerns, as.numeric)
+    across(ConflictFamily:StatusConcerns, as.numeric)
   ) |>
-  dplyr::select(Family:StatusConcerns) |>
+  dplyr::select(ConflictFamily:StatusConcerns) |>
   na.omit()
 
 hagenheat(t(causematrix), hc_method = "ward.D2")
@@ -1710,8 +1710,8 @@ plot_predictions(m, type = 'probs', condition = c('ChildAge')) +
 #
 # barplot_CaregiverResponse
 
-last_signal_response_tbl_hurt <- table(d2$CaregiverResponse, d2$DiscomfortPainInjuryIllness)
-last_signal_response_tbl_punish <- table(d2$CaregiverResponse, d2$Punishment2)
+# last_signal_response_tbl_hurt <- table(d2$CaregiverResponse, d2$DiscomfortPainInjuryIllness)
+# last_signal_response_tbl_punish <- table(d2$CaregiverResponse, d2$Punishment2)
 
 # model statistics --------------------------------------------------------
 

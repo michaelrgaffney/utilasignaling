@@ -148,7 +148,7 @@ shortform_dict <-
     "BodyFatPercentageR" = "BodyFatPercentageR",
     "FlexedR" = "FlexedR",
     RelativeMaternalInvestment2 = "Relative investment (w/in household)",
-    Family = "Family conflict",
+    ConflictFamily = "Family conflict",
     TransgressionMade = "Transgression made",
     LossOfPrivlegesOrItem = "Loss of privleges or item"
 
