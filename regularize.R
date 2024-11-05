@@ -547,8 +547,8 @@ ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_c
 ggsave("Figures/plot_caregiver_response_combined.svg", plot_caregiver_response_combined, width = 12, height = 12)
 
 plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
-ggsave("Figures/plot_caregiver_punish.pdf", plot_caregiver_response_combined, width = 12, height = 12)
-ggsave("Figures/plot_caregiver_punish.svg", plot_caregiver_response_combined, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_punish.pdf", plot_caregiver_punish, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_punish.svg", plot_caregiver_punish, width = 12, height = 12)
 
 # want to add relativeneed and relativeinvestment but code does not work
 

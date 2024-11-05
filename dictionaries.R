@@ -150,7 +150,7 @@ shortform_dict <-
     RelativeMaternalInvestment2 = "Relative investment (w/in household)",
     ConflictFamily = "Family conflict",
     TransgressionMade = "Transgression made",
-    LossOfPrivlegesOrItem = "Loss of privleges or item"
+    LossOfPrivlegesOrItem = "Loss of privileges or item"
 
   )
 
