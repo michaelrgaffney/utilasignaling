@@ -30,7 +30,6 @@ library(gratia)
 library(pvclust)
 library(nnet)
 library(skimr)
-library(pvclust)
 
 source("recode.R")
 source("dictionaries.R")
@@ -1584,8 +1583,8 @@ causematrix <-
 
 hagenheat(t(causematrix), hc_method = "ward.D2")
 
-out <- pvclust(causematrix, method.hclust = "ward.D2")
-x <- cutree(out$hclust, k = 3)
+cause_cluster_analysis <- pvclust(causematrix, method.hclust = "ward.D2")
+x <- cutree(cause_cluster_analysis $hclust, k = 3)
 
 causes2 <- causes |>
   mutate(

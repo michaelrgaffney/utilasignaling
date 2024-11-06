@@ -384,8 +384,11 @@ ordinal_plot <- function(fit, predictor, data, title){
       {{predictor}}, Negative:Positive
     ) |>
     pivot_longer(Negative:Positive)
-  # x_axis_name <- shortform_dict[deparse(substitute(predictor))]
-  # print(x_axis_name)
+
+  dsum <- d |>
+    summarise(mean = mean(value), .by = c(name, {{predictor}}))
+  print(dsum)
+
   ggplot(d, aes({{predictor}}, value, colour = name)) +
     geom_count(position = position_dodge(width = 0.1)) +
     geom_smooth(method='lm', se = F, position = position_dodge(width = 0.1)) +
@@ -869,4 +872,3 @@ ggsave("Figures/plot_fullcorrmat.svg", plot_fullcorrmat, width = 12, height = 12
 # conflictparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 1))
 # names(conflictparams$Outcome) <- str_c(conflictparams$Outcome, conflictparams$alpha)
 # conflictparams$out <- map2(conflictparams$Outcome, conflictparams$alpha, \(x, y) glmnet2(sv3, x, 7:ncol(sv3), alpha = y), .progress = T)
-
