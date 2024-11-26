@@ -412,7 +412,8 @@ modeldf <-
     LifestyleReality_5,
     LifestyleReality_6,
     LifestyleReality_7,
-    LifestyleReality_8
+    LifestyleReality_8,
+    ChildID
   )
 
 
@@ -592,4 +593,43 @@ conflict_vars_temp <-
 #     ImmigrateUtila,
 #     UserLanguage
 #   )
+
+AddedVars <-
+  d2 |>
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
+  dplyr::select(
+    householdID,
+    childHHid,
+    RelativeNeed3,
+    RelativeMaternalInvestment2,
+    ConflictFamily:StatusConcerns,
+    CaregiverResponse
+  )
+
+StudyVars <- SignalVars |>
+  dplyr::select(-AlloparentingXsex) |>
+  left_join(AddedVars, by = c('householdID', 'childHHid'))
+
+# Definitely
+# ChildAge
+# Sex
+# CaregiverAge
+# NumberOfChildren
+# number_adults
+# Neighborhood2
+# ImmigrateUtila
+
+# Maybe
+# StayAtHomeMom
+# EducationLevelYears
+# Lifestyle Reality vars
+# FoodSecurity
+# UserLanguage
+
+# Probably not
+# MeanChildRelatedness
+# MedicalProblemsMean
+# IllnessSusceptibilityMean
+# HouseQuality
+# LogIncome (but category based?)
 
