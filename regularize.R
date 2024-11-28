@@ -1,19 +1,4 @@
 
-library(glmnet)
-library(glmnetUtils)
-library(hagenutils)
-library(patchwork)
-library(skimr)
-library(pvclust)
-library(ggcorrplot)
-library(tidymodels)
-library(poissonreg)
-library(marginaleffects)
-library(easybgm)
-library(tidygraph)
-library(ggraph)
-library(BDgraph)
-
 # Regularized regression --------------------------------------------------
 
 glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){

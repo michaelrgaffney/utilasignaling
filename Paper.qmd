@@ -66,11 +66,8 @@ crossref:
 ---
 
 ```{r setup, include=FALSE}
-source("dictionaries.R", local = knitr::knit_global())
 source("analysisforpaper.R", local = knitr::knit_global())
-
 library(modelsummary)
-# source("regularize.R")
 ```
 
 # Abstract
@@ -178,7 +175,7 @@ The data for this study were collected as part of the Utila Child Health Project
 We used 6-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
 
 |  |  |
-|--------------------------|----------------------------------------------|
+|------------------|------------------------------------------------------|
 | Variable | Survey question wording |
 | Crying Frequency | How often does your child cry? |
 | Sad Frequency | How often is your child sad? |
@@ -447,7 +444,7 @@ Children face the challenge of eliciting support from others in times of adversi
 
 ::: {#stbl-relvars}
 |  |  |
-|--------------------------|----------------------------------------------|
+|----------------|--------------------------------------------------------|
 | Variable | Survey question wording |
 | Relative Need | How much time, effort, and resources does this child need compared to your other children? |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
@@ -457,7 +454,7 @@ Variable names and question wording for measures about relative need and investm
 
 ::: {#stbl-medical-record}
 |  |  |
-|-------------------------|------------------------------------------------|
+|---------------|---------------------------------------------------------|
 | Variable | Survey question wording |
 | SchoolAges1 | My child has missed a lot of school due to illness. |
 | SchoolAges2 | My child has had to deal with a variety of medical issues in their life so far. |
@@ -467,7 +464,7 @@ Variable names and question wording for measures about a child's health history.
 
 ::: {#stbl-healthvars}
 |  |  |
-|--------------------------|----------------------------------------------|
+|----------------|--------------------------------------------------------|
 | Variable | Survey question wording |
 | IllnessAvoidance1 | If an illness is 'going around', my child will get it. |
 | IllnessAvoidance2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
@@ -478,7 +475,7 @@ Variable names and question wording for measures about a child's current likelih
 
 ::: {#stbl-Food-Security}
 |  |  |
-|-------------------------|------------------------------------------------|
+|-------------|-----------------------------------------------------------|
 | Variable | Survey question wording |
 | FoodSecurity_1 | In the past year, the food that we bought often didn’t last, and we didn’t have money to get more. |
 | FoodSecurity_2 | In the past year, we couldn’t afford to eat balanced meals. |
@@ -492,7 +489,7 @@ Variable names and question wording for the modified version of the USDA Food Se
 
 ::: {#stbl-Home-Instability}
 |  |  |
-|-------------------------|-----------------------------------------------|
+|------------------|------------------------------------------------------|
 | Variable | Survey question wording |
 | HomeInstability_1 | We move our home a lot. |
 | HomeInstability_2 | I wish our household felt more stable. |
@@ -504,7 +501,7 @@ Variable names and question wording for the home instability questions. All ques
 
 ::: {#stbl-Neighborhood-Quality}
 |  |  |
-|--------------------------|----------------------------------------------|
+|-------------------|-----------------------------------------------------|
 | Variable | Survey question wording |
 | NeighborhoodQuality_1 | As a place to live, my neighborhood is good quality. |
 | NeighborhoodQuality_2 | As a place to raise children, my neighborhood is good quality. |

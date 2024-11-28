@@ -1,8 +1,3 @@
-library(utiladata2023) # data package
-library(tidyverse)
-library(labelled)
-library(mgcv)
-library(localgrowth)
 
 source("recode.R")
 source("dictionaries.R")
