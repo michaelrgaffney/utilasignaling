@@ -10,6 +10,14 @@ library(hagenutils) # from github
 library(knitr)
 library(kableExtra)
 library(skimr)
+library(glmnet)
+library(tidymodels)
+library(poissonreg)
+library(marginaleffects)
+library(easybgm)
+library(tidygraph)
+library(ggraph)
+library(ordinalNet)
 
 source("dataprep.R")
 

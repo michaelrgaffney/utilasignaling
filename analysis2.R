@@ -1,13 +1,4 @@
 
-library(glmnet)
-library(tidymodels)
-library(poissonreg)
-library(marginaleffects)
-library(easybgm)
-library(tidygraph)
-library(ggraph)
-library(ordinalNet)
-
 # Regularized regression --------------------------------------------------
 
 glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
