@@ -24,11 +24,11 @@ source("dataprep.R")
 ## main paper plots --------------------------------------------------------
 
 signalfreqdf <-
-  d2 |>
+  modeldf |>
   dplyr::select(
     householdID,
     childHHid,
-    uniqueID,
+    # uniqueID,
     SadFreqOF,
     CryFreqOF,
     TantrumFreqOF,
@@ -86,7 +86,7 @@ barplot_SignalFreq <-
 barplot_SignalFreq
 
 
-signal_subset <- d2[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
+signal_subset <- modeldf[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
 names(signal_subset) <- shortform_dict[names(signal_subset)]
 
 signal_corrplot <-
@@ -155,7 +155,7 @@ causes2 <-
   )
 
 cause_response0 <-
-  d2 |>
+  modeldf |>
   left_join(causes2[c("uniqueID", "CauseType")]) |>
   dplyr::filter(!is.na(CauseType), !is.na(CaregiverResponse), !is.na(ChildAge)) |>
   mutate(

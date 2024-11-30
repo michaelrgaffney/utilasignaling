@@ -275,6 +275,7 @@ modeldf <-
   d2 |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
   dplyr::select(
+    uniqueID,
     householdID,
     childHHid,
     CryFreqN,
@@ -283,6 +284,7 @@ modeldf <-
     SignalFreq,
     SignalCost,
     SignalFreqMax,
+    CaregiverResponse,
     ChildAge,
     OtherChildrenHH,
     YoungerKids,
@@ -325,6 +327,7 @@ modeldf <-
     RelativeNeed,
     RelativeMaternalInvestment,
     Neighborhood2F,
+    StayAtHomeMom,
     StayAtHomeMomF,
     HomeInstability_1,
     HomeInstability_2,
@@ -359,56 +362,51 @@ modeldf_FULLSIG <-
 #   "ChildAge",   "Younger children have more needs they cannot address on their own and face lower reputational costs to crying. Older children engage in costlier signals."
 # )
 
-signal_vars_temp <-
-  "ChildAge:Younger children have more needs they cannot address on their own and face lower reputational costs to crying. Older children engage in costlier signals.X
-  Sex:The sexes differ in the adversity they face, the forms of competetion they will engage in with peers, their ability to bargain for increased support outside of signals of need, and the reputational costs of signaling need. These differences may be small or nonexistent in young children.X
-  IllnessSusceptibilityMean:Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function.X
-  MedicalProblemsMean:Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. No pathogenic health issues may limit the ability of the child to satisfy their own needs, something which can lead to greater payoffs for signaling need.X
-  AlloparentingFreqN:Children might prefer to spend time outside of the family (e.g., to invest in their embodied capital or to find cooperative partners and maintain those relationships) and signal to reduce caregiver pressure to alloparent.X
-  CaregiverAge:Overtime, caretakers learn how to better satsify child needs, resist child bargaining, communicate the reasons for their actions. Older moms also have lower residual reproductive value, somethign which may result in greater valuation of investment in existing children compared to younger moms.X
-  StayAtHomeMom:Stay at home mom's are capable of providing more investment to children and see them more often.X
-  EducationLevelYears:Greater education leads to differences in caretaking behavior and mental models of caretaking while also increasing caregiver earning potential.X
-  AdultsChildcare:More adults helping with child care can lead to greater potential for investment. This might lead to decreased payoffs to singaling need in some circumstances. However, it may also increase signaling behaviors in others due to the presence of more signal targerts.X
-  number_adults:More adults equals more targets for signaling.X
-  AdultsHousework:More adults helping around the house likely leads to less pressure from caretakers for children engage in household labor.X
-  NumberOfChildren:More children equals more behavioral conflict over investment.X
-  OtherChildAlloparentingFreqN:More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for other chlildren of alloparenting age.X
-  LogIncome:The pool of availible resources influences the benefits to signaling.X
-  HouseQuality:Children might determine relative status based in part on house quality. This alters the payoffs to signaling.X
-  LifestyleReality_1:X
-  LifestyleReality_2:X
-  LifestyleReality_3:X
-  LifestyleReality_4:X
-  LifestyleReality_5:X
-  LifestyleReality_6:X
-  LifestyleReality_7:X
-  LifestyleReality_8:X
-  HomeInstability_1:X
-  HomeInstability_2:X
-  HomeInstability_3:X
-  HomeInstability_4:X
-  NeighborhoodQuality:Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.X
-  Neighborhood2:Campanado is percieved to be a lower quality environment for children and likely is based on demographics, population density, and differences in status and discrimination. Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.X
-  FoodSecurity:Children may be more likely to signal for more food when it is hard to come by.X
-  ImmigrateUtila:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling.X
-  UserLanguage:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling."
-
 #HomeInstabilityMean:Children in unstable homes likely face more adversity and find themselves having to signal to new people or face the challenge of previous caretakers leaving or moving away from friends.X
 
-signalvars <- data.frame(signal_vars_temp) |>
-  separate_rows(signal_vars_temp, sep = "X") |>
-  separate(col = signal_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
-  mutate(
-    Var = str_trim(Var)
-  )
+signal_vars <- c(
+  ChildAge = "Younger children have more needs they cannot address on their own and face lower reputational costs to crying. Older children engage in costlier signals.",
+  Sex = "The sexes differ in the adversity they face, the forms of competetion they will engage in with peers, their ability to bargain for increased support outside of signals of need, and the reputational costs of signaling need. These differences may be small or nonexistent in young children.",
+  IllnessSusceptibilityMean = "Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function.",
+  MedicalProblemsMean = "Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. No pathogenic health issues may limit the ability of the child to satisfy their own needs, something which can lead to greater payoffs for signaling need.",
+  AlloparentingFreqN = "Children might prefer to spend time outside of the family (e.g., to invest in their embodied capital or to find cooperative partners and maintain those relationships) and signal to reduce caregiver pressure to alloparent.",
+  CaregiverAge = "Overtime, caretakers learn how to better satsify child needs, resist child bargaining, communicate the reasons for their actions. Older moms also have lower residual reproductive value, somethign which may result in greater valuation of investment in existing children compared to younger moms.",
+  StayAtHomeMom = "Stay at home mom's are capable of providing more investment to children and see them more often.",
+  EducationLevelYears = "Greater education leads to differences in caretaking behavior and mental models of caretaking while also increasing caregiver earning potential.",
+  AdultsChildcare = "More adults helping with child care can lead to greater potential for investment. This might lead to decreased payoffs to singaling need in some circumstances. However, it may also increase signaling behaviors in others due to the presence of more signal targerts.",
+  number_adults = "More adults equals more targets for signaling.",
+  AdultsHousework = "More adults helping around the house likely leads to less pressure from caretakers for children engage in household labor.",
+  NumberOfChildren = "More children equals more behavioral conflict over investment.",
+  OtherChildAlloparentingFreqN = "More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for other chlildren of alloparenting age.",
+  LogIncome = "The pool of availible resources influences the benefits to signaling.",
+  HouseQuality = "Children might determine relative status based in part on house quality. This alters the payoffs to signaling.",
+  LifestyleReality_1 = "",
+  LifestyleReality_2 = "",
+  LifestyleReality_3 = "",
+  LifestyleReality_4 = "",
+  LifestyleReality_5 = "",
+  LifestyleReality_6 = "",
+  LifestyleReality_7 = "",
+  LifestyleReality_8 = "",
+  HomeInstability_1 = "",
+  HomeInstability_2 = "",
+  HomeInstability_3 = "",
+  HomeInstability_4 = "",
+  NeighborhoodQuality = "Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.",
+  Neighborhood2 = "Campanado is percieved to be a lower quality environment for children and likely is based on demographics, population density, and differences in status and discrimination. Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.",
+  FoodSecurity = "Children may be more likely to signal for more food when it is hard to come by.",
+  ImmigrateUtila = "There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling.",
+  UserLanguage = "There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling."
+)
 
-SignalVars <- d2 |>
+SignalVars <-
+  modeldf |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
   dplyr::select(
     householdID,
     childHHid,
     SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN, MeanChildRelatedness, # Fullsibs, Halfsibs, Stepsibs,
-    all_of(signalvars$Var)
+    all_of(names(signal_vars))
     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
     # OldestChild, Does not seem to add much beyond age + number of children.X
     # PartnerStatus, Does this add much beyond the number of adults in the household without better data on adult-child relatedness?
@@ -423,59 +421,3 @@ SignalVars <- d2 |>
     AlloparentingXsex = AlloparentingFreqN * Sex,
   ) |>
   na.omit()
-
-conflict_vars_temp <-
-  "ChildAge:Younger children have more needs they cannot address on their own, something which can lead to conflict. Older children are more likely to have conflicts with parents over investment within vs. outside the family.X
-  Sex:The sexes differ in the adversity they face and their ability to bargain for increased support outside of signals of need. These differences can lead to differences in conflict frequency. These differences may be small or nonexistent in young children.X
-  AlloparentingFreqN:Children might prefer to spend time outside of the family, while parents might prefer more investment within the family.X
-  OnlyChild:Only children do not have to compete for attention or other forms of investment with existing children, something which results in conflict in families with more children.X
-  CaregiverAge:Caretakers learn how to better satsify child needs and communicate the reasons for their actions. Older moms also have lower residual reproductive value, resulting in greater valuation in investment compared to younger moms, all else being equal.X
-  StayAtHomeMom:Stay at home mom's are capable of providing more investment to children and see them more often.X
-  EducationLevelYears:Greater education leads to differences in caretaking behavior and increases caregiver earning potential, something which can affect conflict frequency.X
-  AdultsChildcare:More adults helping with child care equals more investment for children and may diffuse conflict throughout the family.X
-  number_adults:More adults equals more targets for signaling, which parents can see as conflict.X
-  AdultsHousework:More adults helping around the house leads to less pressure from caretakers for children to alloparent.X
-  NumberOfChildren:More children equals more conflict over investment.X
-  OtherChildAlloparentingFreqN:More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for older chlildren.X
-  LogIncome:The pool of availible resources influences the benefits to signaling, which parents can see as conflict.X
-  HomeInstabilityMean:Children in unstable homes likely face more adversity and find themselves having to signal to new people or face the challenge of previous caretakers leaving or moving away from friends. All of these can lead to conflict and signaling, which may be perceived as conflict.X
-  NeighborhoodQuality:Parental investment can help children succeed in dangerous environments through teaching and increased child status.X
-  Neighborhood2:Neighborhood can affect the strategies children use to compete among peers. Some of these strategies might lead to conflict with parents.X
-  ImmigrateUtila:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict.X
-  UserLanguage:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict."
-
-# conflictvars <- data.frame(conflict_vars_temp) |>
-#   separate_rows(conflict_vars_temp, sep = "X") |>
-#   separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
-#   mutate(Var = str_trim(Var))
-#
-# # one option is to just use signaling vars as parents might see signaling as conflict
-# ConflictVars <- d2 |>
-#   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
-#   dplyr::select(
-#     householdID,
-#     childHHid,
-#     ChildAge,
-#     Sex,
-#     IllnessSusceptibilityMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function. This can favor signaling, which parents see as conflict.
-#     MedicalProblemsMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. This can favor signaling, which parents see as conflict.
-#     AlloparentingFreqN,
-#     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.
-#     # OldestChild, Does not seem to add much beyond age + number of children.
-#     CaregiverAge,
-#     StayAtHomeMom,
-#     # PartnerStatus, Does this add much beyond the number of adults in the househld?
-#     EducationLevelYears,
-#     AdultsChildcare,
-#     number_adults,
-#     NumberOfChildren,
-#     OtherChildAlloparentingFreqN,
-#     LogIncome,
-#     HomeInstabilityMean,
-#     NeighborhoodQuality,
-#     Neighborhood2,
-#     # HouseQuality, Does this add much?X
-#     # FoodSecurity Children may be more likely to signal for more food when it is hard to come by. This can be seen as conflict by caretakers.
-#     ImmigrateUtila,
-#     UserLanguage
-#   )
