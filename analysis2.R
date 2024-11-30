@@ -1,4 +1,6 @@
 
+library(glmnet)
+
 # Regularized regression --------------------------------------------------
 
 glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
