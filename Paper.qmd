@@ -49,6 +49,7 @@ format:
     toc: true
     toc-expand: 2
     number-sections: true
+    embed-resources: true
 lightbox: true
 editor: visual
 tbl-cap-location: bottom
