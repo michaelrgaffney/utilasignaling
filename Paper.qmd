@@ -66,8 +66,7 @@ crossref:
 ---
 
 ```{r setup, include=FALSE}
-source("analysisforpaper.R", local = knitr::knit_global())
-library(modelsummary)
+source("analysis.R", local = knitr::knit_global())
 ```
 
 # Abstract
@@ -238,7 +237,11 @@ The anonymized data used in the study are available at https://github.com/grassh
 
 # Results
 
-`{r} dplyr::n_distinct(modeldf$householdID)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`, non-binary = `{r} table(caregivers$CaregiverSex)[3]`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. Anthropometric and signaling data exist for `{r} nrow(modeldf_FULLANTHROPOMETRICS)` children, of whom `{r} sex_table2[1]` were female and `{r} sex_table2[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
+```{r}
+sex_table <- table(modeldf$Sex)
+```
+
+`{r} xfun::numbers_to_words(n_distinct(modeldf$householdID), cap=T)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(modeldf), cap=T)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
 
 ```{r sumtab_combined}
 #| label: tbl-sumtab_combined
@@ -362,6 +365,10 @@ Effects of selected predictors of child-parent conflict frequencies when holding
 
 ## Positive associations between child age and signaling frequency and perceptions of child neediness
 
+```{r}
+rel_need_table <- table(modeldf$RelativeNeed3)
+```
+
 Primary caretakers rarely described a child as “much less” `{r} fmt_sum(modeldf$RelativeNeed == "Much less")` \[fix in word doc?\] or “much more” `{r} fmt_sum(modeldf$RelativeNeed == "Much more")` needy compared to their other children. Therefore, we collapsed “less” and “much less” into a “less” factor and “more” and “much more” into a “more” factor. The end result was `{r} rel_need_table[1]` less needy children, `{r} rel_need_table[2]` children who were as needy as their siblings, and `{r} rel_need_table[3]` more needy children.
 
 There were positive relationships between perceived relative neediness within the family and both child age and the frequency of child sadness. See @fig-effect_relativeneed.
@@ -395,6 +402,10 @@ barplot_CaregiverResponse
 
 Frequencies of caregiver response to the last instance of child signaling by the cause of the signaling. Categories of causes were based on cluster analysis of more fine-grained cause variables. See @sfig-cause-clustering for cluster dendrogram and @stbl-sumtab-causes for the frequencies of causes and caregiver responses.
 :::
+
+```{r}
+response_overlap <- table(modeldf$PositiveResponse, modeldf$NegativeResponse)
+```
 
 There were `{r} response_overlap[1,1]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
