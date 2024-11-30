@@ -233,7 +233,7 @@ All analyses were conducted with `{r} R.version.string`.
 
 ## Data availability
 
-The anonymized data used in the study are available at https://github.com/grasshoppermouse/utiladata2023. Study code is available at https://github.com/michaelrgaffney/utilasignaling.
+The anonymized data used in the study are available at <https://github.com/grasshoppermouse/utiladata2023>. Study code is available at <https://github.com/michaelrgaffney/utilasignaling>.
 
 # Results
 

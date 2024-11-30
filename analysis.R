@@ -206,3 +206,30 @@ signal_alluvial_plot <-
   theme(axis.title.y = element_text(angle = 0, hjust = 1)) +
   scale_fill_viridis_d()
 signal_alluvial_plot
+
+# PCA ---------------------------------------------------------------------
+e <- mdf2 |>
+  dplyr::select(
+    - SignalFreq,
+    - SignalCost,
+    - SignalFreqMax,
+    - OldestChild,
+    - OlderGirls,
+    - PartnerStatus,
+    - CaregiverAge,
+    - YoungerKids,
+    - contains("Xsex")
+  )
+
+e <- set_names(e, shortform_dict[names(e)])
+# names(e) <- shortform_dict[names(e)]
+
+m <- prcomp(e, scale. = T) # Remove composite signaling vars
+plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
+plot_biplot <- pca_biplot(m) + theme_minimal(15)
+
+plot_pca <- plot_loadings + plot_biplot + plot_layout(widths = c(1,2)) +
+  plot_annotation(tag_levels = "A")
+ggsave("Figures/plot_pca.svg", plot_pca)
+ggsave("Figures/plot_pca.pdf", plot_pca)
+
