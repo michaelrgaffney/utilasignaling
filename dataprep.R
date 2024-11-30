@@ -31,67 +31,9 @@ mean2 <- function(..., na.rm = F){
 
 # dataframe prep ----------------------------------------------------------
 
-children2 <-
-  children |>
-  dplyr::filter(ChildID != "") |>
-  dplyr::select(ChildID, householdID)
-
-anthropometricMeans0 <-
-  anthropometrics |>
-  dplyr::select(
-    ChildID,
-    AgeAtMeasurement = Age,
-    Sex,
-    Date.of.measurement,
-    contains("Mean")
-  ) |>
-  mutate(
-    measurements = n(),
-    .by = ChildID
-  ) |>
-  mutate(
-    BMI = WeightMean_KG / (HeightMean / 100 )^2,
-    Year = year(Date.of.measurement)
-  ) |>
-  relocate(measurements, .after = Year)
-
-anthropometricMeans <-
-  anthropometricMeans0 |>
-  dplyr::filter(
-    measurements == 1 | year(Date.of.measurement) == 2023
-  ) |>
-  left_join(children2) # note that we filter out householdID based on it's column number
-
-anthropometricMeans$WeightZ <- growthRef(AgeAtMeasurement, WeightMean_KG, Sex, anthropometricMeans, type = "Weight", pop = "CDC")
-anthropometricMeans$HeightZ <- growthRef(AgeAtMeasurement, HeightMean, Sex, anthropometricMeans, type = "Height", pop = "CDC")
-anthropometricMeans$BMIZ <- growthRef(AgeAtMeasurement, BMI, Sex, anthropometricMeans, type = "BMI", pop = "CDC")
-anthropometricMeans$Sex2 <- factor(anthropometricMeans$Sex)
-
-m <- mgcv::gam(GripStrengthMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 4), data = anthropometricMeans)
-anthropometricMeans$GripR <- residuals(m)
-
-# Result for bodyfat predicitng crying freq changes if k is unspecified
-m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$TricepR <- residuals(m2)
-
-m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$SubscapR <- residuals(m3)
-
-m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$BodyFatPercentageR <- residuals(m4)
-
-m5 <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$FlexedR <- residuals(m5)
-
-m5b <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3) + s(householdID, bs = "re"), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$FlexedRb <- residuals(m5b)
-
-anthropometricMeans$Sex <- NULL
-
 d <-
   children |>
   remove_labels() |>
-  #dplyr::filter(CompleteSurvey) %>%
   mutate(
     OnlyChild = n() == 1,
     YoungerKids = map_int(ChildAge, \(x) sum(x > ChildAge)),
@@ -248,7 +190,6 @@ d <-
     MedicalProblemsMean = mean2(SchoolAges1, SchoolAges2, na.rm = TRUE) # 1 child has data for only 1
   ) |>
   ungroup() |>
-  left_join(anthropometricMeans[-21], by = "ChildID") |>  # removing householdID column
   left_join(dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
                           EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                           number_children2, number_adults, UserLanguage, CurrentJob, contains("CaregiverMarital"), NeighborhoodQuality, HouseQuality,
@@ -265,7 +206,6 @@ d2 <-
     StayAtHomeMomF = as.factor(case_when(
       StayAtHomeMom == 0 ~ "No",
       StayAtHomeMom == 1 ~ "Yes")),
-    BodyFat = c(scale(TricepR) + scale(SubscapR)),
     RecentSignalSeverity = com1[as.character(Sad1)],
     RecentSignalCause = com2[as.character(Sad1)],
     AdultsHousework = as.numeric(AdultsHousework),
@@ -375,16 +315,6 @@ modeldf <-
     NegativeResponse,
     CaregiverAge,
     IncomeCategoryN,
-    SubscapR,
-    HeightZ,
-    WeightZ,
-    BMIZ,
-    SubscapMean,
-    SubscapR,
-    TricepMean,
-    TricepR,
-    BodyFat,
-    FlexedR,
     CaregiverAge,
     FoodSecurity,
     Neighborhood2,
@@ -411,6 +341,9 @@ modeldf <-
     ChildID
   )
 
+modeldf_FULLSIG <-
+  modeldf |>
+  dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN))
 
 # dataframes for analysis -------------------------------------------------
 
@@ -489,48 +422,6 @@ SignalVars <- d2 |>
     # PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
     AlloparentingXsex = AlloparentingFreqN * Sex,
   ) |>
-  na.omit()
-
-SignalVarsAnthro0 <-
-  anthropometricMeans0 |>
-  dplyr::filter(
-    measurements == 2
-  ) |>
-  pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
-  left_join(d2[c("householdID", "childHHid", "ChildID")], by = 'ChildID') |>
-  dplyr::filter(!is.na(householdID) & !is.na(childHHid))
-
-SignalVarsAnthro <-
-  SignalVars |>
-  left_join(SignalVarsAnthro0) |>
-  dplyr::filter(!is.na(HeightMean_2024))
-
-# out <- skim(anthropometricMeans)
-# nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
-
-tmp <- left_join(anthropometricMeans, d2[c("childHHid", "ChildID")], by = 'ChildID')
-
-SignalVarsAnthro2 <-
-  left_join(SignalVars, tmp) |>
-  dplyr::select(
-    -c(IllnessSusceptibilityMean:AlloparentingXsex),
-    -MeanChildRelatedness,
-    -AgeAtMeasurement,
-    -Year,
-    -measurements,
-    -Date.of.measurement,
-    -Sex2,
-    -ChildID,
-    -FlexedRb,
-    -FlexedMean,
-    -TricepMean,
-    -SubscapMean,
-    -HeightMean,
-    -WeightMean_KG,
-    -BMI,
-    -BodyFatPercentageMean,
-    -GripStrengthMean
-    ) |>
   na.omit()
 
 conflict_vars_temp <-
