@@ -1,13 +1,15 @@
 library(utiladata2023) # data package
 library(tidyverse)
+library(patchwork)
 library(modelsummary)
 library(labelled)
 library(ggcorrplot)
 library(pvclust)
 library(ggalluvial)
-library(hagenutils)
+library(hagenutils) # from github
 library(knitr)
 library(kableExtra)
+library(skimr)
 
 source("dataprep.R")
 
@@ -208,7 +210,38 @@ signal_alluvial_plot <-
 signal_alluvial_plot
 
 # PCA ---------------------------------------------------------------------
-e <- mdf2 |>
+
+out <- skim(modeldf)
+nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
+nms <- c(nms, "Sex", "UserLanguage", "ImmigrateUtila", "PartnerStatus", "OldestChild")
+
+mdf2 <-
+  modeldf |>
+  dplyr::select(
+    all_of(nms),
+    -householdID,
+    -childHHid,
+    -NegativeResponse,
+    -PositiveResponse,
+    -IncomeCategoryN,
+    # -ConflictFreqN,
+    -OtherChildrenHH, # omit or keep?
+    -contains('IllnessSusceptibility')
+  ) |>
+  na.omit() |>
+  mutate(
+    Sex = ifelse(Sex == "Female", 0, 1),
+    UserLanguage = ifelse(UserLanguage == "EN", 0, 1),
+    ImmigrateUtila = ifelse(ImmigrateUtila == "No", 0, 1),
+    PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
+    across(-c(1:6), \(x) c(scale(x))),
+    AlloparentingXsex = AlloparentingFreqN * Sex,
+    ChildAgeXsex = ChildAge * Sex,
+    OldestXsex = OldestChild * Sex
+  )
+
+e <-
+  mdf2 |>
   dplyr::select(
     - SignalFreq,
     - SignalCost,
