@@ -391,7 +391,7 @@ ordinal_plot2 <- function(fit, predictor, data, title){
 # Perceived need
 
 SignalVars4 <-
-  left_join(SignalVars, modeldf[c("householdID", "childHHid", "RelativeNeed3")]) |>
+  left_join(SignalVars, utila_df[c("householdID", "childHHid", "RelativeNeed3")]) |>
   relocate(RelativeNeed3, .after = 'childHHid') |>
   mutate(
     across(-c(1:3), as.numeric),
@@ -427,7 +427,7 @@ ggsave("Figures/plot_need_combined.svg", plot_need_combined, width = 12, height 
 # Relative investment
 
 SignalVars5 <-
-  left_join(SignalVars, modeldf[c("householdID", "childHHid", "RelativeMaternalInvestment2", "RelativeNeed3")]) |>
+  left_join(SignalVars, utila_df[c("householdID", "childHHid", "RelativeMaternalInvestment2", "RelativeNeed3")]) |>
   relocate(RelativeMaternalInvestment2, .after = 'childHHid') |>
   mutate(
     across(-c(1:3), as.numeric),
@@ -471,7 +471,7 @@ cause_count <- map_int(causematrix[-c(1:2)], \(x) sum(x, na.rm = T))
 cause_vars <- names(cause_count[cause_count > 5])
 
 SignalVars3 <-
-  left_join(SignalVars, modeldf[c("householdID", "childHHid", "CaregiverResponse")]) |>
+  left_join(SignalVars, utila_df[c("householdID", "childHHid", "CaregiverResponse")]) |>
   left_join(causematrix[c("householdID", "childHHid", cause_vars)]) |>
   relocate(CaregiverResponse, .after = childHHid) |>
   mutate(

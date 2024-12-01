@@ -1,6 +1,7 @@
 
-source("recode.R")
-source("dictionaries.R")
+library(utiladata2023) # data package
+library(tidyverse)
+library(labelled)
 
 # functions used ----------------------------------------------------------
 
@@ -271,7 +272,7 @@ d2 <-
 # dataframe for plots -----------------------------------------------------
 
 # filters based on having at least one value of SadFreqN, CryFreqN, or TantrumFreqN
-modeldf <-
+utila_df <-
   d2 |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
   dplyr::select(
@@ -344,10 +345,6 @@ modeldf <-
     ChildID
   )
 
-modeldf_FULLSIG <-
-  modeldf |>
-  dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN))
-
 # dataframes for analysis -------------------------------------------------
 
 # new vars:
@@ -400,7 +397,7 @@ signal_vars <- c(
 )
 
 SignalVars <-
-  modeldf |>
+  utila_df |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
   dplyr::select(
     householdID,
@@ -421,3 +418,5 @@ SignalVars <-
     AlloparentingXsex = AlloparentingFreqN * Sex,
   ) |>
   na.omit()
+
+caregiverSex <- sort(caregivers$CaregiverSex[caregivers$householdID %in% utila_df$householdID], na.last = T)

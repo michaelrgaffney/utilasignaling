@@ -20,13 +20,13 @@ library(ggraph)
 library(ordinalNet)
 
 modeldf_FULLSIG <-
-  modeldf |>
+  utila_df |>
   dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN))
 
 ## main paper plots --------------------------------------------------------
 
 signalfreqdf <-
-  modeldf |>
+  utila_df |>
   dplyr::select(
     householdID,
     childHHid,
@@ -88,7 +88,7 @@ barplot_SignalFreq <-
 barplot_SignalFreq
 
 
-signal_subset <- modeldf[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
+signal_subset <- utila_df[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
 names(signal_subset) <- shortform_dict[names(signal_subset)]
 
 signal_corrplot <-
@@ -104,7 +104,7 @@ signal_corrplot
 
 
 barplot_conflict <-
-  modeldf |>
+  utila_df |>
   mutate(
     ConflictFreq2 = factor(freq_short[ConflictFreqOF], levels = c(freq_short))
   )|>
@@ -118,7 +118,7 @@ barplot_conflict <-
 barplot_conflict
 
 barplot_alloparenting <-
-  modeldf |>
+  utila_df |>
   mutate(
     AlloparentingFreq02 = factor(freq_short[AlloparentingFreq0], levels = c(freq_short))
   )|>
@@ -157,7 +157,7 @@ causes2 <-
   )
 
 cause_response0 <-
-  modeldf |>
+  utila_df |>
   left_join(causes2[c("uniqueID", "CauseType")]) |>
   dplyr::filter(!is.na(CauseType), !is.na(CaregiverResponse), !is.na(ChildAge)) |>
   mutate(
@@ -221,12 +221,12 @@ signal_alluvial_plot
 
 # PCA ---------------------------------------------------------------------
 
-out <- skim(modeldf)
+out <- skim(utila_df)
 nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
 nms <- c(nms, "Sex", "UserLanguage", "ImmigrateUtila", "PartnerStatus", "OldestChild")
 
 mdf2 <-
-  modeldf |>
+  utila_df |>
   dplyr::select(
     all_of(nms),
     -householdID,
