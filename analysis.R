@@ -1,4 +1,4 @@
-library(utiladata2023) # data package
+
 library(tidyverse)
 library(patchwork)
 library(modelsummary)
@@ -19,7 +19,9 @@ library(tidygraph)
 library(ggraph)
 library(ordinalNet)
 
-source("dataprep.R")
+modeldf_FULLSIG <-
+  modeldf |>
+  dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN))
 
 ## main paper plots --------------------------------------------------------
 

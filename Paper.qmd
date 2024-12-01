@@ -26,18 +26,18 @@ author:
     affiliation:
       - name: Washington State University
         department: Anthropology
+  - name: Carolyn R. Hodges-Simeon
+    orcid: 0000-0002-0691-9080
+    corresponding: false
+    affiliation:
+      - name: Boston University
+        department: Anthropology
   - name: Edward H. Hagen
     orcid: 0000-0002-5758-9093
     email: edhagen@wsu.edu
     corresponding: true
     affiliation:
       - name: Washington State University
-        department: Anthropology
-  - name: Carolyn R. Hodges-Simeon
-    orcid: 0000-0002-0691-9080
-    corresponding: false
-    affiliation:
-      - name: Boston University
         department: Anthropology
 execute:
   echo: false
@@ -67,13 +67,17 @@ crossref:
 ---
 
 ```{r setup, include=FALSE}
+source("recode.R")
+source("dictionaries.R")
+source("dataprep.R")
+# source("dataprepPublic.R")
 source("analysis.R")
 # source("analysis2.R") # slow!
 ```
 
 # Abstract
 
-To gain support, children use signals to communicate their needs and wants to parents. Infant signals of need, particularly infant cries, have been extensively studied in a range of populations. However, the full range of potential child signals of need, which extend beyond cries, has rarely been investigated in a single study of children of all ages. To fill this gap, we collected mother and other primary caregiver reports of child signaling from `{r} nrow(caregivers)` families with `{r} nrow(modeldf)` children on Utila, a small island off the coast of Honduras. In exploratory analyses, we found that child signaling was common in both sexes and across all ages, although it decreased with age and neighborhood quality and increased with the frequency of conflict between children and caretakers. Consistent with signaling theory, children who were sad more frequently were perceived as needier within the household and were more likely to receive investment. Consistent with previous research, increased alloparenting effort was associated with more signaling by girls but less signaling by boys. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
+To gain support, children use signals to communicate their needs and wants to parents. Infant signals of need, particularly infant cries, have been extensively studied in a range of populations. However, the full range of potential child signals of need, which extend beyond cries, has rarely been investigated in a single study of children of all ages. To fill this gap, we collected mother and other primary caregiver reports of child signaling from `{r} n_distinct(modeldf$householdID)` families with `{r} nrow(modeldf)` children on Utila, a small island off the coast of Honduras. In exploratory analyses, we found that child signaling was common in both sexes and across all ages, although it decreased with age and neighborhood quality and increased with the frequency of conflict between children and caretakers. Consistent with signaling theory, children who were sad more frequently were perceived as needier within the household and were more likely to receive investment. Consistent with previous research, increased alloparenting effort was associated with more signaling by girls but less signaling by boys. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
 
 # Introduction
 
@@ -243,7 +247,7 @@ The anonymized data used in the study are available at <https://github.com/grass
 sex_table <- table(modeldf$Sex)
 ```
 
-`{r} xfun::numbers_to_words(n_distinct(modeldf$householdID), cap=T)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(modeldf), cap=T)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
+`{r} xfun::numbers_to_words(n_distinct(modeldf$householdID), cap=T)` primary caretakers (females = `{r} table(caregiverSex)[1]`, males = `{r} table(caregiverSex)[2]`, missing sex = `{r} sum(is.na(caregiverSex))`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(modeldf), cap=T)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
 
 ```{r sumtab_combined}
 #| label: tbl-sumtab_combined
