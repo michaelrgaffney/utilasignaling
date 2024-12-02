@@ -18,26 +18,6 @@
 # sharing that data publicly in a way that could link it to individual
 # participants.
 
-
-source('dataprep.R')
-library(sdcMicro)
-
-AddedVars <-
-  d2 |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
-  dplyr::select(
-    householdID,
-    childHHid,
-    RelativeNeed3,
-    RelativeMaternalInvestment2,
-    ConflictFamily:StatusConcerns,
-    CaregiverResponse
-  )
-
-StudyVars <- SignalVars |>
-  dplyr::select(-AlloparentingXsex) |>
-  left_join(AddedVars, by = c('householdID', 'childHHid'))
-
 # Definitely
 # ChildAge
 # Sex
@@ -61,53 +41,37 @@ StudyVars <- SignalVars |>
 # HouseQuality
 # LogIncome (but category based?)
 
+# Cluster ages
+
+library(sdcMicro)
+
+discretize <- function(v, n){
+  q <- quantile(v, seq(0, 1, 1/n))[-1]
+  map_int(v, \(x) min(q[x<=q]))
+}
+
+utila_df <-
+  utila_df |>
+  mutate(
+    Neighborhood2 = ifelse(is.na(Neighborhood2), c(0,1), Neighborhood2),
+    ChildAge = discretize(ChildAge, 4)
+  ) |>
+  mutate(
+    NumberOfChildren = sample(NumberOfChildren, n()),
+    number_adults = sample(number_adults, n()),
+    .by = Neighborhood2
+  )
+
 sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage"),
-  numVars = c("ChildAge", "NumberOfChildren", "number_adults")
+  utila_df,
+  keyVars = c("ChildAge", "Sex", "Neighborhood2", "ImmigrateUtila") #,
 )
 measure_risk(sdcObj)
-
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila"),
-  numVars = c("ChildAge", "NumberOfChildren", "number_adults")
-)
-measure_risk(sdcObj)
-
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "NumberOfChildren", "number_adults"),
-  numVars = c("ChildAge")
-)
-measure_risk(sdcObj)
-
-
-out <- measure_risk(
-  as.data.frame(StudyVars[c('householdID', "Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage")]),
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage"),
-  hid = 'householdID'
-)
+out <- localSuppression(sdcObj, k=4)
 out
+plot(out)
 
-out <- measure_risk(
-  as.data.frame(StudyVars[c('householdID', "Sex", "Neighborhood2")]),
-  keyVars = c("Sex", "Neighborhood2"),
-  hid = 'householdID'
-)
-out
+utila_df$ChildAge <- out@manipKeyVars$ChildAge
 
-out <- measure_risk(
-  as.data.frame(StudyVars),
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "NumberOfChildren", "number_adults"),
-  hid = 'householdID'
-)
-out
+save(utila_df, causes, caregiverSex, file = "data/utilasignalingData.rda")
 
-# Using microaggregation
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "NumberOfChildren", "number_adults"),
-  numVars = c("ChildAge")
-)
-out <- microaggregation(sdcObj)

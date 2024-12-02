@@ -69,10 +69,10 @@ crossref:
 ```{r setup, include=FALSE}
 source("recode.R")
 source("dictionaries.R")
-source("dataprep.R")
-# source("dataprepPublic.R")
+# source("dataprep.R")
+source("dataprepPublic.R")
 source("analysis.R")
-# source("analysis2.R") # slow!
+# source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
@@ -247,7 +247,7 @@ The anonymized data used in the study are available at <https://github.com/grass
 sex_table <- table(utila_df$Sex)
 ```
 
-`{r} xfun::numbers_to_words(n_distinct(utila_df$householdID), cap=T)` primary caretakers (females = `{r} table(caregiverSex)[1]`, males = `{r} table(caregiverSex)[2]`, missing sex = `{r} sum(is.na(caregiverSex))`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(utila_df), cap=T)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
+`{r} xfun::numbers_to_words(n_distinct(utila_df$householdID), cap=T)` primary caretakers (females = `{r} table(caregiverSex)[1]`, males = `{r} table(caregiverSex)[2]`, missing sex = `{r} sum(is.na(caregiverSex))`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(utila_df), cap=T)` children had frequency data for at least one signal, with `{r} nrow(utila_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
 
 ```{r sumtab_combined}
 #| label: tbl-sumtab_combined
