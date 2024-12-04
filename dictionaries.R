@@ -21,7 +21,7 @@ longform_dict <-
     IncomeCategoryN = "Monthly household income (Lempira)",
     FoodSecurity = "Household food insecurity",
     NeighborhoodQuality = "Neighborhood quality index",
-    HouseQuality = "House quality index",
+    HouseQuality = "House sanitation index",
     MedicalProblemsMean = "Child medical problems index",
     IllnessSusceptibilityMean = "Child illness avoidance index",
     HeightZ = "Height Z-score (CDC)",
