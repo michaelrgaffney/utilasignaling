@@ -16,7 +16,7 @@ longform_dict <-
     MeanChildRelatedness = "Child relatedness",
     number_adults = "Number of adults in household",
     AdultsChildcare = "Household adults who provide childcare",
-    AdultsHousework = "Household adults who provide, food, housework, and othe neccesities",
+    AdultsHousework = "Household adults who provide, food, housework, and other neccesities",
     EducationLevelYears = "Caregiver education level (years)",
     IncomeCategoryN = "Monthly household income (Lempira)",
     FoodSecurity = "Household food insecurity",

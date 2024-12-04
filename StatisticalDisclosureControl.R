@@ -41,25 +41,45 @@
 # HouseQuality
 # LogIncome (but category based?)
 
-# Cluster ages
+# Run in a fresh R session
+
+source("recode.R")
+source("dictionaries.R")
+source("dataprep.R")
 
 library(sdcMicro)
 
+# Cluster ages
 discretize <- function(v, n){
   q <- quantile(v, seq(0, 1, 1/n))[-1]
   map_int(v, \(x) min(q[x<=q]))
 }
 
+new_hid <- sample(nrow(utila_df))
+names(new_hid) <- utila_df$householdID
+
 utila_df <-
   utila_df |>
   mutate(
+    householdID = new_hid,
+    childHHid = householdID,
+    uniqueID = householdID,
     Neighborhood2 = ifelse(is.na(Neighborhood2), c(0,1), Neighborhood2),
     ChildAge = discretize(ChildAge, 4)
   ) |>
+  arrange(householdID) |>
   mutate(
     NumberOfChildren = sample(NumberOfChildren, n()),
     number_adults = sample(number_adults, n()),
     .by = Neighborhood2
+  )
+
+causes <-
+  causes |>
+  mutate(
+    householdID = new_hid[householdID],
+    childHHid = householdID,
+    uniqueID = householdID
   )
 
 sdcObj <- createSdcObj(
@@ -73,5 +93,5 @@ plot(out)
 
 utila_df$ChildAge <- out@manipKeyVars$ChildAge
 
-save(utila_df, causes, caregiverSex, file = "data/utilasignalingData.rda")
+save(utila_df, causes, householdIDs, caregiverSex, file = "data/utilasignalingData.rda")
 

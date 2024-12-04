@@ -3,6 +3,8 @@ library(utiladata2023) # data package
 library(tidyverse)
 library(labelled)
 
+load("data/m3_1e6_cost_freq.rda")
+
 # functions used ----------------------------------------------------------
 
 # function to invert the scoring on a Likert scale
@@ -327,6 +329,7 @@ utila_df <-
     PartnerStatus,
     RelativeNeed,
     RelativeMaternalInvestment,
+    RelativeMaternalInvestment2,
     Neighborhood2F,
     StayAtHomeMom,
     StayAtHomeMomF,
@@ -361,4 +364,5 @@ utila_df <-
 
 #HomeInstabilityMean:Children in unstable homes likely face more adversity and find themselves having to signal to new people or face the challenge of previous caretakers leaving or moving away from friends.X
 
+householdIDs <- sample(utila_df$householdID, length(utila_df$householdID))
 caregiverSex <- sort(caregivers$CaregiverSex[caregivers$householdID %in% utila_df$householdID], na.last = T)

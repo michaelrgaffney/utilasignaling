@@ -520,7 +520,7 @@ SignalVars6 <- SignalVars5 |>
 # code breaks when inserting 550:552 in here
 plot_fullcorrmat <- ggcorrplot(
   cor(
-    SignalVars6|>
+    SignalVars6 |>
       set_names(nm = shortform_dict[names(SignalVars6)])
     ,
     use = 'pairwise.complete.obs'),
