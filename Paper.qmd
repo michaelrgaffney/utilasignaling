@@ -26,6 +26,12 @@ author:
     affiliation:
       - name: Washington State University
         department: Anthropology
+  - name: Carolyn R. Hodges-Simeon
+    orcid: 0000-0002-0691-9080
+    corresponding: false
+    affiliation:
+      - name: Boston University
+        department: Anthropology
   - name: Edward H. Hagen
     orcid: 0000-0002-5758-9093
     email: edhagen@wsu.edu
@@ -33,23 +39,19 @@ author:
     affiliation:
       - name: Washington State University
         department: Anthropology
-  - name: Carolyn R. Hodges-Simeon
-    orcid: 0000-0002-0691-9080
-    corresponding: false
-    affiliation:
-      - name: Boston University
-        department: Anthropology
 execute:
   echo: false
   warning: false
+  keep-md: true
 format:
   docx:
     number-sections: true
+    prefer-html: true
   html:
     toc: true
     toc-expand: 2
     number-sections: true
-lightbox: true
+lightbox: false
 editor: visual
 tbl-cap-location: bottom
 bibliography: signaling.bib
@@ -70,6 +72,7 @@ source("dictionaries.R", local = knitr::knit_global())
 source("analysisforpaper.R", local = knitr::knit_global())
 
 library(modelsummary)
+library(english)
 # source("regularize.R")
 ```
 
@@ -93,7 +96,7 @@ While parent-offspring conflict and sibling competition are likely ubiquitous, t
 
 Humans are a uniquely interdependent species among the living primates [@tomasello2012] in that one’s fitness prospects depend greatly on a network of close kin and other social allies [@apicella2019]. This need for others is most intense with children, who are born highly altricial and require many years of investment to develop to the point where they can obtain enough food to survive on their own and develop the social skills needed to succeed in their communities [@kaplan2009; @rosenberg2021; @schniter2015]. Much of this investment comes from mothers and fathers [@kramer2018]. However, grandparents, aunts, uncles, and non-relatives also provide significant investment in children in many societies [@kramer2018; @sear2008], which was likely favored due to a combination of inclusive fitness benefits, reciprocity, and reputation management [@gurven2000] + (Schniter Preprint (permission needed). Children also often serve as alloparents, helping to raise their younger siblings via direct care, food collection and preparation, and other family tasks [@hrdy2009; @meehan2009; @sear2008] despite still requiring substantial amounts of investment themselves [@kramer2018a].
 
-Children’s potential to invest in their families can also cause conflicts with their parents. Older children might prefer to spend their time investing in romantic or other social relationships, or learning valuable skills, whereas parents might prefer them to care for their siblings, acquire or prepare food, or complete other household chores [@lowe2003; @syme2023a]. Conflicts of interest over investment in the family also appear to extend to when a child starts having their own children [@kushnick2023; @emlen1995], with parents potentially benefiting from delaying the reproductive careers of certain offspring in order to gain more allocare for their other children [@flinn1989; @emlen1992] or speeding up a child’s departure from the household in order to provide more parental investment to other children [@kushnick2023].
+Children’s potential to invest in their families can also cause conflicts with their parents. Older children might prefer to spend their time investing in romantic or other social relationships, or learning valuable skills, whereas parents might prefer them to care for their siblings, acquire or prepare food, or complete other household chores [@lowe2003; @syme2023]. Conflicts of interest over investment in the family also appear to extend to when a child starts having their own children [@kushnick2023; @emlen1995], with parents potentially benefiting from delaying the reproductive careers of certain offspring in order to gain more allocare for their other children [@flinn1989; @emlen1992] or speeding up a child’s departure from the household in order to provide more parental investment to other children [@kushnick2023].
 
 ## Signals of needs and wants
 
@@ -105,7 +108,7 @@ Credible signals can nevertheless evolve and be maintained in multiple ways. Sig
 
 In the context of child signals of need, a child has access to information about their internal state, which is unavailable to others, that allows them to estimate their valuation of additional investment. By signaling in a credible way, the child reveals their resource valuation to potential caretakers who may be skeptical of the child’s claims due to the common conflicts of interest described above. With the information revealed by the signal, caretakers should generally be more likely to provide additional support due to their fitness interest in the child’s wellbeing. When this is the case, all parties are better off than they would be without the signal, with caretakers benefitting from the revelation of fitness-relevant information and the child benefitting from the increased likelihood of a beneficial response.
 
-However, even credible signals of needs or wants might not result in a beneficial response because belief in a child’s need is not the only factor determining the form and amount of support given by caregivers. Instead, caregivers are expected to weigh the costs and benefits of support against other options [@daly1987; @daly1983]. Ancestrally, this likely often meant evaluating the viability of the child as well as how much a particular resource benefited one child relative to other children, current or future[@clutton-brock1991; @daly1983; @dawkins1976; @hagen1999]. The former is thought to have resulted in children having to demonstrate their vigor early in life [@soltis2004], while the latter is expected to result in context-specific support [@beaulieu2008; @frankenhuis2022]. For example, one unit of a resource is often expected to be worth more to a newborn than an adolescent, favoring that investment flowing to the newborn all else being equal. However, if resources are in short supply, parents may benefit more from investing more in older children as they are closer to reaching adulthood and have higher reproductive value [@daly1983]. Additionally, a parent may also decide against investing in a child, despite deeming that investment worthwhile, if time is not right (e.g., if a mother preferred to breastfeed during rest rather than foraging) [@altmann1980]. When this is the case, outward conflicts may exaggerate the extent of a conflict of interest and involve parents teaching children ways to behave that benefit them both [@altmann1980]. Finally, caregivers often have better information about the costs and benefits of various items and actions, and therefore can make more beneficial decisions for a child than the child can herself (e.g., preventing a child from playing with matches).
+However, even credible signals of needs or wants might not result in a beneficial response because belief in a child’s need is not the only factor determining the form and amount of support given by caregivers. Instead, caregivers are expected to weigh the costs and benefits of support against other options [@daly1987; @daly1983]. Ancestrally, this likely often meant evaluating the viability of the child as well as how much a particular resource benefited one child relative to other children, current or future [@clutton-brock1991; @daly1983; @dawkins1976; @hagen1999]. The former is thought to have resulted in children having to demonstrate their vigor early in life [@soltis2004], while the latter is expected to result in context-specific support [@beaulieu2008; @frankenhuis2022]. For example, one unit of a resource is often expected to be worth more to a newborn than an adolescent, favoring that investment flowing to the newborn all else being equal. However, if resources are in short supply, parents may benefit more from investing more in older children as they are closer to reaching adulthood and have higher reproductive value [@daly1983]. Additionally, a parent may also decide against investing in a child, despite deeming that investment worthwhile, if time is not right (e.g., if a mother preferred to breastfeed during rest rather than foraging) [@altmann1980]. When this is the case, outward conflicts may exaggerate the extent of a conflict of interest and involve parents teaching children ways to behave that benefit them both [@altmann1980]. Finally, caregivers often have better information about the costs and benefits of various items and actions, and therefore can make more beneficial decisions for a child than the child can herself (e.g., preventing a child from playing with matches).
 
 Saved for now: Although differing in their details, a common theme is that the indirect fitness costs signalers incur from imposing costs on their that parents and siblings through begging (be them energetic costs, survival costs, or reduced likelihood of future siblings) creates a floor to possible deception but falls short of preventing it [@daly1990; @wells2003].
 
@@ -113,7 +116,7 @@ Saved for now: Throughout human evolutionary history, individuals often found th
 
 ### Crying
 
-Crying is the most studied way children signal need. Crying is a human universal [@gracanin2018] with few suspected non-signaling functions outside of the role vocal cries might play in the development of vocalization [@wells2003] and the functions tears have in terms of cleaning, protecting, and lubricating the eye [@murube2009; @sznycer2023]. Hunger, pain, anger, fear, and separation are all common causes of crying [@vingerhoets2013; @wells2003], although tear production also often happens with joyful events [@sznycer2023; @vingerhoets2013; @zickfeld].
+Crying is the most studied way children signal need. Crying is a human universal [@gracanin2018] with few suspected non-signaling functions outside of the role vocal cries might play in the development of vocalization [@wells2003] and the functions tears have in cleaning, protecting, and lubricating the eye [@murube2009; @sznycer2023]. Hunger, pain, anger, fear, and separation are all common causes of crying [@vingerhoets2013; @wells2003], although tear production also often happens with joyful events [@sznycer2023; @vingerhoets2013; @zickfeld].
 
 Infant cries increase amounts of care, resources, and attention infants receive, as well as increase their proximity to parents [@lin2012]. For example, Karo Batak infants who cried more were breastfed more, and the length of crying bouts predicted the time mothers breastfed [@kushnick2006]. Similarly, !Kung San mothers frequently respond to crying infants by providing comfort and breastfeeding access, with comforting behaviors being far more common than behaviors restricting infants [@kruger2010]. Although this study found mothers were the most common responders, siblings, fathers, and other adults frequently stepped in so that 88% of crying bouts were responded to, with the majority of the cries ignored lasting under ten seconds. Similar responsiveness has also been reported among the Aka [@hewlett1998], the Mbendjele [@chaudhary2024], the Efe [@tronick1987], and the Ache, among whom young children have been described as “win\[ning\] most conflicts with parents simply by crying and whining” [@kaplan1987]. Studies examining the potential for long-term benefits are rare and difficult to achieve; however, during a time of high infant mortality in a sample of 13 Massai infants, those with easy temperaments were more likely to die (5/7) than those with difficult temperaments (1/6), an outcome that is consistent with signals eliciting beneficial treatment [@devries1987].
 
@@ -123,21 +126,21 @@ Although widely accepted as a signal, there is no consensus on why emotional cry
 
 ### Sadness
 
-Sadness is a type of negative affect that is generally thought to arise from loss [@horwitz2017; @levenson1999; @smith1993], especially when one has little power to reverse or mitigate the loss on one’s own [@emanuel2023; @gunderson2021]. Sadness and low mood, like other forms of psychological pain, probably evolved to motivate victims of adversity to shift their attention to the causes of adversity to mitigate its negative fitness consequences and to learn to solve or avoid future such adverse events [@andrews2009; @nesse1990; @thornhill1989]. Low mood, for example, is often thought to be adaptive in situations when activity is dangerous or unlikely to result in benefits, with anhedonia, pessimism, and fatigue all helping reduce behavior that may not be worth the costs or that may cause additional problems [@nesse2019; @nettle2009]. It may also encourage the reappraisal of one’s circumstances after new information comes to light that one’s current strategy is not working [@nesse2009].
+Sadness is a type of negative affect that is generally thought to arise from loss [@horwitz2017; @levenson1999; @smith1993], especially when one has little power to reverse or mitigate the loss without help [@emanuel2023; @gunderson2021]. Sadness and low mood, like other forms of psychological pain, probably evolved to motivate victims of adversity to shift their attention to the causes of adversity to mitigate its negative fitness consequences and to learn to solve or avoid future such adverse events [@andrews2009; @nesse1990; @thornhill1989]. Low mood, for example, is often thought to be adaptive in situations when activity is dangerous or unlikely to result in benefits, with anhedonia, pessimism, and fatigue all helping reduce behavior that may not be worth the costs or that may cause additional problems [@nesse2019; @nettle2009]. It may also encourage the reappraisal of one’s circumstances after new information comes to light that one’s current strategy is not working [@nesse2009].
 
 Through the reduction in behavior and attention in one’s usual interests that can accompany sadness and low-mood [@nettle2009], one’s relatives and other social partners would likely gain some indication, in the form of cues, that the sad individual was experiencing adversity and could benefit from increased support. In addition to this cue-based information, sadness also results in facial expressions and crying, both of which probably evolved to indicate need [@balsters2013; @bowlby1980; @reed2017; @darwin1872]. Such expressions seem to be important to conveying this information as is seen by responses to those who cannot produce certain elements of facial expressions like tear production [@hasson2009; @nesse2019] or certain facial movements [@bogart2012; @bogart2010].
 
 ### Temper tantrums
 
-Temper tantrums may also be the result of adaptive strategies by which children can elicit more support from parents [@koch2003]. They are common in children from 18 months to 4 years old [@potegal2003] but also exist among older children, albeit with decreased frequency [@macfarlane1962; @barbarin1999; @ward2013; @osterman2010; @goodenough1931; @bhatia1990]. Temper tantrums vary in their severity and include behaviors ranging from crying, shrieking, and screaming to violent bodily movements, aggression, and self-harm [@potegal2003]. Similar behaviors are also seen in other young animals, often surrounding feeding or weaning conflict [@altmann1980; @goodall1986; @schaller1964]. Tantrums have been reported in many societies with different forms of subsistence systems, political organization, and norms surrounding anger and parenting [@albino1956; @banisalameh2021; @fouts2005; @henderson1966; @hilger1957; @konner1974; @ward1970; @johnson2003; @bhatia1990; @myers1988; @dubois @konner1972], suggesting they might be a human universal [@potegal2019]. As with the other proposed signals of need, they are capable of eliciting a wide range of responses, including pro-child responses, neutral responses (e.g., parents ignoring the child) [@hilger1957; @konner1974; @johnson2003], and negative responses like abuse [@schmitt1987].
+Temper tantrums may also be the result of adaptive strategies by which children can elicit more support from parents [@koch2003]. They are common in children from 18 months to 4 years old [@potegal2003] but also exist among older children, albeit with decreased frequency [@macfarlane1962; @barbarin1999; @ward2013; @osterman2010; @goodenough1931; @bhatia1990]. Temper tantrums vary in their severity and include behaviors ranging from crying, shrieking, and screaming to violent bodily movements, aggression, and self-harm [@potegal2003]. Similar behaviors are also seen in other young animals, often surrounding feeding or weaning conflict [@altmann1980; @goodall1986; @schaller1964]. Tantrums have been reported in many societies with different forms of subsistence systems, political organization, and norms surrounding anger and parenting [@albino1956; @banisalameh2021; @fouts2005; @henderson1966; @hilger1957; @konner1974; @ward1970; @johnson2003; @bhatia1990; @myers1988; @dubois @konner1972], suggesting they might be a human universal [@potegal2019]. As with the other proposed signals of need, they are capable of eliciting a wide range of responses, including pro-child responses (e.g., parents giving in to a child’s wishes), neutral responses [e.g., parents ignoring the child, @hilger1957; @konner1974; @johnson2003], and negative responses like abuse [@schmitt1987].
 
 As with the vocalizations that come with crying, temper tantrums might motivate caretakers to upregulate their support of the signaler due to the energetic costs of tantrums or the increased risk of predation stemming from the noisy display, both of which might result in credible signals if they are costly enough to deter faking [@lummaa1998]. In addition, tantrums also impose direct costs on caretakers who may be less able to complete important tasks [@altmann1980] like finding or preparing food or taking care of other children.
 
-Another possibility is that temper tantrums carry the risk or implication of self-harm. For example, Utilian mothers reported in focus groups that some temper tantrums involved children banging their heads on things when they do not get what they want, behaviors that have been reported in other populations [@belden2008; @burrows1953; @daniels2012; @dennis1940; @vandenakker2022]. Similarly, young chimpanzees have been observed to beat their heads on the ground when refused access to breast milk [@goodall1986], and American white pelican chicks have been found to throw themselves on the ground, flail violently, and bite at their own wings when begging for food [@schaller1964]. Such behaviors s could credibly signal need as they are likely relatively less costly to those who are truly in dire need compared to those who are not, thus deterring deceptive signaling [@hagen2008].
+Another possibility is that temper tantrums carry the risk or implication of self-harm. For example, Utilian mothers reported in focus groups that some temper tantrums involved children banging their heads on things when they do not get what they want, behaviors that have been reported in other populations [@belden2008; @burrows1953; @daniels2012; @dennis1940; @vandenakker2022]. Similarly, young chimpanzees have been observed to beat their heads on the ground when refused access to breast milk [@goodall1986], and American white pelican chicks have been found to throw themselves on the ground, flail violently, and bite at their own wings when begging for food [@schaller1964]. Such behaviors could credibly signal need as they are likely relatively less costly to those who are truly in dire need compared to those who are not, thus deterring deceptive signaling [@hagen2008].
 
 ## Study Aims
 
-Although infant signals of need, particularly infant cries, have been extensively studied in many populations [@barr1991; @fouts2005; @konner1974; @kruger2010; @kushnick2006; @meehan2017; @müller2021; @tronick1987], the full range of potential child signals of need, which likely extend beyond cries, has never been investigated in children of all ages. In particular, how and when older children signal need has rarely been investigated [for one exception, see @syme2023a].
+Although infant signals of need, particularly infant cries, have been extensively studied in many populations [@barr1991; @fouts2005; @konner1974; @kruger2010; @kushnick2006; @meehan2017; @müller2021; @tronick1987], the full range of potential child signals of need, which likely extend beyond cries, has never been investigated in children of all ages. In particular, how and when older children signal need has rarely been investigated [for one exception, see @syme2023].
 
 This study aimed to establish the natural history of child signaling in Utila, Honduras, by quantifying the frequencies of common child signals of need and various types of caregiver responses. From these, we used signaling theory to explore 1) the causes of child signals of need, 2) how and why signal costs might vary, 3) how parents respond to indications of child need, 4) how signaling behavior changes with age and sex, 5) and if there were differences in child signaling and parental responses in two subpopulations that face different levels of social and economic adversity. More specifically, we hypothesized that children have evolved strategies to tailor their signals of need to 1) their valuation of a given resource, 2) the presence of existing information about a child's needs and wants (i.e., potential to benefit from a resource) and 3) the extent of conflicts of interest with caretakers, which should influence signal cost. Such strategies can lead to some combination of verbal requests for more support, facial sadness, crying, withdrawal, temper tantrums and self-harm, all of which may be effective in certain circumstances and are sometimes successful in eliciting more support from caretakers, despite a child's low status and formidability.
 
@@ -147,15 +150,15 @@ A major challenge when studying signals of need is the fact that such signaling 
 
 ## Study population
 
-This study of children aged `{r} paste(range(modeldf$ChildAge), collapse="-")` and their parents and other primary caretakers, was conducted in Utila, Honduras, one of the country’s small Bay Islands in the Western Caribbean. Participants in the study were sampled from two populations who face different levels of economic and social adversity: 1) a long-standing English-speaking community primarily comprising descendants of British immigrants who arrived on the island in the 1800’s, and 2) a more recent community of Spanish-speakers, mostly from the mainland. Compared to those born on Utila, immigrants from the mainland [@davis2014] are more likely to live in crowded and unsanitary conditions, face active discrimination [@garcia2017], and experience economic uncertainty due the predominance of low paying, seasonal jobs primarily related to the island’s diving tourism industry [@garcia2018; @stonich2000]. Such inequality appears to be increasing in response to recent growth in the tourism industry, with the majority of wealth from tourism being enjoyed by a small portion of native English-speaking islanders and other Westerners [@davis2014].
+This study of children aged `{r} paste(range(modeldf$ChildAge), collapse="-")` and their parents and other primary caretakers, was conducted in Utila, Honduras, one of the country’s small Bay Islands in the Western Caribbean. Participants in the study were sampled from two populations who face different levels of economic and social adversity: 1) a long-standing English-speaking community primarily comprising descendants of British immigrants who arrived on the island in the 1800’s, and 2) a more recent community of Spanish-speakers, mostly from mainland Honduras. Compared to the former, the latter are more likely to live in crowded and suboptimal conditions, face active discrimination and increased stress [@garcia2017], and experience economic uncertainty due the predominance of low paying, seasonal jobs primarily related to the island’s diving tourism industry [@garcia2018; @stonich2000]. Such inequality appears to be increasing in response to recent growth in the tourism industry, with the majority of wealth from tourism flowing to a small portion of native English-speaking islanders and other Westerners [@davis2014].
 
 ## Focus group interviews
 
-To inform development of our survey questionnaire on child signaling, focus groups of Utilan parents were held in July 2022. Parents indicated frequent sibling competition and various ways children might signal need. Both Spanish-speaking and English-speaking moms reported that fighting between siblings was extremely common, with fights over toys, gifts, and phone time being the most reported causes. In both populations, crying and various forms of withdrawal were listed as the most common responses to a child not receiving investment or support, followed by temper tantrums and making messes in their home. Spanish-speaking mothers reported that refusing to do homework was a common tactic, while English-speaking mothers emphasized running away and self-harm (e.g., a child slamming their head on the ground) to a greater degree. In response to these hypothesized signals, discipline was common. Although the mothers generally reported that children were treated equally, needier children were described as getting more resources from parents, perhaps due to differences in signaling among children as well as information caretakers gained from cues of need.
+To inform development of our survey questionnaire on child signaling, focus groups of Utilian parents were held in July 2022. Parents indicated frequent sibling competition and various ways children might signal need. Both Spanish-speaking and English-speaking moms reported that fighting between siblings was extremely common, with fights over toys, gifts, and phone time being the most reported causes. In both populations, crying and various forms of withdrawal were listed as the most common responses to a child not receiving investment or support, followed by temper tantrums and making messes in their home. Spanish-speaking mothers reported that refusing to do homework was a common tactic, while English-speaking mothers emphasized running away and self-harm (e.g., a child slamming their head on the ground) to a greater degree. In response to these hypothesized signals, discipline was common. Although the mothers generally reported that children were treated equally, needier children were described as getting more resources from parents, perhaps due to differences in signaling among children as well as information caretakers gained from cues of need.
 
 ## Sampling
 
-Participants for this study were recruited through convenience sampling. JH recruited early participants with the help of primary informants and the use of snowball sampling. Participants were also recruited via Facebook posts and fliers which were sent home with children attending Utila's Methodist school.
+Participants for this study were recruited through convenience sampling. JH recruited early participants with the help of primary informants and the use of snowball sampling. Participants were also recruited via Facebook posts.
 
 In all forms of recruitment, participants were informed of the purpose of the study, what they would be asked to do, and the inclusion criteria, such as being 18 or older, having permanent residence on Utila, and having a child between 6 and 18 years old.
 
@@ -165,9 +168,9 @@ All participants for the survey portion of the study met the inclusion criteria.
 
 ## Ethics
 
-All participants provided informed consent. The surveys, which included many topics outside of child signaling, were designed to last about an hour, plus 20 minutes for each additional child. Participants were paid \$XXXXX for the survey portion of the study.
+All participants provided informed consent. The surveys, which included many topics outside of child signaling, were designed to last about an hour, plus 20 minutes for each additional child. Participants were paid 350 lempiras (\$13.84 at the time of writing) for the survey portion of the study.
 
-This study was approved by the WSU xxxIRBINFOxxx and BU xxxIRBINFOxxx.
+This study was approved by the WSU and BU IRBs.
 
 ## Survey
 
@@ -175,7 +178,7 @@ The data for this study were collected as part of the Utila Child Health Project
 
 ### Frequency of child signaling, alloparenting contributions, and conflict with caretaker
 
-We used 6-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
+We used six-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
 
 |  |  |
 |--------------------------|----------------------------------------------|
@@ -195,29 +198,29 @@ We also calculated the summed frequency of child alloparenting contributions by 
 
 ### Relative neediness of children and relative investment in children within the family
 
-We used 6-point Likert scales for parental reports of 1) the relative neediness of children within the household, and 2) the relative investment they provide to each participating child compared to the rest of their children. Both questions were framed need as involving time, effort, and resources. See Table @stbl-relvars for exact wording.
+We used six-point Likert scales for parental reports of 1) the relative neediness of children within the household, and 2) the relative investment they provide to each participating child compared to the rest of their children. Both questions were framed need as involving time, effort, and resources. See Table @stbl-relvars for exact wording.
 
 ### Causes of, and responses to, the last instance of child signaling of need
 
-We asked caretakers about the last time each participating child was sad or cried. Caretakers provided a free response of the reason(s) for the emotional display, and their responses to it. The researcher then binned responses into at least one of 31 categories which included positive, negative, and neutral responses (from the child's perspective). For the full list of options see @stbl-response-valence. We then created a *caregiver response* variable, which was coded as 1 for a positive response (e.g., helping child), 0 for a neutral response (e.g., not responding), and -1 for a negative response (e.g., punishment; all from the child's perspective). MG and KS also coded the causes for the presence or absence of 17 elements (e.g., whether the caused involved the child was asked to do an *unwanted task*, *punishment*, *family conflict*, and/or *discomfort, pain, injury, or illness*).
+We asked caretakers about the last time each participating child was sad or cried. Caretakers provided a free response of the reason(s) for the emotional display, and their responses to it. The researcher then binned responses into at least one of 31 categories which included positive, negative, and neutral responses (from the child's perspective). For the full list of options see @stbl-response-valence. We then created a *caregiver response* variable, which was coded as 1 for a positive response (e.g., helping child), 0 for a neutral response (e.g., not responding), and -1 for a negative response (e.g., punishment; all from the child's perspective). MG and KS also coded the causes for the presence or absence of 17 elements (e.g., whether the cause involved *punishment*, *family conflict*, and/or *discomfort, pain, injury, or illness*).
 
 ### Caretaker perceptions of child health and ability to avoid illness
 
-Caretakers were asked about the frequency of their child missing school and their child's history of medical problems in general terms (i.e., the extent to which they experienced a "variety of medical issues"). Both involved the use of five point Likert scales, the scores of which were averaged for use in analyses. See @stbl-medical-record for the wording of these variables.
+Caretakers were asked about the frequency of their child missing school and their child's history of medical problems in general terms (i.e., the extent to which they experienced a "variety of medical issues"). Both involved the use of five-point Likert scales, the scores of which were averaged for use in analyses. See @stbl-medical-record for the wording of these variables.
 
-Caretakers were also asked three questions using a five point Likert scale about their child's susceptibility to illness. We reversed the scores on two measures so that a score of 5 corresponded with the lowest susceptibility to illness before we averaged the scores of these to create a mean *illness avoidance* variable. In the `{r} sum((!is.na(modeldf$IllnessSusceptibility2)) & is.na(modeldf$IllnessSusceptibility3))` instance in which we only had data for 2 of the measures, we still calculated the mean but used a numerator of 2. See @stbl-healthvars for the wording of these variables.
+Caretakers were also asked three questions using a five-point Likert scale about their child's susceptibility to illness. We reversed the scores on two measures so that a score of 5 corresponded with the lowest susceptibility to illness before we averaged the scores of these to create a mean *illness avoidance* variable. In the `{r} sum((!is.na(modeldf$IllnessSusceptibility2)) & is.na(modeldf$IllnessSusceptibility3))` instance in which we only had data for two of the measures, we still calculated the mean but used a numerator of 2. See @stbl-healthvars for the wording of these variables.
 
-### Caretaker perceptions of house quality, neighborhood quality, home instability, and food security
+### Caretaker perceptions of home sanitation, neighborhood quality, home instability, and food security
 
-Affirmative caregiver responses to the following questions about their home were summed to create a home quality index: having an indoor bathroom, having a bathroom that is not shared with anyone outside of the household, having a flush toilet, having running water to wash hands in the bathroom, and having a home which did not flood in the last year.
+Affirmative caregiver responses to the following questions about their home were summed to create a home sanitation index: having an indoor bathroom, having a bathroom that is not shared with anyone outside of the household, having a flush toilet, having running water to wash hands in the bathroom, and having a home which did not flood in the last year.
 
-Caregiver perceptions of neighborhood quality were measured using ten questions relating to the costs and benefits associated with living in one's neighborhood. The mean of these values was used in analyses as a neighborhood quality index. Levels of home instability were measured with four questions covering the degree to which the caregiver's family had/has to move homes and whether people move in and out of their homes frequently. For wording of the these items, which used five point Likert scales, see @stbl-Neighborhood-Quality and @stbl-Home-Instability.
+Caregiver perceptions of neighborhood quality were measured using ten questions relating to the safety and suitability of their neighborhood for raising children in addition to questions explicitly asking about neighborhood quality, e.g., "Sometimes I hear about illegal drug activity in my neighborhood." The mean of these values was used in analyses as a neighborhood quality index. Levels of home instability were measured with four questions covering the degree to which the caregiver's family had/has to move homes and whether people move in and out of their homes frequently. For wording of the these items, which used five-point Likert scales, see @stbl-Neighborhood-Quality and @stbl-Home-Instability.
 
-We used a modified version of the USDA Food Security Questionnaire [@blumberg1999] to measure food insecurity, with the most significant changes being converting of the measures to a five point Likert scale and averaging them for a food insecurity index. See @stbl-Food-Security for the wording of these variables.
+We used a modified version of the USDA Food Security Questionnaire [@blumberg1999] to measure food insecurity, with the most significant changes being converting the measures to a five-point Likert scale and averaging them for a food insecurity index. See @stbl-Food-Security for the wording of these variables.
 
 ### Demographic questions
 
-The survey also included many demographic questions about the caretakers and their households. Those used in this study included the (1) ages of those in the household, (2) sexes of those in the household, (3) kinship ties within households, (4) partnership status of the primary caregiver, (5) number of adults who provide childcare within the household, (6) highest level of education of the primary caregiver, (7) immigration status (in regards to Utila), (8) monthly household income, (9) neighborhood of residence, (10) current job of the primary caretaker, and (11) ownership of various possessions (e.g., homes, washing machines, or cellphones; see @stbl-possession-list for full list). These data allowed us to calculate the number of children (total, younger, and older) and adults within the household as well as the genetic relatedness between siblings. We also created a variable for residence in Camponado, a densely populated neighborhood on the island with relatively poor sanitation in which most individuals from the mainland live that is seen as the most dangerous and poorest part of Utila [@garcia2017].
+The survey also included many demographic questions about the caretakers and their households. Those used in this study included the (1) ages of those in the household, (2) sexes of those in the household, (3) kinship ties within households, (4) partnership status of the primary caregiver, (5) number of adults who provide childcare within the household, (6) highest level of education of the primary caregiver, (7) immigration status (in regards to Utila), (8) monthly household income, (9) neighborhood of residence, (10) current job of the primary caretaker, and (11) ownership of various possessions (e.g., homes, washing machines, or cellphones; see @stbl-possession-list for full list). These data allowed us to calculate the number of children (total, younger, and older) and adults within the household as well as the genetic relatedness between siblings. We also created a variable for residence in Camponado, a low-SES, densely populated neighborhood on the island with less sanitation access mostly comprising individuals from the mainland [@garcia2017].
 
 In one instance where data for caregiver age was missing, we set the missing value to the mean. This affected data for two children.
 
@@ -225,7 +228,7 @@ In one instance where data for caregiver age was missing, we set the missing val
 
 All statistical analyses were exploratory. Whereas confirmatory studies test prespecified hypotheses generated blind to the data, exploratory analyses are data-driven and prioritize discovery: they risk overfitting the data, generating false positives, but can reveal unexpected yet potentially important relationships that warrant future investigation [@tukey1977].
 
-The overall structure of our data was analyzed with principle components analysis (PCA), Bayesian graphical models (BGM), and minimum spanning trees (MST). PCA is a linear transformation of the data to a new orthonormal coordinate system in which the the first principle component (PC1) corresponds to the axis of maximum variance, the second principle component (PC2) corresponds to the axis perpendicular to the first of the maximum of the remaining variance, and so forth. Among other uses, PCA identifies the linear combinations of variables that account for most of the variance, thereby providing a lower dimensional representation of high dimensional data. In BGA, variables are nodes in an undirected graph, and edges represent their conditional dependencies. Specifically, an edge indicates that two variables are dependent, conditional on the other variables; edge weights indicate the strength and sign of the relationship. Importantly, the absence of an edge indicates that two variables are conditionally independent [@huth2023]. The graph can therefore identify clusters of dependent variables that are independent of other variables. From the graphical models identified with BGM, we extracted an MST, i.e., a subset of the graph in which each node (variable) is connected without any cycles and with the minimum total "distance" between the nodes (more strongly dependent variables, i.e., those with larger absolute weights, having lower "distances"). The MST is therefore typically a dramatically simplified representation of the original graph that often identifies the most important edges among the nodes, which in our case are the most important dependencies among the variables.
+The overall structure of our data was analyzed with principal components analysis (PCA), Bayesian graphical models (BGM), and minimum spanning trees (MST). PCA is a linear transformation of the data to a new orthonormal coordinate system in which the the first principal component (PC1) corresponds to the axis of maximum variance, the second principal component (PC2) corresponds to the axis perpendicular to the first of the maximum of the remaining variance, and so forth. Among other uses, PCA identifies the linear combinations of variables that account for most of the variance, thereby providing a lower dimensional representation of high dimensional data. In BGM, variables are nodes in an undirected graph, and edges represent their conditional dependencies. Specifically, an edge indicates that two variables are dependent, conditional on the other variables; edge weights indicate the strength and sign of the relationship. Importantly, the absence of an edge indicates that two variables are conditionally independent [@huth2023]. The graph can therefore identify clusters of dependent variables that are independent of other variables. From the graphical models identified with BGM, we extracted an MST, i.e., a subset of the graph in which each node (variable) is connected without any cycles and with the minimum total "distance" between the nodes (more strongly dependent variables, i.e., those with larger absolute weights, having lower "distances"). The MST is therefore typically a dramatically simplified representation of the original graph that often identifies the most important edges among the nodes, which in our case are the most important dependencies among the variables.
 
 To investigate the associations between potential causes of child signaling and conflict with caretakers and caregiver reports of child behavior, we used elasticnet regression models. Elasticnet models are useful in cases where the number of predictor variables (p) is large relative to the number of observations (n). These models, often referred to as penalized or regularized regression (e.g., lasso and ridge regression), aim to limit overfitting the data (variance) by allowing some bias, i.e., by optimizing a bias-variance tradeoff. In particular, lasso regression sets the coefficients of uninformative variables to exactly 0, thereby serving as a form of variable selection [@zou2005].
 
@@ -241,13 +244,20 @@ The anonymized data used in the study are available at https://github.com/grassh
 
 # Results
 
-`{r} dplyr::n_distinct(modeldf$householdID)` primary caretakers (females = `{r} table(caregivers$CaregiverSex)[1]`, males = `{r} table(caregivers$CaregiverSex)[2]`, non-binary = `{r} table(caregivers$CaregiverSex)[3]`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. Anthropometric and signaling data exist for `{r} nrow(modeldf_FULLANTHROPOMETRICS)` children, of whom `{r} sex_table2[1]` were female and `{r} sex_table2[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
+```{r}
+# primary_caregivers <- str_to_sentence(english::english(sum(caregivers$HasSignalingData)))
+
+tbl <- table(caregivers$HasSignalingData, caregivers$CaregiverSex)
+primary_caregivers <- tbl[2,1] + tbl[2,2] + tbl[2,3]
+```
+
+`{r} primary_caregivers` primary caregivers (females = `{r} tbl['TRUE', 'Female']`, males = `{r} tbl['TRUE', 'Male']`, non-binary = `{r} tbl['TRUE', 'Non-binary / third gender']`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
 
 ```{r sumtab_combined}
 #| label: tbl-sumtab_combined
 #| tbl-cap: Summary statistics for continuous variables.
 
-kable(custom.summarize(modeldf, longform_dict[1:23])) %>% kable_styling()
+kable(custom.summarize(modeldf, longform_dict[1:23])) #%>% kable_styling()
 ```
 
 ```{r sumtab_factors}
@@ -268,7 +278,7 @@ datasummary_skim(data = dx, type = "categorical")
 A PCA of primary study variables found that sociodemographic and ecological variables loaded primarily on PC1, whereas the child signaling, conflict, and child age variables loaded primarily on PC2. Child signaling variables modestly load on PC1 as well in a direction suggesting that greater signaling covaries with more adverse environments. See @fig-PCA.
 
 ::: {#fig-PCA}
-![](Figures/plot_pca.svg)
+![](Figures/plot_pca.png)
 
 A)  Loadings of PC1 and PC2 on each variable. B) Biplot map of PC1 and PC2. Each point is one child. Arrows represent the loadings of PC1 and PC2 on each variable.
 :::
@@ -336,7 +346,7 @@ Frequency of a child's alloparenting effort (per month) as reported by primary c
 Using lasso regression, we explored all potential predictors of each child signal frequency, as well as of conflict frequency. See @fig-lasso.
 
 ::: {#fig-lasso}
-![](Figures/plot_lasso.svg)
+![](Figures/plot_lasso.png)
 
 Lasso regression models of each child signaling frequency and conflict frequency. Variables whose coefficient values were shrunk to 0 are not displayed. Models fit using quasi-Poisson regression.
 :::
@@ -344,13 +354,13 @@ Lasso regression models of each child signaling frequency and conflict frequency
 The effects of particularly large risk or protective factors for child signaling are shown in @fig-signal-effects and @fig-alloparentingXsex.
 
 ::: {#fig-signal-effects}
-![](Figures/signal_effects_plot.svg)
+![](Figures/signal_effects_plot.png)
 
 Effects of selected predictors of child signaling frequencies when holding continuous variables at their mean and factor variables at their mode.
 :::
 
 ::: {#fig-alloparentingXsex}
-![](Figures/plot_alloparentingXsex.svg)
+![](Figures/plot_alloparentingXsex.png)
 
 Effects of alloparenting frequency (per month) and signal cost and frequency of temper tantrums by sex.
 :::
@@ -358,7 +368,7 @@ Effects of alloparenting frequency (per month) and signal cost and frequency of 
 The effects of particularly large risk or protective factors for conflict frequency are shown in @fig-conflict-effects.
 
 ::: {#fig-conflict-effects}
-![](Figures/conflict_effects_plot.svg)
+![](Figures/conflict_effects_plot.png)
 
 Effects of selected predictors of child-parent conflict frequencies when holding continuous variables at their mean and factor variables at their mode.
 :::
@@ -370,7 +380,7 @@ Primary caretakers rarely described a child as “much less” `{r} fmt_sum(mode
 There were positive relationships between perceived relative neediness within the family and both child age and the frequency of child sadness. See @fig-effect_relativeneed.
 
 ::: {#fig-effect_relativeneed}
-![](Figures/plot_need_combined.svg)
+![](Figures/plot_need_combined.png)
 
 The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children. A: Effect of child age on relative neediness B: Effect child sadness frequency on relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
 :::
@@ -380,7 +390,7 @@ The proportion of children perceived by caretakers as being more needy, as needy
 Signals are capable of eliciting better treatment because the information they provide alters the behavior of signal targets in ways that benefit the signaler. For this reason, we tested the association between caretaker perceptions of relative child need within the household and the caretaker's relative investment within the household. Consistent with signaling theory, our model predicts a greater proportion of caretakers investing more in children who they deem needier and a greater proportion of caretakers investing less in children they deem less needy, controlling for the age of the child, and household demographics. See @fig-plot_relative_investment.
 
 ::: {#fig-plot_relative_investment}
-![](Figures/plot_invest_need.svg)
+![](Figures/plot_invest_need.png)
 
 The effect of perceived need (in terms of time, effort, and resources) relative investment within the household. Outcome variable question wording: How much time, effort, and resources do you put into this child compared to your other children?
 :::
@@ -401,10 +411,10 @@ Frequencies of caregiver response to the last instance of child signaling by the
 
 There were `{r} response_overlap[1,1]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
-Our models found no evidence of relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness, and less likely to respond positively when they attributed the cause of signaling to child punishment (any statistic report here?). See @fig-effect_last_signal_response.
+Our models found no evidence of relationships between, child age, child sex, the number of children in the household, and log family income and the valence of parental reponses (positive, neutral, or negative) from the child's perspective. However, primary caretakers were more likely to respond positively towards a child when they attributed the cause of signaling to discomfort, pain, injury, or illness, and less likely to respond positively when they attributed the cause of signaling to family conflict, child punishment, child trangressions, or a child losing an item or privleges. See @fig-effect_last_signal_response.
 
 ::: {#fig-effect_last_signal_response}
-![](Figures/plot_caregiver_response_combined.svg)
+![](Figures/plot_caregiver_response_combined.png)
 
 Effects of selected predictors of the likelihood of positive, neutral, and negative responses to the last time a child became sad or cried when holding continuous variables at their mean and factor variables at their mode. 1 = evidence of the cause in the caregiver report; 0 = no evidence. The endpoints of the lines are dodged slightly for greater visibility. Dot size represents model predictions for each participant given their values of predictor variables. See @sfig-plot-caregiver-punish for the effect of the cause involving punishment.
 :::
@@ -415,31 +425,31 @@ Caregivers reported a wide range of child signaling frequencies. About half of c
 
 Signaling decreased with child age, and increased with conflict with their primary caretaker, which were the two variables most closely linked with signaling in the MST [@fig-mst]. In our lasso regression models (which excluded family conflict due to the likely bidirectional relationship between signaling and perceived conflict), child age and high neighborhood quality were consistently negatively associated with signaling frequency, as were household income, caregiver education, and number of adults helping with childcare. Medical problems were a consistent, albeit small positive predictor [@fig-lasso; @fig-signal-effects].
 
-Despite the differences in wealth, job certainty, discrimination, and living conditions between recent immigrants from the mainland and native Utilians [@davis2014; @garcia2017; @garcia2018; @stonich2000], primary language, immigration status, and residence in Camponado did not predict child signaling in our lasso regressions. These variables correlated with neighborhood quality, however, which was retained in our models, and lasso regression tends to retain only one of a set of correlated predictors [@zou2005].
+Despite the differences in wealth, job certainty, discrimination, and living conditions between those from the mainland and Utilians [@davis2014; @garcia2017; @garcia2018; @stonich2000], primary language, immigration status, and residence in Camponado did not predict child signaling in our lasso regressions. These variables correlated with neighborhood quality, however, which was retained in our models, and lasso regression tends to retain only one of a set of correlated predictors [@zou2005].
 
-The foregoing results are consistent with the hypothesis that sadness, crying, and tantrums are signals of need, and that children's need is higher in adverse environments and at younger ages. One possible reason for the negative association of signaling with age, which is also seen in more industrialized settings [@zeifman2013; @potegal2003; @koch2003; @macfarlane1962], is that as children mature, they are more capable of fulfilling their own needs, more able to ask others for what they need [@osterman2010], and less vulnerable to threats. The effects of age on signaling are also likely due to how age influences the costliness of signaling need. For example, while the energetic cost of crying might be costly for the youngest children, it is likely insignificant for older children. Older children might instead need to weigh the reputational harm from crying against the potential increase in social support.
+The foregoing results are consistent with the hypothesis that sadness, crying, and tantrums are signals of need, and that children's need is higher in adverse environments and at younger ages. One possible reason for the negative association of signaling with age, which is also seen in more industrialized settings [@zeifman2013; @potegal2003; @koch2003; @macfarlane1962], is that as children mature, they are more capable of fulfilling their own needs, more able to ask others for what they need [@osterman2010], and less vulnerable to threats. The effects of age on signaling are also likely due to how age influences the costliness of signaling need. For example, while the energetic cost of crying might be costly for the youngest children, it is likely insignificant for older children. Older children might instead need to weigh the reputational harm from crying [@citexxx] against the potential increase in social support.
 
-Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of costlier signals, caregiver perceptions of conflict and child signaling frequency were correlated [@fig-signal_corrplot], and family conflict was the most common cause of a child's recent signaling episode [@fig-effect_last_signal_all_responses]. Although conflicts of interest do not always lead to overt behavioral conflict [@altmann1980; @bateson1994], it is likely many, if not most, conflicts are ultimately caused by conflicts of interest. Conflicts, in turn, were negatively associated with child age and higher neigborhood quality, and positively associated with male sex, medical problems, and (oddly) caregiver education [@fig-conflict-effects].
+Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of costlier signals, caregiver perceptions of conflict and child signaling frequency were correlated [@fig-signal_corrplot], and family conflict was the most common cause of a child's recent signaling episode [@fig-effect_last_signal_all_responses]. Although conflicts of interest do not always lead to overt behavioral conflict [@altmann1980; @bateson1994], it is likely many, if not most, conflicts are ultimately caused by conflicts of interest. Conflicts, in turn, were negatively associated with child age and higher neighborhood quality, and positively associated with male sex, medical problems, and (oddly) caregiver education [@fig-conflict-effects].
 
-Caregiver responses to signals were generally positive or neutral, more so for situations involving injury and illness, and less so for situations involving family conflict, loss of privileges, and transgressions [@fig-effect_last_signal_all_responses; @fig-effect_last_signal_response]. These patterns probably reflect a combination of confluences of interest vs. conflicts of interest between child and caretaker, some of which might represent caretaker investment in some children more than others, and less caretaker uncertainty about need in cases of injury and illness. That said, our model predicts positive responses in 35% of cases involving trangressions, suggesting that children are successful in negotiating better outcomes at least some of the time.
+Caregiver responses to signals were generally positive or neutral, more so for situations involving injury and illness, and less so for situations involving family conflict, loss of privileges, and transgressions [@fig-effect_last_signal_all_responses; @fig-effect_last_signal_response]. These patterns probably reflect a combination of confluences of interest vs. conflicts of interest between child and caretaker, some of which might represent caretaker investment in some children more than others, and less caretaker uncertainty about need in cases of injury and illness. That said, our model predicts positive responses in 35% of cases involving transgressions, suggesting that children are successful in negotiating better outcomes at least some of the time.
 
 More frequent sadness was positively associated with perceived higher need relative to other children [@fig-effect_relativeneed]. Although crying and tantrums were not associated with higher perceived need, this was likely due to their high correlation with sadness and the propensity of lasso regression to retain only one of a set of correlated predictors [@zou2005]. Higher perceived need was associated with higher relative investment [@fig-plot_relative_investment]. Signaling behavior did not predict differences in relative caregiver investment beyond its effect on perceived need [@sfig-plot-invest-coefs], similar to an experimental vignette study that found that the likelihood of costly support was largely mediated by the effect of costly signaling on belief in need [@gaffney2022]. Altogether, the foregoing results generally support the hypothesis that the signals we investigated are costly, credible signals of need.
 
-Interestingly, older children were perceived to be needier than younger ones [\@ @fig-effect_relativeneed]. One likely reason for this might be that caretakers perceive the types of investment older children seek as more costly. In line with this reasoning, multiple caretakers mentioned that older kids need more money and advice and get into trouble more often. It might also be that caretakers see investing in older children as relatively costly as they seek to redirect investment toward younger, needier children.
+Interestingly, older children were perceived to be needier than younger ones [@fig-effect_relativeneed]. One likely reason for this might be that caretakers perceive the types of investment older children seek as more costly. In line with this reasoning, multiple caretakers mentioned that older kids need more money and advice and get into trouble more often. It might also be that caretakers see investing in older children as relatively costly as they seek to redirect investment toward younger, needier children.
 
-Finally, based on previous research showing that family demands, such as caring for younger siblings, was an important source of parent-offspring conflict [@syme2019], we investigated the relationship between the frequency of alloparenting by children and their frequency of signaling. Although there was little evidence for sex differences in signaling overall (perhaps because sex differences typically emerge in adolescence, and our sample of adolescents was small), there was evidence that sex interacted with alloparenting effort. We found that higher frequencies of alloparenting by girls was associated with a higher frequency of tantrums and overall signaling costs, whereas for boys this relationship was slightly negative [@fig-alloparentingXsex]. In many societies, girls do more alloparenting than boys [@helfrecht2016; @weisner1977; @barry1971; @turke1988], which matches reports from our focus groups of Utilian mothers. It is plausible that older girls are pressured to do more care of their younger siblings, which in other studies was found to spark parent-offspring conflict [@lowe2003; syme2023a]. If so, girls with excessive alloparenting responsibilities might be signaling their need for more time to invest in peer relationships and status seeking behaviors outside the household. Opposed to this interpretation, our study found a small negative assocation between girls' alloparenting and caregiver reports of conflict [@fig-lasso], although perhaps when girls do what caregivers want, caregivers report less conflict.
+Finally, based on previous research showing that family demands, such as caring for younger siblings, was an important source of parent-offspring conflict [@syme2023], we investigated the relationship between the frequency of alloparenting by children and their frequency of signaling. Although there was little evidence for sex differences in signaling overall (perhaps because sex differences typically emerge in adolescence, and our sample of adolescents was small), there was evidence that sex interacted with alloparenting effort. We found that higher frequencies of alloparenting by girls was associated with a higher frequency of tantrums and overall signaling costs, whereas for boys this relationship was slightly negative [@fig-alloparentingXsex]. In many societies, girls do more alloparenting than boys [@helfrecht2016; @weisner1977; @barry1971; @turke1988], which matches reports from our focus groups of Utilian mothers. It is plausible that older girls are pressured to do more care of their younger siblings, in line with other studies finding an association between household responsibilities, like caregiving, and parent-offspring conflict [@lowe2003; @syme2023]. If so, girls with excessive alloparenting responsibilities might be signaling their need for more time to invest in peer relationships and status seeking behaviors outside the household. Opposed to this interpretation, our study found a small negative association between girls' alloparenting and caregiver reports of conflict [@fig-lasso], although plausibly when girls do what caregivers want, caregivers report less conflict.
 
-Many models designed to explain signals of need (e.g., the begging of young birds) predict that offspring who are worse off or are receiving less investment have more to gain from signaling than those with more [@mock2011; @godfray1991; @caro2016a; @godfray2000] and multiple game theoretical models examining parent-offspring conflict have found that parental resources have a modest impact on the evolutionary stable value for offspring demand for resources [@bossan2013; @mock1997 [confirm]]. In line with this reasoning, children in lower income households and riskier environments might benefit more from signaling effort if they experience greater levels of adversity or perceive themselves as disadvantaged compared to other children they may be competing with for resources, status, and valuable social relationships.
+Many models designed to explain signals of need (e.g., the begging of young birds) predict that offspring who are worse off or are receiving less investment have more to gain from signaling than those with more [@mock2011; @godfray1991; @caro2016a; @godfray2000] and multiple game theoretical models examining parent-offspring conflict have found that parental resources have a modest impact on the evolutionary stable value for offspring demand for resources [@bossan2013; @mock1997 [confirm]]. In line with this reasoning, children in lower income households and riskier environments might benefit more from signaling effort if they experience greater levels of adversity or perceive themselves as disadvantaged compared to other children.
 
 ## Limitations
 
-The main limitation of this study is that it is completely exploratory: our data-driven analyses, which can reveal unexpected relationships and inspire new theory, also risk overfitting the data, suggesting associations that might not exist. Our study was also entirely cross-sectional, further limiting our ability to make causal inferences.
+The main limitation of this study is that it is completely exploratory: our data-driven analyses, which can reveal unexpected relationships and inspire new theory, also risk overfitting the data, suggesting associations that might not exist. Our study was also entirely cross-sectional, further limiting our ability to make causal inferences. Furthermore, our penalized regressions included many variables, some of which might have been colliders, inducing spurious associations between outcome and predictor variables.
 
 Our use of convenience and snowball sampling is also a limitation as it resulted in a non-probability sample which may not be representative of the broader population. This could happen if there was selection bias so that those who participated differed from the rest of the population in how they interacted with their children or how they assessed, remembered, and reported child behavior. All data come from caregiver reports, and therefore, reflect the biases of caretakers, whatever those might be.
 
 # Conclusion
 
-Children face the challenge of eliciting support from others in times of adversity and opportunity. The signaling strategies of Utilian children were highly correlated and engaged in by children of all ages, albeit more frequently by younger children and those living in more adverse conditions, who plausibly had greater need. Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of costlier signals, child signaling effort was positively correlated with the frequency of conflict with caretakers and with perceptions of need, and greater perceptions of child need predicted greater investment in a given child. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
+Children face the challenge of eliciting support from others in times of adversity and opportunity. On the island of Utila, child signaling strategies were highly correlated and engaged in by children of all ages, albeit more frequently by younger children and those living in more adverse conditions, who plausibly had greater need. Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of costlier signals, child signaling effort was positively correlated with the frequency of conflict with caretakers and with perceptions of need, and greater perceptions of child need predicted greater investment in a given child. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
 
 # Supplementary Information
 
@@ -553,7 +563,7 @@ Negative: Other \[Text Box\]\
 NA (Can't remember, refuse to answer, etc)\
 Other: Other \[Text Box\]
 
-List of options for research assistant to classify participant responses to the question of how they responded when their child was last sad or cried.
+List of options for research assistants to classify participant responses to the question of how they responded when their child was last sad or cried.
 :::
 
 ::: {#stbl-possession-list}
@@ -580,7 +590,7 @@ Combinations of signaling frequencies per month. Alluvium width equals the numbe
 :::
 
 ::: {#sfig-plot-full-corrmat}
-![](Figures/plot_fullcorrmat.svg)
+![](Figures/plot_fullcorrmat.png)
 
 Complete correlation matrix of study variables.
 :::
@@ -594,7 +604,7 @@ Cluster dendrogram for the causes of child signaling. Method = ward.D2.
 :::
 
 ::: {#sfig-plot-caregiver-punish}
-![](Figures/plot_caregiver_punish.svg)
+![](Figures/plot_caregiver_punish.png)
 
 The likelihood of positive, neutral, and negative responses to the last time a child became sad or cried when punishment was implicated in the cause when holding continuous variables at their mean and factor variables at their mode. 1 = evidence of the cause involving punishment. 0 = no evidence of the cause involving punishment. The endpoints of the lines are dodged slightly for greater visibility. Dot size represents model predictions for each participant given their values of predictor variables.
 :::
@@ -618,37 +628,19 @@ Frequencies of various causes of the last time each child was sad or cried as re
 ## Coefficient plots
 
 ::: {#sfig-plot-need-coefs}
-![](Figures/plot_need_coefs.svg)
+![](Figures/plot_need_coefs.png)
 
 Effects of predictor variables on relative need between household children. Ordinal logistic regression model with elastic net penalties.
 :::
 
 ::: {#sfig-plot-invest-coefs}
-![](Figures/plot_invest_coefs.svg)
+![](Figures/plot_invest_coefs.png)
 
 Effects of predictor variables on relative investment in household children. Ordinal logistic regression model with elastic net penalties.
 :::
 
 ::: {#sfig-plot-caregiverresponse-coefs}
-![](Figures/plot_caregiverresponse_coefs.svg)
+![](Figures/plot_caregiverresponse_coefs.png)
 
 Effects of predictor variables on caregiver responses to the last time a child was sad or cried. Ordinal logistic regression model with elastic net penalties.
 :::
-
-# Deleted sections
-
-### Child anthropometrics
-
-xxxxxxxxxxDescribe camps brieflyxxxxxxxxxxxxxx - include dates and how we handled those. For cross-sectional analyses, we used the 2023 anthropometric values due to them being closer in time to the caretaker surveys.
-
-All anthropometric measurements were taken twice, in accordance with anthropometric standards [@lohman1988], and then averaged. Before being measured, participants were asked to remove their shoes and heavy articles of clothing. Height was measured to the nearest millimeter using an anthropometer, and weight was measured to the nearest 100 g with a digital scale (model name) that was used in a building with a concrete foundation. All participants were wearing lightweight clothing, so we made no adjustments for clothing weight. Grip strength was measured using a dynamometer (model name), with participants seated/standing? and told to xxxxxxxx. XXXX time was passed between the first and second measurements.
-
-Triceps and subscapular skinfold thicknesses were measured using skinfold calipers. The triceps measurement was taken at the midpoint of the upper arm. The subscapular measurement occurred immediately below the inferior angle of the scapula, being picked up diagonally at the natural fold line of the skin [@antóna]. Flexed bicep circumference was measured perpendicular to the long axis of the upper arm. For this measure participants were asked to sit/stand? and position their upper arm perpendicular to their body with their elbow being held at a 90° angle, before flexing their clenched fist towards themselves as much as they could.
-
-We computed each child's height, weight, and BMI Z-scores with respect to the CDC child growth standards [@kuczmarski2002].
-
-For our independent variables of skinfold thickness, flexed bicep circumference, and grip strength on signaling behavior, we used the residuals from generalized additive models which modeled the effect of sex and age on each measurement using the mgcv package [@wood2011]. The resulting variables represent how each child differed from the average child for their given sex and age. We also centered and scaled the skinfold thickness residuals before summing them to create a body fat index.
-
-### Old discussion parts
-
-The effect of age was smallest on child sadness. However, interpretation of this finding is more difficult due to the fact that, unlike crying and temper tantrums, sadness is thought to have important non-signaling functions including drawing one’s attention to a problem, motivating deeper analysis of one’s situation, and causing withdrawal from situations with low fitness prospects [@nesse2019; @nettle2009; @allen2003; @hagen2011]. By asking about sadness as a whole, our measure was unable to disentangle information caretakers gleaned from cues from information that came from signals.

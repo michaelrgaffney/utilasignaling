@@ -75,7 +75,7 @@ plot_lasso <-
   plot_layout(axis_titles = 'collect', ncol = 2)
 plot_lasso
 ggsave("Figures/plot_lasso.pdf", plot_lasso, width = 12, height = 12)
-ggsave("Figures/plot_lasso.svg", plot_lasso, width = 12, height = 12)
+ggsave("Figures/plot_lasso.png", plot_lasso, width = 12, height = 12)
 
 plotpredictions2 <- function(params, cond, title = NULL, plot = T){
 
@@ -113,7 +113,7 @@ signal_effects_plot &
   scico::scale_color_scico_d(palette = 'roma', begin = 0.1, end = 0.8)
 
 ggsave("Figures/signal_effects_plot.pdf", signal_effects_plot, width = 12, height = 9)
-ggsave("Figures/signal_effects_plot.svg", signal_effects_plot, width = 12, height = 9)
+ggsave("Figures/signal_effects_plot.png", signal_effects_plot, width = 12, height = 9)
 
 
 # Alloparenting special case (SignalCost)
@@ -172,7 +172,7 @@ plot_alloparentingXsex <- plot_alloparenting_cost / plot_alloparenting_cost_tant
 plot_alloparentingXsex
 
 ggsave("Figures/plot_alloparentingXsex.pdf", plot_alloparentingXsex, width = 12, height = 9)
-ggsave("Figures/plot_alloparentingXsex.svg", plot_alloparentingXsex, width = 12, height = 9)
+ggsave("Figures/plot_alloparentingXsex.png", plot_alloparentingXsex, width = 12, height = 9)
 
 # Conflict effects plot
 
@@ -202,7 +202,7 @@ conflict_effects_plot <-
 conflict_effects_plot
 
 ggsave("Figures/conflict_effects_plot.pdf", conflict_effects_plot, width = 12, height = 9)
-ggsave("Figures/conflict_effects_plot.svg", conflict_effects_plot, width = 12, height = 9)
+ggsave("Figures/conflict_effects_plot.png", conflict_effects_plot, width = 12, height = 9)
 
 # Need to plot this by sex
 # out <- plotpredictions2(signalparams, c('AlloparentingXsex', 'Sex'), plot = F)
@@ -230,7 +230,7 @@ plot_pca <- plot_loadings1 + plot_biplot1 + plot_layout(widths = c(1,2))
 plot_pca
 
 ggsave("Figures/plot_pca.pdf", plot_pca, width = 20, height = 12)
-ggsave("Figures/plot_pca.svg", plot_pca, width = 20, height = 12)
+ggsave("Figures/plot_pca.png", plot_pca, width = 20, height = 12)
 
 # pca2 <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
 # plot_loadings2 <- pca_loadings_plot(pca2, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
@@ -320,21 +320,21 @@ mst_weighted <- igraph::mst(g3, algorithm = 'prim')
 plot_mst <- graph_plot(mst_weighted, weights = 'weight2', title = 'MST (weighted)')
 plot_mst
 
-ggsave('Figures/plot_mst.svg', plot_mst, width = 12, height = 9)
+ggsave('Figures/plot_mst.png', plot_mst, width = 12, height = 9)
 ggsave("Figures/plot_mst.pdf", plot_mst, width = 12, height = 9)
 
 mst_unweighted <- igraph::mst(g3, algorithm = 'unweighted')
 plot_mst_uw <- graph_plot(mst_unweighted, title = 'MST (unweighted)')
 plot_mst_uw
 
-ggsave('Figures/plot_mst_uw.svg', plot_mst_uw, width = 12, height = 9)
+ggsave('Figures/plot_mst_uw.png', plot_mst_uw, width = 12, height = 9)
 ggsave("Figures/plot_mst_uw.pdf", plot_mst_uw, width = 12, height = 9)
 
 mst_unit <- igraph::mst(g3, algorithm = 'prim', weights = rep(1, times = igraph::gsize(g3)))
 plot_mst_unit <- graph_plot(mst_unit, title = 'MST (unit weights)')
 plot_mst_unit
 
-ggsave('Figures/plot_mst_unit.svg', plot_mst_unit, width = 12, height = 9)
+ggsave('Figures/plot_mst_unit.png', plot_mst_unit, width = 12, height = 9)
 ggsave("Figures/plot_mst_unit.pdf", plot_mst_unit, width = 12, height = 9)
 
 
@@ -457,14 +457,14 @@ colMeans(summary(out))
 plot_need_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_need_coefs
 ggsave("Figures/plot_need_coefs.pdf", plot_need_coefs, width = 12, height = 12)
-ggsave("Figures/plot_need_coefs.svg", plot_need_coefs, width = 12, height = 12)
+ggsave("Figures/plot_need_coefs.png", plot_need_coefs, width = 12, height = 12)
 
 plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
 plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
 
 plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "A")
 ggsave("Figures/plot_need_combined.pdf", plot_need_combined, width = 12, height = 12)
-ggsave("Figures/plot_need_combined.svg", plot_need_combined, width = 12, height = 12)
+ggsave("Figures/plot_need_combined.png", plot_need_combined, width = 12, height = 12)
 
 # Relative investment
 
@@ -493,11 +493,11 @@ colMeans(summary(out))
 plot_invest_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_invest_coefs
 ggsave("Figures/plot_invest_coefs.pdf", plot_invest_coefs, width = 12, height = 12)
-ggsave("Figures/plot_invest_coefs.svg", plot_invest_coefs, width = 12, height = 12)
+ggsave("Figures/plot_invest_coefs.png", plot_invest_coefs, width = 12, height = 12)
 
 plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment')
 ggsave("Figures/plot_invest_need.pdf", plot_invest_need, width = 12, height = 12)
-ggsave("Figures/plot_invest_need.svg", plot_invest_need, width = 12, height = 12)
+ggsave("Figures/plot_invest_need.png", plot_invest_need, width = 12, height = 12)
 
 # Caregiver response
 
@@ -538,7 +538,7 @@ colMeans(summary(out))
 plot_caregiverresponse_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
 plot_caregiverresponse_coefs
 ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
-ggsave("Figures/plot_caregiverresponse_coefs.svg", plot_caregiverresponse_coefs, width = 12, height = 12)
+ggsave("Figures/plot_caregiverresponse_coefs.png", plot_caregiverresponse_coefs, width = 12, height = 12)
 
 plot_caregiver_familyconflict <- ordinal_plot(out$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response')
 plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response')
@@ -547,11 +547,11 @@ plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data =
 
 plot_caregiver_response_combined <- plot_caregiver_familyconflict + plot_caregiver_loss + ggtitle("") + plot_caregiver_trangsression + ggtitle("") + plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)
-ggsave("Figures/plot_caregiver_response_combined.svg", plot_caregiver_response_combined, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_response_combined.png", plot_caregiver_response_combined, width = 12, height = 12)
 
 plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
 ggsave("Figures/plot_caregiver_punish.pdf", plot_caregiver_punish, width = 12, height = 12)
-ggsave("Figures/plot_caregiver_punish.svg", plot_caregiver_punish, width = 12, height = 12)
+ggsave("Figures/plot_caregiver_punish.png", plot_caregiver_punish, width = 12, height = 12)
 
 # want to add relativeneed and relativeinvestment but code does not work
 
@@ -573,7 +573,7 @@ plot_fullcorrmat <- ggcorrplot(
 plot_fullcorrmat
 
 ggsave("Figures/plot_fullcorrmat.pdf", plot_fullcorrmat, width = 12, height = 12)
-ggsave("Figures/plot_fullcorrmat.svg", plot_fullcorrmat, width = 12, height = 12)
+ggsave("Figures/plot_fullcorrmat.png", plot_fullcorrmat, width = 12, height = 12)
 
 
 # newdat <- datagrid(NeighborhoodQuality = seq(-2.5, 1.5, 0.1), newdata = SignalVars3[-c(1:3)])
