@@ -59,7 +59,6 @@ discretize <- function(v, n){
 # The householdID variable now has a unique random # for
 # each child, not each household
 new_hid <- sample(nrow(utila_df))
-names(new_hid) <- utila_df$householdID
 
 utila_df <-
   utila_df |>
@@ -80,13 +79,15 @@ utila_df <-
   )
 
 # householdIDs are set to the new ones generated above
+names(new_hid) <- utila_df$householdID
 causes <-
   causes |>
   mutate(
-    householdID = new_hid[householdID],
+    householdID = unname(new_hid[householdID]),
     childHHid = householdID,
     uniqueID = householdID
-  )
+  ) |>
+  arrange(householdID)
 
 # Assess disclosure risk
 # Aim for k-anonymity >= 4

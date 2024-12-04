@@ -344,8 +344,7 @@ utila_df <-
     LifestyleReality_5,
     LifestyleReality_6,
     LifestyleReality_7,
-    LifestyleReality_8,
-    ChildID
+    LifestyleReality_8
   )
 
 # dataframes for analysis -------------------------------------------------
