@@ -43,6 +43,7 @@
 
 # Run in a fresh R session
 
+#+ message=F, warning=F
 source("recode.R")
 source("dictionaries.R")
 source("dataprep.R")
@@ -55,6 +56,8 @@ discretize <- function(v, n){
   map_int(v, \(x) min(q[x<=q]))
 }
 
+# The householdID variable now has a unique random # for
+# each child, not each household
 new_hid <- sample(nrow(utila_df))
 names(new_hid) <- utila_df$householdID
 
@@ -65,15 +68,18 @@ utila_df <-
     childHHid = householdID,
     uniqueID = householdID,
     Neighborhood2 = ifelse(is.na(Neighborhood2), c(0,1), Neighborhood2),
-    ChildAge = discretize(ChildAge, 4)
+    ChildAge = discretize(ChildAge, 4) # Child ages clustered into quartiles
   ) |>
   arrange(householdID) |>
+  # These variables are randomized within the two neighborhoods
   mutate(
     NumberOfChildren = sample(NumberOfChildren, n()),
     number_adults = sample(number_adults, n()),
+    UserLanguage = sample(UserLanguage, n()),
     .by = Neighborhood2
   )
 
+# householdIDs are set to the new ones generated above
 causes <-
   causes |>
   mutate(
@@ -82,16 +88,21 @@ causes <-
     uniqueID = householdID
   )
 
+# Assess disclosure risk
+# Aim for k-anonymity >= 4
+#+ message=T
 sdcObj <- createSdcObj(
   utila_df,
-  keyVars = c("ChildAge", "Sex", "Neighborhood2", "ImmigrateUtila") #,
+  keyVars = c("ChildAge", "Sex", "Neighborhood2", "ImmigrateUtila")
 )
 measure_risk(sdcObj)
+
+# Delete values to achieve k-anonymity >= 4
 out <- localSuppression(sdcObj, k=4)
 out
 plot(out)
 
 utila_df$ChildAge <- out@manipKeyVars$ChildAge
 
-save(utila_df, causes, householdIDs, caregiverSex, file = "data/utilasignalingData.rda")
+save(utila_df, causes, householdIDs, caregiverSex, file = "data/utilasignalingPublicData.rda")
 
