@@ -656,30 +656,10 @@ Effects of predictor variables on relative investment in household children. Ord
 
 Effects of predictor variables on caregiver responses to the last time a child was sad or cried. Ordinal logistic regression model with elastic net penalties.
 :::
-<<<<<<< HEAD
 
-# Deleted sections
-
-### Child anthropometrics
-
-xxxxxxxxxxDescribe camps brieflyxxxxxxxxxxxxxx - include dates and how we handled those. For cross-sectional analyses, we used the 2023 anthropometric values due to them being closer in time to the caretaker surveys.
-
-All anthropometric measurements were taken twice, in accordance with anthropometric standards [@lohman1988], and then averaged. Before being measured, participants were asked to remove their shoes and heavy articles of clothing. Height was measured to the nearest millimeter using an anthropometer, and weight was measured to the nearest 100 g with a digital scale (model name) that was used in a building with a concrete foundation. All participants were wearing lightweight clothing, so we made no adjustments for clothing weight. Grip strength was measured using a dynamometer (model name), with participants seated/standing? and told to xxxxxxxx. XXXX time was passed between the first and second measurements.
-
-Triceps and subscapular skinfold thicknesses were measured using skinfold calipers. The triceps measurement was taken at the midpoint of the upper arm. The subscapular measurement occurred immediately below the inferior angle of the scapula, being picked up diagonally at the natural fold line of the skin [@antóna]. Flexed bicep circumference was measured perpendicular to the long axis of the upper arm. For this measure participants were asked to sit/stand? and position their upper arm perpendicular to their body with their elbow being held at a 90° angle, before flexing their clenched fist towards themselves as much as they could.
-
-We computed each child's height, weight, and BMI Z-scores with respect to the CDC child growth standards [@kuczmarski2002].
-
-For our independent variables of skinfold thickness, flexed bicep circumference, and grip strength on signaling behavior, we used the residuals from generalized additive models which modeled the effect of sex and age on each measurement using the mgcv package [@wood2011]. The resulting variables represent how each child differed from the average child for their given sex and age. We also centered and scaled the skinfold thickness residuals before summing them to create a body fat index.
-
-### Old discussion parts
-
-The effect of age was smallest on child sadness. However, interpretation of this finding is more difficult due to the fact that, unlike crying and temper tantrums, sadness is thought to have important non-signaling functions including drawing one’s attention to a problem, motivating deeper analysis of one’s situation, and causing withdrawal from situations with low fitness prospects [@nesse2019; @nettle2009; @allen2003; @hagen2011]. By asking about sadness as a whole, our measure was unable to disentangle information caretakers gleaned from cues from information that came from signals.
 
 ```{r}
 sessionInfo()
 ```
 
 # References
-=======
->>>>>>> 056cbac2d2cb3d3554da65bcb8d7e2bb84961fee
