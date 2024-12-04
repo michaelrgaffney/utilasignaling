@@ -51,7 +51,8 @@ format:
     toc: true
     toc-expand: 2
     number-sections: true
-lightbox: false
+    embed-resources: true
+lightbox: true
 editor: visual
 tbl-cap-location: bottom
 bibliography: signaling.bib
@@ -68,17 +69,23 @@ crossref:
 ---
 
 ```{r setup, include=FALSE}
-source("dictionaries.R", local = knitr::knit_global())
-source("analysisforpaper.R", local = knitr::knit_global())
+if(!dir.exists("Figures")) dir.create("Figures")
 
-library(modelsummary)
-library(english)
-# source("regularize.R")
+source("recode.R")
+source("dictionaries.R")
+
+# To use public data, comment out dataprep.R
+# and uncomment dataprepPublic.R
+source("dataprep.R")
+# source("dataprepPublic.R")
+
+source("analysis.R")
+source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
 
-To gain support, children use signals to communicate their needs and wants to parents. Infant signals of need, particularly infant cries, have been extensively studied in a range of populations. However, the full range of potential child signals of need, which extend beyond cries, has rarely been investigated in a single study of children of all ages. To fill this gap, we collected mother and other primary caregiver reports of child signaling from `{r} nrow(caregivers)` families with `{r} nrow(modeldf)` children on Utila, a small island off the coast of Honduras. In exploratory analyses, we found that child signaling was common in both sexes and across all ages, although it decreased with age and neighborhood quality and increased with the frequency of conflict between children and caretakers. Consistent with signaling theory, children who were sad more frequently were perceived as needier within the household and were more likely to receive investment. Consistent with previous research, increased alloparenting effort was associated with more signaling by girls but less signaling by boys. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
+To gain support, children use signals to communicate their needs and wants to parents. Infant signals of need, particularly infant cries, have been extensively studied in a range of populations. However, the full range of potential child signals of need, which extend beyond cries, has rarely been investigated in a single study of children of all ages. To fill this gap, we collected mother and other primary caregiver reports of child signaling from `{r} n_distinct(householdIDs)` families with `{r} nrow(utila_df)` children on Utila, a small island off the coast of Honduras. In exploratory analyses, we found that child signaling was common in both sexes and across all ages, although it decreased with age and neighborhood quality and increased with the frequency of conflict between children and caretakers. Consistent with signaling theory, children who were sad more frequently were perceived as needier within the household and were more likely to receive investment. Consistent with previous research, increased alloparenting effort was associated with more signaling by girls but less signaling by boys. Our results suggest that evolutionary theories of signaling can help explain patterns of child sadness, crying, and temper tantrums.
 
 # Introduction
 
@@ -150,7 +157,7 @@ A major challenge when studying signals of need is the fact that such signaling 
 
 ## Study population
 
-This study of children aged `{r} paste(range(modeldf$ChildAge), collapse="-")` and their parents and other primary caretakers, was conducted in Utila, Honduras, one of the country’s small Bay Islands in the Western Caribbean. Participants in the study were sampled from two populations who face different levels of economic and social adversity: 1) a long-standing English-speaking community primarily comprising descendants of British immigrants who arrived on the island in the 1800’s, and 2) a more recent community of Spanish-speakers, mostly from mainland Honduras. Compared to the former, the latter are more likely to live in crowded and suboptimal conditions, face active discrimination and increased stress [@garcia2017], and experience economic uncertainty due the predominance of low paying, seasonal jobs primarily related to the island’s diving tourism industry [@garcia2018; @stonich2000]. Such inequality appears to be increasing in response to recent growth in the tourism industry, with the majority of wealth from tourism flowing to a small portion of native English-speaking islanders and other Westerners [@davis2014].
+This study of children aged `{r} paste(range(utila_df$ChildAge), collapse="-")` and their parents and other primary caretakers, was conducted in Utila, Honduras, one of the country’s small Bay Islands in the Western Caribbean. Participants in the study were sampled from two populations who face different levels of economic and social adversity: 1) a long-standing English-speaking community primarily comprising descendants of British immigrants who arrived on the island in the 1800’s, and 2) a more recent community of Spanish-speakers, mostly from mainland Honduras. Compared to the former, the latter are more likely to live in crowded and suboptimal conditions, face active discrimination and increased stress [@garcia2017], and experience economic uncertainty due the predominance of low paying, seasonal jobs primarily related to the island’s diving tourism industry [@garcia2018; @stonich2000]. Such inequality appears to be increasing in response to recent growth in the tourism industry, with the majority of wealth from tourism flowing to a small portion of native English-speaking islanders and other Westerners [@davis2014].
 
 ## Focus group interviews
 
@@ -181,7 +188,7 @@ The data for this study were collected as part of the Utila Child Health Project
 We used six-point Likert scales to get caregiver reports on the frequencies of 1) various types of child signaling, such as sadness and crying, 2) conflict between the caretaker and each participating child, 3) and child allocare of other children in their household. See @tbl-freqvars for exact wording. Caretakers were often not asked about child alloparenting behavior if a child was an only child. For this reason, we gave children an alloparenting frequency of “never” if they were the only child within a household.
 
 |  |  |
-|--------------------------|----------------------------------------------|
+|------------------|------------------------------------------------------|
 | Variable | Survey question wording |
 | Crying Frequency | How often does your child cry? |
 | Sad Frequency | How often is your child sad? |
@@ -208,7 +215,7 @@ We asked caretakers about the last time each participating child was sad or crie
 
 Caretakers were asked about the frequency of their child missing school and their child's history of medical problems in general terms (i.e., the extent to which they experienced a "variety of medical issues"). Both involved the use of five-point Likert scales, the scores of which were averaged for use in analyses. See @stbl-medical-record for the wording of these variables.
 
-Caretakers were also asked three questions using a five-point Likert scale about their child's susceptibility to illness. We reversed the scores on two measures so that a score of 5 corresponded with the lowest susceptibility to illness before we averaged the scores of these to create a mean *illness avoidance* variable. In the `{r} sum((!is.na(modeldf$IllnessSusceptibility2)) & is.na(modeldf$IllnessSusceptibility3))` instance in which we only had data for two of the measures, we still calculated the mean but used a numerator of 2. See @stbl-healthvars for the wording of these variables.
+Caretakers were also asked three questions using a five point Likert scale about their child's susceptibility to illness. We reversed the scores on two measures so that a score of 5 corresponded with the lowest susceptibility to illness before we averaged the scores of these to create a mean *illness avoidance* variable. In the `{r} sum((!is.na(utila_df$IllnessSusceptibility2)) & is.na(utila_df$IllnessSusceptibility3))` instance in which we only had data for 2 of the measures, we still calculated the mean but used a numerator of 2. See @stbl-healthvars for the wording of these variables.
 
 ### Caretaker perceptions of home sanitation, neighborhood quality, home instability, and food security
 
@@ -240,24 +247,21 @@ All analyses were conducted with `{r} R.version.string`.
 
 ## Data availability
 
-The anonymized data used in the study are available at https://github.com/grasshoppermouse/utiladata2023. Study code is available at https://github.com/michaelrgaffney/utilasignaling.
+The anonymized data used in the study are available at <https://github.com/grasshoppermouse/utiladata2023>. Study code is available at <https://github.com/michaelrgaffney/utilasignaling>.
 
 # Results
 
 ```{r}
-# primary_caregivers <- str_to_sentence(english::english(sum(caregivers$HasSignalingData)))
-
-tbl <- table(caregivers$HasSignalingData, caregivers$CaregiverSex)
-primary_caregivers <- tbl[2,1] + tbl[2,2] + tbl[2,3]
+sex_table <- table(utila_df$Sex)
 ```
 
-`{r} primary_caregivers` primary caregivers (females = `{r} tbl['TRUE', 'Female']`, males = `{r} tbl['TRUE', 'Male']`, non-binary = `{r} tbl['TRUE', 'Non-binary / third gender']`) took the survey and provided signaling data for at least one child. `{r} nrow(modeldf)` children had frequency data for at least one signal, with `{r} nrow(modeldf_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
+`{r} xfun::numbers_to_words(n_distinct(householdIDs), cap=T)` primary caretakers (females = `{r} table(caregiverSex)[1]`, males = `{r} table(caregiverSex)[2]`, missing sex = `{r} sum(is.na(caregiverSex))`) took the survey and provided signaling data for at least one child. `{r} xfun::numbers_to_words(nrow(utila_df), cap=T)` children had frequency data for at least one signal, with `{r} nrow(utila_FULLSIG)` having data for all three. Among those with at least one record of signaling frequency, `{r} sex_table[1]` were female and `{r} sex_table[2]` were male. For summary statistics of study variables see @tbl-sumtab_combined and @tbl-sumtab_factors.
 
 ```{r sumtab_combined}
 #| label: tbl-sumtab_combined
 #| tbl-cap: Summary statistics for continuous variables.
 
-kable(custom.summarize(modeldf, longform_dict[1:23])) #%>% kable_styling()
+kable(custom.summarize(utila_df, longform_dict[1:23])) %>% kable_styling()
 ```
 
 ```{r sumtab_factors}
@@ -265,7 +269,7 @@ kable(custom.summarize(modeldf, longform_dict[1:23])) #%>% kable_styling()
 #| tbl-cap: Summary statistics for factor variables.
 
 # convert to factor to omit NAs in datasummary_skim
-dx <- modeldf |>
+dx <- utila_df |>
   dplyr::select(any_of(names(longform_dict))) |>
   mutate(
     across(starts_with(c("Lifestyle", "ImmigrateUtila")), as.factor)
@@ -303,11 +307,11 @@ fmt_sum <- function(v){
 }
 ```
 
-Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(modeldf$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(modeldf$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(modeldf$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(modeldf$SadFreqN >= 30)`; crying: `{r} fmt_sum(modeldf$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(modeldf$SadFreqN == 0)`; crying; `{r} fmt_sum(modeldf$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(modeldf$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot.
+Child sadness, crying, and temper tantrums were common and highly correlated with one another. See @fig-barplot_SignalFreq and @fig-signal_corrplot. Caregivers reported that `{r} fmt_sum(utila_df$SadFreqN >= 8)` were sad at least once a week, `{r} fmt_sum(utila_df$CryFreqN >= 8)` cried at least once a week, and `{r} fmt_sum(utila_df$TantrumFreqN >= 8)` threw temper tantrums at least once a week. A small subset of children engaged in these signals/states at least daily; sadness: `{r} fmt_sum(utila_df$SadFreqN >= 30)`; crying: `{r} fmt_sum(utila_df$CryFreqN >= 30)`; and tantrums: `{r} fmt_sum(utila_df$TantrumFreqN >= 30)`. However, many children were reported to never engage in these signals/states; sadness: `{r} fmt_sum(utila_df$SadFreqN == 0)`; crying; `{r} fmt_sum(utila_df$CryFreqN == 0)`; and tantrums: `{r} fmt_sum(utila_df$TantrumFreqN == 0)`. For a visualization of how signal frequencies varied within children see @sfig-signal_alluvial_plot.
 
-Conflict between children and caretakers was also common, with `{r} fmt_sum(modeldf$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(modeldf$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq. Conflict was also associated with higher signaling frequencies. See @fig-PCA and @fig-signal_corrplot.
+Conflict between children and caretakers was also common, with `{r} fmt_sum(utila_df$ConflictFreqN >= 8)` having conflicts with parents more than once a week. However, `{r} fmt_sum(utila_df$ConflictFreqN == 0)` were described as never having conflicts with parents. See @fig-barplot_ConflictFreq. Conflict was also associated with higher signaling frequencies. See @fig-PCA and @fig-signal_corrplot.
 
-The frequency of child alloparenting effort, which previous research has linked to parent-child conflict, was bimodally distributed, with `{r} fmt_sum(modeldf$AlloparentingFreqN == 0)` reported to never engage in it (`r sum(na.omit(modeldf$NumberOfChildren==1))` instances were due to a child being an only child) and `{r} fmt_sum(modeldf$AlloparentingFreqN >= 30)` reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq.
+The frequency of child alloparenting effort, which previous research has linked to parent-child conflict, was bimodally distributed, with `{r} fmt_sum(utila_df$AlloparentingFreqN == 0)` reported to never engage in it (`r sum(na.omit(utila_df$NumberOfChildren==1))` instances were due to a child being an only child) and `{r} fmt_sum(utila_df$AlloparentingFreqN >= 30)` reported to help with childcare at least once a day. See @fig-barplot_AlloparentingFreq.
 
 ::: {#fig-barplot_SignalFreq}
 ```{r}
@@ -375,7 +379,11 @@ Effects of selected predictors of child-parent conflict frequencies when holding
 
 ## Positive associations between child age and signaling frequency and perceptions of child neediness
 
-Primary caretakers rarely described a child as “much less” `{r} fmt_sum(modeldf$RelativeNeed == "Much less")` \[fix in word doc?\] or “much more” `{r} fmt_sum(modeldf$RelativeNeed == "Much more")` needy compared to their other children. Therefore, we collapsed “less” and “much less” into a “less” factor and “more” and “much more” into a “more” factor. The end result was `{r} rel_need_table[1]` less needy children, `{r} rel_need_table[2]` children who were as needy as their siblings, and `{r} rel_need_table[3]` more needy children.
+```{r}
+rel_need_table <- table(utila_df$RelativeNeed3)
+```
+
+Primary caretakers rarely described a child as “much less” `{r} fmt_sum(utila_df$RelativeNeed == "Much less")` \[fix in word doc?\] or “much more” `{r} fmt_sum(utila_df$RelativeNeed == "Much more")` needy compared to their other children. Therefore, we collapsed “less” and “much less” into a “less” factor and “more” and “much more” into a “more” factor. The end result was `{r} rel_need_table[1]` less needy children, `{r} rel_need_table[2]` children who were as needy as their siblings, and `{r} rel_need_table[3]` more needy children.
 
 There were positive relationships between perceived relative neediness within the family and both child age and the frequency of child sadness. See @fig-effect_relativeneed.
 
@@ -408,6 +416,10 @@ barplot_CaregiverResponse
 
 Frequencies of caregiver response to the last instance of child signaling by the cause of the signaling. Categories of causes were based on cluster analysis of more fine-grained cause variables. See @sfig-cause-clustering for cluster dendrogram and @stbl-sumtab-causes for the frequencies of causes and caregiver responses.
 :::
+
+```{r}
+response_overlap <- table(utila_df$PositiveResponse, utila_df$NegativeResponse)
+```
 
 There were `{r} response_overlap[1,1]` instances in which a caregiver's response involved acts which were both negative and positive from the child's perspective. These were excluded from analyses due to their rarity.
 
@@ -457,7 +469,7 @@ Children face the challenge of eliciting support from others in times of adversi
 
 ::: {#stbl-relvars}
 |  |  |
-|--------------------------|----------------------------------------------|
+|----------------|--------------------------------------------------------|
 | Variable | Survey question wording |
 | Relative Need | How much time, effort, and resources does this child need compared to your other children? |
 | Relative Investment | How much time, effort, and resources do you put into this child compared to your other children? |
@@ -467,7 +479,7 @@ Variable names and question wording for measures about relative need and investm
 
 ::: {#stbl-medical-record}
 |  |  |
-|-------------------------|------------------------------------------------|
+|---------------|---------------------------------------------------------|
 | Variable | Survey question wording |
 | SchoolAges1 | My child has missed a lot of school due to illness. |
 | SchoolAges2 | My child has had to deal with a variety of medical issues in their life so far. |
@@ -477,7 +489,7 @@ Variable names and question wording for measures about a child's health history.
 
 ::: {#stbl-healthvars}
 |  |  |
-|--------------------------|----------------------------------------------|
+|----------------|--------------------------------------------------------|
 | Variable | Survey question wording |
 | IllnessAvoidance1 | If an illness is 'going around', my child will get it. |
 | IllnessAvoidance2 | In general, my child is very susceptible to colds, flu, and other infectious diseases |
@@ -488,7 +500,7 @@ Variable names and question wording for measures about a child's current likelih
 
 ::: {#stbl-Food-Security}
 |  |  |
-|-------------------------|------------------------------------------------|
+|-------------|-----------------------------------------------------------|
 | Variable | Survey question wording |
 | FoodSecurity_1 | In the past year, the food that we bought often didn’t last, and we didn’t have money to get more. |
 | FoodSecurity_2 | In the past year, we couldn’t afford to eat balanced meals. |
@@ -502,7 +514,7 @@ Variable names and question wording for the modified version of the USDA Food Se
 
 ::: {#stbl-Home-Instability}
 |  |  |
-|-------------------------|-----------------------------------------------|
+|------------------|------------------------------------------------------|
 | Variable | Survey question wording |
 | HomeInstability_1 | We move our home a lot. |
 | HomeInstability_2 | I wish our household felt more stable. |
@@ -514,7 +526,7 @@ Variable names and question wording for the home instability questions. All ques
 
 ::: {#stbl-Neighborhood-Quality}
 |  |  |
-|--------------------------|----------------------------------------------|
+|-------------------|-----------------------------------------------------|
 | Variable | Survey question wording |
 | NeighborhoodQuality_1 | As a place to live, my neighborhood is good quality. |
 | NeighborhoodQuality_2 | As a place to raise children, my neighborhood is good quality. |

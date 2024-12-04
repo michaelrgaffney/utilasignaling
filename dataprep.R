@@ -1,11 +1,9 @@
+
 library(utiladata2023) # data package
 library(tidyverse)
 library(labelled)
-library(mgcv)
-library(localgrowth)
 
-source("recode.R")
-source("dictionaries.R")
+load("data/m3_1e6_cost_freq.rda")
 
 # functions used ----------------------------------------------------------
 
@@ -36,67 +34,9 @@ mean2 <- function(..., na.rm = F){
 
 # dataframe prep ----------------------------------------------------------
 
-children2 <-
-  children |>
-  dplyr::filter(ChildID != "") |>
-  dplyr::select(ChildID, householdID)
-
-anthropometricMeans0 <-
-  anthropometrics |>
-  dplyr::select(
-    ChildID,
-    AgeAtMeasurement = Age,
-    Sex,
-    Date.of.measurement,
-    contains("Mean")
-  ) |>
-  mutate(
-    measurements = n(),
-    .by = ChildID
-  ) |>
-  mutate(
-    BMI = WeightMean_KG / (HeightMean / 100 )^2,
-    Year = year(Date.of.measurement)
-  ) |>
-  relocate(measurements, .after = Year)
-
-anthropometricMeans <-
-  anthropometricMeans0 |>
-  dplyr::filter(
-    measurements == 1 | year(Date.of.measurement) == 2023
-  ) |>
-  left_join(children2) # note that we filter out householdID based on it's column number
-
-anthropometricMeans$WeightZ <- growthRef(AgeAtMeasurement, WeightMean_KG, Sex, anthropometricMeans, type = "Weight", pop = "CDC")
-anthropometricMeans$HeightZ <- growthRef(AgeAtMeasurement, HeightMean, Sex, anthropometricMeans, type = "Height", pop = "CDC")
-anthropometricMeans$BMIZ <- growthRef(AgeAtMeasurement, BMI, Sex, anthropometricMeans, type = "BMI", pop = "CDC")
-anthropometricMeans$Sex2 <- factor(anthropometricMeans$Sex)
-
-m <- mgcv::gam(GripStrengthMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 4), data = anthropometricMeans)
-anthropometricMeans$GripR <- residuals(m)
-
-# Result for bodyfat predicitng crying freq changes if k is unspecified
-m2 <- mgcv::gam(TricepMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$TricepR <- residuals(m2)
-
-m3 <- mgcv::gam(SubscapMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$SubscapR <- residuals(m3)
-
-m4 <- mgcv::gam(BodyFatPercentageMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$BodyFatPercentageR <- residuals(m4)
-
-m5 <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$FlexedR <- residuals(m5)
-
-m5b <- mgcv::gam(FlexedMean ~ Sex+s(AgeAtMeasurement, by = Sex2, k = 3) + s(householdID, bs = "re"), data = anthropometricMeans, na.action = na.exclude)
-anthropometricMeans$FlexedRb <- residuals(m5b)
-
-anthropometricMeans$Sex <- NULL
-
 d <-
   children |>
   remove_labels() |>
-  #dplyr::filter(CompleteSurvey) %>%
   mutate(
     OnlyChild = n() == 1,
     YoungerKids = map_int(ChildAge, \(x) sum(x > ChildAge)),
@@ -253,7 +193,6 @@ d <-
     MedicalProblemsMean = mean2(SchoolAges1, SchoolAges2, na.rm = TRUE) # 1 child has data for only 1
   ) |>
   ungroup() |>
-  left_join(anthropometricMeans[-21], by = "ChildID") |>  # removing householdID column
   left_join(dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
                           EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                           number_children2, number_adults, UserLanguage, CurrentJob, contains("CaregiverMarital"), NeighborhoodQuality, HouseQuality,
@@ -270,7 +209,6 @@ d2 <-
     StayAtHomeMomF = as.factor(case_when(
       StayAtHomeMom == 0 ~ "No",
       StayAtHomeMom == 1 ~ "Yes")),
-    BodyFat = c(scale(TricepR) + scale(SubscapR)),
     RecentSignalSeverity = com1[as.character(Sad1)],
     RecentSignalCause = com2[as.character(Sad1)],
     AdultsHousework = as.numeric(AdultsHousework),
@@ -336,10 +274,11 @@ d2 <-
 # dataframe for plots -----------------------------------------------------
 
 # filters based on having at least one value of SadFreqN, CryFreqN, or TantrumFreqN
-modeldf <-
+utila_df <-
   d2 |>
   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
   dplyr::select(
+    uniqueID,
     householdID,
     childHHid,
     CryFreqN,
@@ -348,6 +287,7 @@ modeldf <-
     SignalFreq,
     SignalCost,
     SignalFreqMax,
+    CaregiverResponse,
     ChildAge,
     OtherChildrenHH,
     YoungerKids,
@@ -380,16 +320,6 @@ modeldf <-
     NegativeResponse,
     CaregiverAge,
     IncomeCategoryN,
-    SubscapR,
-    HeightZ,
-    WeightZ,
-    BMIZ,
-    SubscapMean,
-    SubscapR,
-    TricepMean,
-    TricepR,
-    BodyFat,
-    FlexedR,
     CaregiverAge,
     FoodSecurity,
     Neighborhood2,
@@ -399,7 +329,9 @@ modeldf <-
     PartnerStatus,
     RelativeNeed,
     RelativeMaternalInvestment,
+    RelativeMaternalInvestment2,
     Neighborhood2F,
+    StayAtHomeMom,
     StayAtHomeMomF,
     HomeInstability_1,
     HomeInstability_2,
@@ -416,7 +348,6 @@ modeldf <-
     ChildID
   )
 
-
 # dataframes for analysis -------------------------------------------------
 
 # new vars:
@@ -431,165 +362,7 @@ modeldf <-
 #   "ChildAge",   "Younger children have more needs they cannot address on their own and face lower reputational costs to crying. Older children engage in costlier signals."
 # )
 
-signal_vars_temp <-
-  "ChildAge:Younger children have more needs they cannot address on their own and face lower reputational costs to crying. Older children engage in costlier signals.X
-  Sex:The sexes differ in the adversity they face, the forms of competetion they will engage in with peers, their ability to bargain for increased support outside of signals of need, and the reputational costs of signaling need. These differences may be small or nonexistent in young children.X
-  IllnessSusceptibilityMean:Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function.X
-  MedicalProblemsMean:Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. No pathogenic health issues may limit the ability of the child to satisfy their own needs, something which can lead to greater payoffs for signaling need.X
-  AlloparentingFreqN:Children might prefer to spend time outside of the family (e.g., to invest in their embodied capital or to find cooperative partners and maintain those relationships) and signal to reduce caregiver pressure to alloparent.X
-  CaregiverAge:Overtime, caretakers learn how to better satsify child needs, resist child bargaining, communicate the reasons for their actions. Older moms also have lower residual reproductive value, somethign which may result in greater valuation of investment in existing children compared to younger moms.X
-  StayAtHomeMom:Stay at home mom's are capable of providing more investment to children and see them more often.X
-  EducationLevelYears:Greater education leads to differences in caretaking behavior and mental models of caretaking while also increasing caregiver earning potential.X
-  AdultsChildcare:More adults helping with child care can lead to greater potential for investment. This might lead to decreased payoffs to singaling need in some circumstances. However, it may also increase signaling behaviors in others due to the presence of more signal targerts.X
-  number_adults:More adults equals more targets for signaling.X
-  AdultsHousework:More adults helping around the house likely leads to less pressure from caretakers for children engage in household labor.X
-  NumberOfChildren:More children equals more behavioral conflict over investment.X
-  OtherChildAlloparentingFreqN:More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for other chlildren of alloparenting age.X
-  LogIncome:The pool of availible resources influences the benefits to signaling.X
-  HouseQuality:Children might determine relative status based in part on house quality. This alters the payoffs to signaling.X
-  LifestyleReality_1:X
-  LifestyleReality_2:X
-  LifestyleReality_3:X
-  LifestyleReality_4:X
-  LifestyleReality_5:X
-  LifestyleReality_6:X
-  LifestyleReality_7:X
-  LifestyleReality_8:X
-  HomeInstability_1:X
-  HomeInstability_2:X
-  HomeInstability_3:X
-  HomeInstability_4:X
-  NeighborhoodQuality:Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.X
-  Neighborhood2:Campanado is percieved to be a lower quality environment for children and likely is based on demographics, population density, and differences in status and discrimination. Parental investment can help children succeed in dangerous environments through teaching and increased child status. This affects the payoff to signaling. Children also pick up on their relative status, which may motivate increased signaling to better compete with wealthier kids.X
-  FoodSecurity:Children may be more likely to signal for more food when it is hard to come by.X
-  ImmigrateUtila:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling.X
-  UserLanguage:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling."
-
 #HomeInstabilityMean:Children in unstable homes likely face more adversity and find themselves having to signal to new people or face the challenge of previous caretakers leaving or moving away from friends.X
 
-signalvars <- data.frame(signal_vars_temp) |>
-  separate_rows(signal_vars_temp, sep = "X") |>
-  separate(col = signal_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
-  mutate(
-    Var = str_trim(Var)
-  )
-
-SignalVars <- d2 |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
-  dplyr::select(
-    householdID,
-    childHHid,
-    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN, MeanChildRelatedness, # Fullsibs, Halfsibs, Stepsibs,
-    all_of(signalvars$Var)
-    # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
-    # OldestChild, Does not seem to add much beyond age + number of children.X
-    # PartnerStatus, Does this add much beyond the number of adults in the household without better data on adult-child relatedness?
-    # HouseQuality, Does this add much beyond neighborhood variables?
-    ) |>
-  mutate(
-    across(starts_with("Lifestyle"), \(x) ifelse(x == "No", 0, 1)),
-    Sex = ifelse(Sex == "Female", 0, 1),
-    UserLanguage = ifelse(UserLanguage == "EN", 0, 1),
-    ImmigrateUtila = ifelse(ImmigrateUtila == "No", 0, 1),
-    # PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
-    AlloparentingXsex = AlloparentingFreqN * Sex,
-  ) |>
-  na.omit()
-
-SignalVarsAnthro0 <-
-  anthropometricMeans0 |>
-  dplyr::filter(
-    measurements == 2
-  ) |>
-  pivot_wider(names_from = "Year", values_from = BicepMean:BMI, id_cols = ChildID) |>
-  left_join(d2[c("householdID", "childHHid", "ChildID")], by = 'ChildID') |>
-  dplyr::filter(!is.na(householdID) & !is.na(childHHid))
-
-SignalVarsAnthro <-
-  SignalVars |>
-  left_join(SignalVarsAnthro0) |>
-  dplyr::filter(!is.na(HeightMean_2024))
-
-# out <- skim(anthropometricMeans)
-# nms <- out$skim_variable[out$skim_type == 'numeric' & out$complete_rate > 0.9]
-
-tmp <- left_join(anthropometricMeans, d2[c("childHHid", "ChildID")], by = 'ChildID')
-
-SignalVarsAnthro2 <-
-  left_join(SignalVars, tmp) |>
-  dplyr::select(
-    -c(IllnessSusceptibilityMean:AlloparentingXsex),
-    -MeanChildRelatedness,
-    -AgeAtMeasurement,
-    -Year,
-    -measurements,
-    -Date.of.measurement,
-    -Sex2,
-    -ChildID,
-    -FlexedRb,
-    -FlexedMean,
-    -TricepMean,
-    -SubscapMean,
-    -HeightMean,
-    -WeightMean_KG,
-    -BMI,
-    -BodyFatPercentageMean,
-    -GripStrengthMean
-    ) |>
-  na.omit()
-
-conflict_vars_temp <-
-  "ChildAge:Younger children have more needs they cannot address on their own, something which can lead to conflict. Older children are more likely to have conflicts with parents over investment within vs. outside the family.X
-  Sex:The sexes differ in the adversity they face and their ability to bargain for increased support outside of signals of need. These differences can lead to differences in conflict frequency. These differences may be small or nonexistent in young children.X
-  AlloparentingFreqN:Children might prefer to spend time outside of the family, while parents might prefer more investment within the family.X
-  OnlyChild:Only children do not have to compete for attention or other forms of investment with existing children, something which results in conflict in families with more children.X
-  CaregiverAge:Caretakers learn how to better satsify child needs and communicate the reasons for their actions. Older moms also have lower residual reproductive value, resulting in greater valuation in investment compared to younger moms, all else being equal.X
-  StayAtHomeMom:Stay at home mom's are capable of providing more investment to children and see them more often.X
-  EducationLevelYears:Greater education leads to differences in caretaking behavior and increases caregiver earning potential, something which can affect conflict frequency.X
-  AdultsChildcare:More adults helping with child care equals more investment for children and may diffuse conflict throughout the family.X
-  number_adults:More adults equals more targets for signaling, which parents can see as conflict.X
-  AdultsHousework:More adults helping around the house leads to less pressure from caretakers for children to alloparent.X
-  NumberOfChildren:More children equals more conflict over investment.X
-  OtherChildAlloparentingFreqN:More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for older chlildren.X
-  LogIncome:The pool of availible resources influences the benefits to signaling, which parents can see as conflict.X
-  HomeInstabilityMean:Children in unstable homes likely face more adversity and find themselves having to signal to new people or face the challenge of previous caretakers leaving or moving away from friends. All of these can lead to conflict and signaling, which may be perceived as conflict.X
-  NeighborhoodQuality:Parental investment can help children succeed in dangerous environments through teaching and increased child status.X
-  Neighborhood2:Neighborhood can affect the strategies children use to compete among peers. Some of these strategies might lead to conflict with parents.X
-  ImmigrateUtila:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict.X
-  UserLanguage:There may be cultural differences in child signaling or parental responsiveness. Differences in resources by group influences the payoffs to signaling. All of these might affect the frequency of conflict."
-
-# conflictvars <- data.frame(conflict_vars_temp) |>
-#   separate_rows(conflict_vars_temp, sep = "X") |>
-#   separate(col = conflict_vars_temp, sep = ":", into = c("Var", "Rationale")) |>
-#   mutate(Var = str_trim(Var))
-#
-# # one option is to just use signaling vars as parents might see signaling as conflict
-# ConflictVars <- d2 |>
-#   dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
-#   dplyr::select(
-#     householdID,
-#     childHHid,
-#     ChildAge,
-#     Sex,
-#     IllnessSusceptibilityMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to increase immune function. This can favor signaling, which parents see as conflict.
-#     MedicalProblemsMean, # Children who are sick more require more energy to make up for the costs of the illness*immune response interaction. They may also benefit from increased investment if this has the potential to improve their health or increase immune function. This can favor signaling, which parents see as conflict.
-#     AlloparentingFreqN,
-#     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.
-#     # OldestChild, Does not seem to add much beyond age + number of children.
-#     CaregiverAge,
-#     StayAtHomeMom,
-#     # PartnerStatus, Does this add much beyond the number of adults in the househld?
-#     EducationLevelYears,
-#     AdultsChildcare,
-#     number_adults,
-#     NumberOfChildren,
-#     OtherChildAlloparentingFreqN,
-#     LogIncome,
-#     HomeInstabilityMean,
-#     NeighborhoodQuality,
-#     Neighborhood2,
-#     # HouseQuality, Does this add much?X
-#     # FoodSecurity Children may be more likely to signal for more food when it is hard to come by. This can be seen as conflict by caretakers.
-#     ImmigrateUtila,
-#     UserLanguage
-#   )
+householdIDs <- sample(utila_df$householdID, length(utila_df$householdID))
+caregiverSex <- sort(caregivers$CaregiverSex[caregivers$householdID %in% utila_df$householdID], na.last = T)

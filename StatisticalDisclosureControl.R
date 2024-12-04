@@ -18,26 +18,6 @@
 # sharing that data publicly in a way that could link it to individual
 # participants.
 
-
-source('dataprep.R')
-library(sdcMicro)
-
-AddedVars <-
-  d2 |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
-  dplyr::select(
-    householdID,
-    childHHid,
-    RelativeNeed3,
-    RelativeMaternalInvestment2,
-    ConflictFamily:StatusConcerns,
-    CaregiverResponse
-  )
-
-StudyVars <- SignalVars |>
-  dplyr::select(-AlloparentingXsex) |>
-  left_join(AddedVars, by = c('householdID', 'childHHid'))
-
 # Definitely
 # ChildAge
 # Sex
@@ -61,53 +41,68 @@ StudyVars <- SignalVars |>
 # HouseQuality
 # LogIncome (but category based?)
 
+# Run in a fresh R session
+
+#+ message=F, warning=F
+source("recode.R")
+source("dictionaries.R")
+source("dataprep.R")
+
+library(sdcMicro)
+
+# Cluster ages
+discretize <- function(v, n){
+  q <- quantile(v, seq(0, 1, 1/n))[-1]
+  map_int(v, \(x) min(q[x<=q]))
+}
+
+# The householdID variable now has a unique random # for
+# each child, not each household
+new_hid <- sample(nrow(utila_df))
+names(new_hid) <- utila_df$householdID
+
+utila_df <-
+  utila_df |>
+  mutate(
+    householdID = new_hid,
+    childHHid = householdID,
+    uniqueID = householdID,
+    Neighborhood2 = ifelse(is.na(Neighborhood2), c(0,1), Neighborhood2),
+    ChildAge = discretize(ChildAge, 4) # Child ages clustered into quartiles
+  ) |>
+  arrange(householdID) |>
+  # These variables are randomized within the two neighborhoods
+  mutate(
+    NumberOfChildren = sample(NumberOfChildren, n()),
+    number_adults = sample(number_adults, n()),
+    UserLanguage = sample(UserLanguage, n()),
+    .by = Neighborhood2
+  )
+
+# householdIDs are set to the new ones generated above
+causes <-
+  causes |>
+  mutate(
+    householdID = new_hid[householdID],
+    childHHid = householdID,
+    uniqueID = householdID
+  )
+
+# Assess disclosure risk
+# Aim for k-anonymity >= 4
+#+ message=T
 sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage"),
-  numVars = c("ChildAge", "NumberOfChildren", "number_adults")
+  utila_df,
+  keyVars = c("ChildAge", "Sex", "Neighborhood2", "ImmigrateUtila")
 )
 measure_risk(sdcObj)
 
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila"),
-  numVars = c("ChildAge", "NumberOfChildren", "number_adults")
-)
-measure_risk(sdcObj)
-
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "NumberOfChildren", "number_adults"),
-  numVars = c("ChildAge")
-)
-measure_risk(sdcObj)
-
-
-out <- measure_risk(
-  as.data.frame(StudyVars[c('householdID', "Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage")]),
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "UserLanguage"),
-  hid = 'householdID'
-)
+# Delete values to achieve k-anonymity >= 4
+out <- localSuppression(sdcObj, k=4)
 out
+plot(out)
 
-out <- measure_risk(
-  as.data.frame(StudyVars[c('householdID', "Sex", "Neighborhood2")]),
-  keyVars = c("Sex", "Neighborhood2"),
-  hid = 'householdID'
-)
-out
+utila_df$ChildAge <- out@manipKeyVars$ChildAge
 
-out <- measure_risk(
-  as.data.frame(StudyVars),
-  keyVars = c("Sex", "Neighborhood2", "ImmigrateUtila", "NumberOfChildren", "number_adults"),
-  hid = 'householdID'
-)
-out
+save(utila_df, causes, householdIDs, caregiverSex, file = "data/utilasignalingPublicData.rda")
 
-# Using microaggregation
-sdcObj <- createSdcObj(
-  StudyVars,
-  keyVars = c("Sex", "Neighborhood2", "NumberOfChildren", "number_adults"),
-  numVars = c("ChildAge")
-)
-out <- microaggregation(sdcObj)

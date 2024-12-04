@@ -156,6 +156,6 @@ shortform_dict <-
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]
 
-# kable(custom.summarize(modeldf, c(dict1[1,3], dict2[1,3,5]), facvar = "Sex")) %>% kable_styling()
+# kable(custom.summarize(utila_df, c(dict1[1,3], dict2[1,3,5]), facvar = "Sex")) %>% kable_styling()
 
-# kable(custom.summarize(modeldf, vars_c[c(1,4,5)], facvar = "Sex")) %>% kable_styling()
+# kable(custom.summarize(utila_df, vars_c[c(1,4,5)], facvar = "Sex")) %>% kable_styling()
