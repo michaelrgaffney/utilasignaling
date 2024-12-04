@@ -673,3 +673,9 @@ For our independent variables of skinfold thickness, flexed bicep circumference,
 ### Old discussion parts
 
 The effect of age was smallest on child sadness. However, interpretation of this finding is more difficult due to the fact that, unlike crying and temper tantrums, sadness is thought to have important non-signaling functions including drawing one’s attention to a problem, motivating deeper analysis of one’s situation, and causing withdrawal from situations with low fitness prospects [@nesse2019; @nettle2009; @allen2003; @hagen2011]. By asking about sadness as a whole, our measure was unable to disentangle information caretakers gleaned from cues from information that came from signals.
+
+```{r}
+sessionInfo()
+```
+
+# References
