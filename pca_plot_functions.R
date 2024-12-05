@@ -87,3 +87,24 @@ pca_biplot <- function(obj, components = c(1,2), data = NULL, threshold = 0, rev
     geom_segment(data=datapc, aes(x=0, y=0, xend=v1, yend=v2), arrow=arrow(length=unit(0.2,"cm")), alpha=0.75, color="red") +
     theme_minimal()
 }
+
+ggdotchart <- function(v, threshold = NULL){
+  d <- tibble::tibble(
+    x = c(v), # remove table class
+    y = forcats::fct_reorder(names(v), v)
+  )
+
+  if (!is.null(threshold) & is.numeric(threshold)){
+    d$threshold <- d$x > threshold
+    p <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = threshold, shape = threshold))
+  } else {
+    p <- ggplot2::ggplot(d, ggplot2::aes(x, y))
+  }
+
+  if (min(v) >= 0) p <- p + ggplot2::xlim(0, NA)
+
+  p +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::labs(x = "", y = "") +
+    ggplot2::theme_minimal(15)
+}

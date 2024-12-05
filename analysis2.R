@@ -37,7 +37,7 @@ glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
   names(coefs$estimate) <- shortform_dict[coefs$term]
 
   p <-
-    hagenutils::ggdotchart(coefs$estimate[-1]) +
+    ggdotchart(coefs$estimate[-1]) +
     geom_vline(xintercept = 0, linetype = 'dotted') +
     xlab("Coefficients") +
     ggtitle(shortform_dict[outcome])
