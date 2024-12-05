@@ -4279,15 +4279,6 @@
       ],
       "Hash": "62b65c52671e6665f803ff02954446e9"
     },
-    "utiladata2023": {
-      "Package": "utiladata2023",
-      "Version": "0.0.0.9000",
-      "Source": "unknown",
-      "Requirements": [
-        "R"
-      ],
-      "Hash": "4f010a27d54c0f9c5069b520305db744"
-    },
     "uuid": {
       "Package": "uuid",
       "Version": "1.2-0",
