@@ -74,9 +74,9 @@ source("recode.R")
 source("dictionaries.R")
 
 # To use public data, comment out dataprep.R
-# and uncomment dataprepPublic.R
+# and uncomment load statement
 source("dataprep.R")
-# source("dataprepPublic.R")
+# load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
 source("analysis2.R") # Generates many plots. Slow!
