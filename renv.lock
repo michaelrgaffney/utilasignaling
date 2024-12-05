@@ -1854,14 +1854,14 @@
     },
     "hagenutils": {
       "Package": "hagenutils",
-      "Version": "0.3.18",
+      "Version": "0.3.19",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "hagenutils",
       "RemoteUsername": "grasshoppermouse",
       "RemotePkgRef": "grasshoppermouse/hagenutils",
-      "RemoteSha": "16c6f40e53c40fd82b9d94a9098e72c9fd3ea09b",
+      "RemoteSha": "ef6e9b92fd145104e0459025eb5ded2d229e800a",
       "Requirements": [
         "R",
         "UpSetR",
@@ -1874,6 +1874,7 @@
         "ggrepel",
         "glue",
         "gt",
+        "kableExtra",
         "readr",
         "reshape2",
         "scales",
@@ -1882,7 +1883,7 @@
         "tidyr",
         "viridis"
       ],
-      "Hash": "9335d7c64bfa961214aace178e2acdc1"
+      "Hash": "9bdc9f16e3cfc82d9eeabd43b5644531"
     },
     "hardhat": {
       "Package": "hardhat",
