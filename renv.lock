@@ -477,6 +477,24 @@
       ],
       "Hash": "7fba3f587b0f3cb3232d03d540dbf772"
     },
+    "UpSetR": {
+      "Package": "UpSetR",
+      "Version": "1.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "ggplot2",
+        "grDevices",
+        "gridExtra",
+        "methods",
+        "plyr",
+        "scales",
+        "stats",
+        "utils"
+      ],
+      "Hash": "f6ef89503aaff474873f8bc1823894e1"
+    },
     "V8": {
       "Package": "V8",
       "Version": "4.4.2",
@@ -1218,8 +1236,9 @@
     },
     "ergm": {
       "Package": "ergm",
-      "Version": "4.7-7448",
-      "Source": "unknown",
+      "Version": "4.7.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rdpack",
@@ -1240,7 +1259,7 @@
         "tibble",
         "trust"
       ],
-      "Hash": "7e7c381513902c8c0640d437319565d0"
+      "Hash": "d5f7384696942dcb25a0cefe94127194"
     },
     "evaluate": {
       "Package": "evaluate",
@@ -1835,14 +1854,17 @@
     },
     "hagenutils": {
       "Package": "hagenutils",
-      "Version": "0.3.17",
+      "Version": "0.3.18",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "hagenutils",
       "RemoteUsername": "grasshoppermouse",
+      "RemotePkgRef": "grasshoppermouse/hagenutils",
+      "RemoteSha": "16c6f40e53c40fd82b9d94a9098e72c9fd3ea09b",
       "Requirements": [
         "R",
+        "UpSetR",
         "broom",
         "broom.mixed",
         "dplyr",
@@ -1860,7 +1882,7 @@
         "tidyr",
         "viridis"
       ],
-      "Hash": "0cf3adf0e3e7873517d61bcf31c2d168"
+      "Hash": "9335d7c64bfa961214aace178e2acdc1"
     },
     "hardhat": {
       "Package": "hardhat",
