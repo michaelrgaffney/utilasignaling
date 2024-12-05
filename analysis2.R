@@ -241,7 +241,7 @@ names(discrete_vars) <- names(discrete_vars0$discrete)
 # Very long run time
 # set.seed(456)
 # m3 <- easybgm(SignalVars[-c(1,2,3,4,5)], type = 'mixed', not_cont = discrete_vars[-c(1,2,3,4,5)], iter = 1000000, package = 'BDgraph', g.prior = 0.05)
-# save(m3, file = 'm3_1e6_cost_freq.rda')
+# save(m3, file = 'data/m3_1e6_cost_freq.rda')
 load("data/m3_1e6_cost_freq.rda")
 
 plot_network(m3, layout = "spring", vsize = 4, label.cex = 1, exc_prob = 0.9)
