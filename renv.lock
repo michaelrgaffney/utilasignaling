@@ -1021,8 +1021,9 @@
     },
     "ergm": {
       "Package": "ergm",
-      "Version": "4.7-7448",
-      "Source": "unknown",
+      "Version": "4.7.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rdpack",
@@ -1043,7 +1044,7 @@
         "tibble",
         "trust"
       ],
-      "Hash": "7e7c381513902c8c0640d437319565d0"
+      "Hash": "d5f7384696942dcb25a0cefe94127194"
     },
     "evaluate": {
       "Package": "evaluate",
