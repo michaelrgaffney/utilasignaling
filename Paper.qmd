@@ -79,7 +79,7 @@ source("dataprep.R")
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-source("analysis2.R") # Generates many plots. Slow!
+# source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
@@ -260,7 +260,10 @@ sex_table <- table(utila_df$Sex)
 #| label: tbl-sumtab_combined
 #| tbl-cap: Summary statistics for continuous variables.
 
-kable(custom.summarize(utila_df, longform_dict[1:23])) %>% kable_styling()
+utila_df |> 
+  dplyr::select(any_of(names(utila_df[names(longform_dict[1:23])]))) |> 
+  setNames(longform_dict[1:23]) |> 
+  datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
 ```
 
 ```{r sumtab_factors}

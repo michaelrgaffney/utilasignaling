@@ -1,14 +1,11 @@
 
-library(tidyverse)
+library(ggplot2)
+library(forcats)
 library(patchwork)
 library(modelsummary)
-library(labelled)
 library(ggcorrplot)
 library(pvclust)
 library(ggalluvial)
-library(hagenutils) # from github
-library(knitr)
-library(kableExtra)
 library(skimr)
 library(glmnet)
 library(tidymodels)
@@ -18,6 +15,8 @@ library(easybgm)
 library(tidygraph)
 library(ggraph)
 library(ordinalNet)
+
+source("pca_plot_functions.R")
 
 utila_FULLSIG <-
   utila_df |>
