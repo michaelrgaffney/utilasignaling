@@ -1,3 +1,5 @@
+# functions from hagenutils
+
 pca_loadings_plot <- function(obj, components = 1:3, sortby = 1, threshold = 0, reverse=NULL){
   require(dplyr)
   if (!all(reverse %in% components)) stop("reverse vector must be a subset of components vector")
@@ -108,3 +110,16 @@ ggdotchart <- function(v, threshold = NULL){
     ggplot2::labs(x = "", y = "") +
     ggplot2::theme_minimal(15)
 }
+
+scale_colour_binary <- function(direction=1, ...){
+  ggplot2::discrete_scale(
+    "colour", "binary",
+    function(n){
+      if (n > 2) stop('custom binary palette provides only 2 colors')
+      cols <- viridisLite::magma(11)[c(4,8)]
+      if (direction >= 0) cols else rev(cols)
+    },
+    ...
+  )
+}
+scale_color_binary <- scale_colour_binary
