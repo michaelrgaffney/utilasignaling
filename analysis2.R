@@ -117,7 +117,7 @@ m_alloparent <-
   fit(f, data = e)
 
 plot_alloparenting_cost <-
-plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newdata = e) +
+  plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newdata = e) +
   scale_color_binary(labels = c("Female", "Male")) +
   ylim(0, NA) +
   labs(x = "Alloparenting Frequency (standardized)", y = "Signal cost") +

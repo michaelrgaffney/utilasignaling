@@ -154,11 +154,12 @@ signal_corrplot <-
     `Child sex` = as.numeric(`Child sex`)
   ) |>
   cor( use = "pairwise.complete.obs") |>
-  ggcorrplot(hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5) +
+  ggcorrplot(hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5, tl.cex = 16) +
   scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9, limits = c(-1, 1)) +
   guides(fill = guide_colorbar(title = "Correlation coefficients"))
 signal_corrplot
-
+ggsave("Figures/signal_corrplot.pdf", width = 12, height = 9)
+ggsave("Figures/signal_corrplot.png", width = 12, height = 9)
 
 barplot_conflict <-
   utila_df |>
@@ -168,6 +169,7 @@ barplot_conflict <-
   filter_at(vars(ConflictFreqOF),all_vars(!is.na(.))) |>
   ggplot(aes(x=ConflictFreq2, fill= Sex)) +
   geom_bar(position = "stack") +
+  ylim(0, 150) +
   labs(title = "Conflict") +
   scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
   labs(x = "Frequency of conflict (per month)", y = "Number of children") +
@@ -182,11 +184,18 @@ barplot_alloparenting <-
   filter_at(vars(AlloparentingFreq0),all_vars(!is.na(.))) |>
   ggplot(aes(x= AlloparentingFreq02, fill = Sex)) +
   geom_bar(position = "stack") +
+  ylim(0, 150) +
   labs(title = "Alloparenting") +
   scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
   labs(x = "Frequency of child alloparenting (per month)", y = "Number of children") +
   theme_minimal(15)
 barplot_alloparenting
+
+plot_conflict_allo <-
+  (barplot_conflict + barplot_alloparenting) + plot_layout(axes = 'collect_y', axis_titles = "collect_y", guides = 'collect')
+plot_conflict_allo
+ggsave("Figures/plot_conflict_allo.pdf", width = 12, height = 9)
+ggsave("Figures/plot_conflict_allo.png", width = 12, height = 9)
 
 cause_cluster_analysis <-
   causes |>
@@ -242,6 +251,8 @@ barplot_CaregiverResponse <-
   guides(fill = guide_legend("Caregiver response:", nrow = 1, reverse = T, position = "top")) +
   theme_minimal(15)
 barplot_CaregiverResponse
+ggsave("Figures/barplot_CaregiverResponse.pdf", width = 8, height = 8)
+ggsave("Figures/barplot_CaregiverResponse.png", width = 8, height = 8)
 
 sfdfsum <-
   sfdf |>

@@ -79,7 +79,7 @@ source("dataprep.R")
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-# source("analysis2.R") # Generates many plots. Slow!
+source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
