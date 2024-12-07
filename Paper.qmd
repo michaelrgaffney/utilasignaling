@@ -204,7 +204,7 @@ We also calculated the summed frequency of child alloparenting contributions by 
 
 ### Relative neediness of children and relative investment in children within the family
 
-We used six-point Likert scales for parental reports of 1) the relative neediness of children within the household, and 2) the relative investment they provide to each participating child compared to the rest of their children. Both questions were framed need as involving time, effort, and resources. See Table @stbl-relvars for exact wording.
+We used six-point Likert scales for parental reports of 1) the relative neediness of children within the household, and 2) the relative investment they provide to each participating child compared to the rest of their children. Both questions were framed need as involving time, effort, and resources. See @stbl-relvars for exact wording.
 
 ### Causes of, and responses to, the last instance of child signaling of need
 
