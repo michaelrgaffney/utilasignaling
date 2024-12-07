@@ -371,7 +371,7 @@ The effects of particularly large risk or protective factors for conflict freque
 Effects of selected predictors of child-parent conflict frequencies when holding continuous variables at their mean and factor variables at their mode.
 :::
 
-In general, older child age and better neighborhoods were associated with less conflict and less signaling, whereas medical problems were associated with more conflict and more signaling. Alloparenting frequency was positively associated with signaling for girls, and negatively for boys.
+In general, older child age and better neighborhoods were associated with less conflict and less signaling, whereas medical problems were associated with more conflict and more signaling. There was little evidence for a sex difference in signaling, except that alloparenting frequency was positively associated with signaling for girls, and negatively for boys. Male sex was associated with more conflict.
 
 ## Positive associations between child age and signaling frequency and perceptions of child neediness
 
