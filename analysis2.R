@@ -202,24 +202,22 @@ ggsave("Figures/conflict_effects_plot.png", conflict_effects_plot, width = 12, h
 # PCA ---------------------------------------------------------------------
 
 sv2 <-
-  SignalVars[-c(1,2)] |>
+  SignalVars |>
+  dplyr::select(-householdID, -childHHid) |>
   mutate(`Possession score` = rowSums(pick(LifestyleReality_1:LifestyleReality_8))) |>
   dplyr::select(-starts_with("Lifestyle"), -AlloparentingXsex)
 sv2 <- set_names(sv2, shortform_dict[names(sv2)])
 
 pca1 <- prcomp(sv2, scale. = T)
-plot_loadings1 <- pca_loadings_plot(pca1, 1:2, reverse = 1) + theme_bw(20)
-plot_biplot1 <- pca_biplot(pca1)
+plot_loadings1 <- pca_loadings_plot(pca1, 1:2, reverse = 1) + theme_bw(16) + theme(legend.position = 'none')
+plot_biplot1 <- pca_biplot(pca1, threshold = 0.19)
 
 plot_pca <- plot_loadings1 + plot_biplot1 + plot_layout(widths = c(1,2))
 plot_pca
 
-ggsave("Figures/plot_pca.pdf", plot_pca, width = 20, height = 12)
+ggsave("Figures/plot_pca.pdf", plot_pca, width = 20, height = 9)
+ggsave("Figures/plot_pca.svg", plot_pca, width = 20, height = 10)
 ggsave("Figures/plot_pca.png", plot_pca, width = 20, height = 12)
-
-# pca2 <- prcomp(mdf2[-c(4:6)], scale. = T) # Remove composite signaling vars
-# plot_loadings2 <- pca_loadings_plot(pca2, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
-# plot_biplot2 <- pca_biplot(pca2) + theme_minimal(15)
 
 # Graphical models ---------------------------------------------------------
 
