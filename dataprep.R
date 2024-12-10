@@ -1,11 +1,5 @@
 
 library(utiladata2023) # data package
-library(dplyr)
-library(purrr)
-library(stringr)
-library(labelled)
-
-load("data/m3_1e6_cost_freq.rda")
 
 # functions used ----------------------------------------------------------
 
@@ -195,7 +189,7 @@ d <-
     MedicalProblemsMean = mean2(SchoolAges1, SchoolAges2, na.rm = TRUE) # 1 child has data for only 1
   ) |>
   ungroup() |>
-  left_join(dplyr::select(caregivers, householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
+  left_join(dplyr::select(remove_labels(caregivers), householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
                           EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                           number_children2, number_adults, UserLanguage, CurrentJob, contains("CaregiverMarital"), NeighborhoodQuality, HouseQuality,
                           contains("SocialSupport"), contains("FoodSecurity"), contains("HomeInstability_"), contains("Reality_")), by = "householdID") |>

@@ -318,6 +318,7 @@ mdf2 <-
     OldestXsex = OldestChild * Sex
   )
 
+# Remove composite signaling vars
 e <-
   mdf2 |>
   dplyr::select(
@@ -333,9 +334,8 @@ e <-
   )
 
 e <- set_names(e, shortform_dict[names(e)])
-# names(e) <- shortform_dict[names(e)]
 
-m <- prcomp(e, scale. = T) # Remove composite signaling vars
+m <- prcomp(e, scale. = T)
 plot_loadings <- pca_loadings_plot(m, 1:2) # + theme(legend.position = 'top', legend.title = element_blank())
 plot_biplot <- pca_biplot(m, threshold = 0.2) + theme_minimal(15)
 

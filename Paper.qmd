@@ -70,16 +70,24 @@ crossref:
 ```{r setup, include=FALSE}
 if(!dir.exists("Figures")) dir.create("Figures")
 
+library(dplyr)
+library(purrr)
+library(stringr)
+library(labelled)
+
+load("data/m3_1e6_cost_freq.rda")
+
 source("recode.R")
 source("dictionaries.R")
 
-# To use public data, comment out dataprep.R
-# and uncomment load statement
+# To use public data, comment out this line
 source("dataprep.R")
+
+# And uncomment this line
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-# source("analysis2.R") # Generates many plots. Slow!
+source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract

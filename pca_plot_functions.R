@@ -34,7 +34,7 @@ pca_loadings_plot <- function(obj, components = 1:3, sortby = 1, threshold = 0, 
     ggplot2::theme_bw(15)
 }
 
-pca_biplot <- function(obj, components = c(1,2), data = NULL, threshold = 0, reverse=NULL, label_size = 5, geom_point=T) {
+pca_biplot <- function(obj, components = c(1,2), data = NULL, threshold = 0, reverse=NULL, label_size = 5, geom_point=T, force = 1, force_pull = 1) {
 
   if (class(obj) != 'prcomp') stop('obj class must be prcomp')
   if (length(components) != 2 | mode(components) != 'numeric') stop('components is not a numeric vector of length 2')
@@ -70,7 +70,7 @@ pca_biplot <- function(obj, components = c(1,2), data = NULL, threshold = 0, rev
     labs(x = pct_var[1], y = pct_var[2])
 
   if (geom_point){
-    plot <- plot + geom_point()
+    plot <- plot + geom_point(color = "black")
   }
 
   datapc <- data.frame(varnames=rownames(obj$rotation), obj$rotation[,components])
@@ -85,9 +85,9 @@ pca_biplot <- function(obj, components = c(1,2), data = NULL, threshold = 0, rev
   )
   plot +
     coord_equal() +
-    ggrepel::geom_text_repel(data=datapc, aes(x=v1, y=v2, label=varnames), size = label_size, color="red", max.overlaps = Inf) +
-    geom_segment(data=datapc, aes(x=0, y=0, xend=v1, yend=v2), arrow=arrow(length=unit(0.2,"cm")), alpha=0.75, color="red") +
-    theme_minimal()
+    geom_segment(data=datapc, aes(x=0, y=0, xend=v1, yend=v2), arrow=arrow(length=unit(0.2,"cm")), linewidth=1, alpha=0.75, color="red") +
+    ggrepel::geom_text_repel(data=datapc, aes(x=v1, y=v2, label=varnames), size = label_size, color="blue", max.overlaps = Inf, force = force, force_pull = force_pull) +
+    theme_minimal(20)
 }
 
 ggdotchart <- function(v, threshold = NULL){

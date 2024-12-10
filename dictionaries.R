@@ -91,7 +91,7 @@ shortform_dict <-
     YoungerKids = "Younger children",
     AdultsNoChildcare = "Adults that do not provide childcare",
     AdultsChildcare = "Adults that provide childcare",
-    OtherChildAlloparentingFreqN = "Other household child alloparenting freq.",
+    OtherChildAlloparentingFreqN = "Other child alloparenting freq.",
     HeightMean_2024 = "2024 height (cm)",
     HeightMean_2023 = "2023 height (cm)",
     WeightMean_KG_2024 = "2024 weight (kg)",

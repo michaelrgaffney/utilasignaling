@@ -44,6 +44,11 @@
 # Run in a fresh R session
 
 #+ message=F, warning=F
+library(dplyr)
+library(purrr)
+library(stringr)
+library(labelled)
+
 source("recode.R")
 source("dictionaries.R")
 source("dataprep.R")
@@ -72,10 +77,10 @@ utila_df <-
   arrange(householdID) |>
   # These variables are randomized within the two neighborhoods
   mutate(
-    NumberOfChildren = sample(NumberOfChildren, n()),
-    number_adults = sample(number_adults, n()),
-    UserLanguage = sample(UserLanguage, n()),
-    .by = Neighborhood2
+    NumberOfChildren = mean(NumberOfChildren, na.rm=T), #sample(NumberOfChildren, n()),
+    number_adults = mean(number_adults, na.rm=T), #sample(number_adults, n()),
+    UserLanguage = sample(UserLanguage, 1), #n()),
+    # .by = Neighborhood2
   )
 
 # householdIDs are set to the new ones generated above
