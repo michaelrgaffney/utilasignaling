@@ -42,16 +42,16 @@ author:
 execute:
   echo: false
   warning: false
-  keep-md: true
+  keep-md: false
 format:
-  docx:
-    number-sections: true
-    prefer-html: true
   html:
     toc: true
     toc-expand: 2
     number-sections: true
     embed-resources: true
+  docx:
+    number-sections: true
+    prefer-html: true
 lightbox: true
 tbl-cap-location: bottom
 bibliography: signaling.bib
@@ -81,10 +81,10 @@ source("recode.R")
 source("dictionaries.R")
 
 # To use public data, comment out this line
-source("dataprep.R")
+# source("dataprep.R")
 
 # And uncomment this line
-# load("data/utilasignalingPublicData.rda")
+load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
 source("analysis2.R") # Generates many plots. Slow!
