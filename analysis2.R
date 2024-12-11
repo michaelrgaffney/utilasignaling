@@ -45,13 +45,17 @@ glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
   return(list(data = d, lambda.min = lambda.min, model = m2, coefs = coefs, coefplot = p))
 }
 
+sv <- 
+  SignalVars |> 
+  dplyr::select(where(\(x) sd(x, na.rm = T) > 0))
+
 signalparams <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
 names(signalparams$Outcome) <- str_c(signalparams$Outcome, signalparams$alpha)
-signalparams$out <- map2(signalparams$Outcome, signalparams$alpha, \(x, y) glmnet2(SignalVars, x, 9:ncol(SignalVars), alpha = y), .progress = T)
+signalparams$out <- map2(signalparams$Outcome, signalparams$alpha, \(x, y) glmnet2(sv, x, 9:ncol(sv), alpha = y), .progress = T)
 
 conflictparams <- expand_grid(Outcome = c("ConflictFreqN"), alpha = c(0, 1))
 names(conflictparams$Outcome) <- str_c(conflictparams$Outcome, conflictparams$alpha)
-conflictparams$out <- map2(conflictparams$Outcome, conflictparams$alpha, \(x, y) glmnet2(SignalVars, x, 9:ncol(SignalVars), alpha = y), .progress = T)
+conflictparams$out <- map2(conflictparams$Outcome, conflictparams$alpha, \(x, y) glmnet2(sv, x, 9:ncol(sv), alpha = y), .progress = T)
 
 plot_lasso <-
   signalparams$out$SadFreqN1$coefplot + signalparams$out$CryFreqN1$coefplot +
@@ -105,6 +109,7 @@ ggsave("Figures/signal_effects_plot.png", signal_effects_plot, width = 12, heigh
 
 e <- SignalVars |>
   dplyr::select(-householdID, -childHHid, -c(SadFreqN:SignalFreq), -ConflictFreqN, -AlloparentingXsex) |>
+  dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) |> 
   relocate(AlloparentingFreqN, .after = SignalCost)
 e[-1] <- scale(e[-1])
 
@@ -130,6 +135,7 @@ plot_alloparenting_cost
 
 e2 <- SignalVars |>
   dplyr::select(-householdID, -childHHid, -c(SadFreqN:CryFreqN), -c(SignalFreq:SignalCost), -ConflictFreqN, -AlloparentingXsex) |>
+  dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) |>
   relocate(AlloparentingFreqN, .after = TantrumFreqN)
 e2[-1] <- scale(e2[-1])
 
@@ -205,7 +211,8 @@ sv2 <-
   SignalVars |>
   dplyr::select(-householdID, -childHHid) |>
   mutate(`Possession score` = rowSums(pick(LifestyleReality_1:LifestyleReality_8))) |>
-  dplyr::select(-starts_with("Lifestyle"), -AlloparentingXsex)
+  dplyr::select(-starts_with("Lifestyle"), -AlloparentingXsex) |> 
+  dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) # remove vars set to mean for anonymity
 sv2 <- set_names(sv2, shortform_dict[names(sv2)])
 
 pca1 <- prcomp(sv2, scale. = T)
@@ -391,6 +398,7 @@ ordinal_plot2 <- function(fit, predictor, data, title){
 
 SignalVars4 <-
   left_join(SignalVars, utila_df[c("householdID", "childHHid", "RelativeNeed3")]) |>
+  dplyr::select(where(\(x) !all(duplicated(x)[-1L]))) |>
   relocate(RelativeNeed3, .after = 'childHHid') |>
   mutate(
     across(-c(1:3), as.numeric),
@@ -427,6 +435,7 @@ ggsave("Figures/plot_need_combined.png", plot_need_combined, width = 12, height 
 
 SignalVars5 <-
   left_join(SignalVars, utila_df[c("householdID", "childHHid", "RelativeMaternalInvestment2", "RelativeNeed3")]) |>
+    dplyr::select(where(\(x) !all(duplicated(x)[-1L]))) |>
   relocate(RelativeMaternalInvestment2, .after = 'childHHid') |>
   mutate(
     across(-c(1:3), as.numeric),
@@ -472,6 +481,7 @@ cause_vars <- names(cause_count[cause_count > 5])
 SignalVars3 <-
   left_join(SignalVars, utila_df[c("householdID", "childHHid", "CaregiverResponse")]) |>
   left_join(causematrix[c("householdID", "childHHid", cause_vars)]) |>
+  dplyr::select(where(\(x) !all(duplicated(x)[-1L]))) |>
   relocate(CaregiverResponse, .after = childHHid) |>
   mutate(
     across(-c(1:3), as.numeric),
