@@ -51,7 +51,8 @@ longform_dict <-
     LifestyleReality_5 = "Possession: Washing machine",
     LifestyleReality_6 = "Possession: Refrigerator",
     LifestyleReality_7 = "Possession: Home",
-    LifestyleReality_8 = "Possession: Credit card"
+    LifestyleReality_8 = "Possession: Credit card",
+    CaregiverSex = "Caregiver Sex"
   )
 # needs causes
 # caregiver responses?
@@ -152,6 +153,21 @@ shortform_dict <-
     TransgressionMade = "Transgression made",
     LossOfPrivlegesOrItem = "Loss of privileges or item"
 
+  )
+
+longform_dict_adult_cont <-
+  c(
+    CaregiverAge = "Caregiver age (years)",
+    NumberOfChildren = "Children in household",
+    number_adults = "Number of adults in household",
+    AdultsChildcare = "Household adults who provide childcare",
+    AdultsHousework = "Household adults who provide, food, housework, and other neccesities",
+    EducationLevelYears = "Caregiver education level (years)",
+    IncomeCategoryN = "Monthly household income (Lempira)",
+    FoodSecurity = "Household food insecurity",
+    NeighborhoodQuality = "Neighborhood quality index",
+    HouseQuality = "House sanitation index",
+    'Possession score' = "Possession score"
   )
 
 # shortform_dict[c(1,2,9,10,11,12,14,15,16)]

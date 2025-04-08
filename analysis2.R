@@ -427,7 +427,7 @@ ggsave("Figures/plot_need_coefs.png", plot_need_coefs, width = 12, height = 12)
 plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
 plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
 
-plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "A")
+plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "a")
 ggsave("Figures/plot_need_combined.pdf", plot_need_combined, width = 12, height = 12)
 ggsave("Figures/plot_need_combined.png", plot_need_combined, width = 12, height = 12)
 

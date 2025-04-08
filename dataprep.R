@@ -189,7 +189,7 @@ d <-
     MedicalProblemsMean = mean2(SchoolAges1, SchoolAges2, na.rm = TRUE) # 1 child has data for only 1
   ) |>
   ungroup() |>
-  left_join(dplyr::select(remove_labels(caregivers), householdID, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
+  left_join(dplyr::select(remove_labels(caregivers), householdID, CaregiverSex, CPRatio, Neighborhood, ImmigrateUtila, IncomeCategory, IncomeCategoryN,
                           EducationLevel, EducationLevelYears, AdultsMoney, AdultsHousework, AdultsChildcare, AdultsNoChildcare, CaregiverAge,
                           number_children2, number_adults, UserLanguage, CurrentJob, contains("CaregiverMarital"), NeighborhoodQuality, HouseQuality,
                           contains("SocialSupport"), contains("FoodSecurity"), contains("HomeInstability_"), contains("Reality_")), by = "householdID") |>
@@ -361,3 +361,18 @@ utila_df <-
 
 householdIDs <- sample(utila_df$householdID, length(utila_df$householdID))
 caregiverSex <- sort(caregivers$CaregiverSex[caregivers$householdID %in% utila_df$householdID], na.last = T)
+
+# added caregiversex in 192
+utila_df_caregiver <-
+  d2 |>
+  mutate(
+    CaregiverSex = as.factor(ifelse(CaregiverSex == "Non-binary / third gender", "Female", CaregiverSex)), # Data entry errors
+    across(LifestyleReality_1:LifestyleReality_8, \(x) ifelse(x == "No", 0, 1)),
+    `Possession score` = rowSums(pick(LifestyleReality_1:LifestyleReality_8))
+    ) |>
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
+  filter(childHHid == 1)
+
+utila_df_TEST <-
+  d2 |>
+  dplyr::select(householdID, childHHid, MeanChildRelatedness) #child specific
