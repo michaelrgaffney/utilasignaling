@@ -155,7 +155,7 @@ signal_corrplot <-
     `Child sex` = as.numeric(`Child sex`)
   ) |>
   cor( use = "pairwise.complete.obs") |>
-  ggcorrplot(hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5, tl.cex = 16) +
+  ggcorrplot(type = "upper", hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5, tl.cex = 16) +
   scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9, limits = c(-1, 1)) +
   guides(fill = guide_colorbar(title = "Correlation coefficients"))
 signal_corrplot
