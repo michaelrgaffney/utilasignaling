@@ -87,7 +87,7 @@ source("dataprep.R")
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-source("analysis2.R") # Generates many plots. Slow!
+#source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
@@ -108,13 +108,13 @@ While parent-offspring conflict and sibling competition are likely ubiquitous, t
 
 ## Cooperation within the family
 
-Humans are a uniquely interdependent species among the living primates [@tomasello2012] in that one’s fitness prospects depend greatly on a network of close kin and other social allies [@apicella2019]. This need for others is most intense with children, who are born highly altricial and require many years of investment to develop to the point where they can obtain enough food to survive on their own and develop the social skills needed to succeed in their communities [@kaplan2009; @rosenberg2021; @schniter2015]. Much of this investment comes from mothers and fathers [@kramer2018]. However, grandparents, aunts, uncles, and non-relatives also provide significant investment in children in many societies [@kramer2018; @sear2008], which was likely favored due to a combination of inclusive fitness benefits, reciprocity, and reputation management [@gurven2000] + (Schniter Preprint (permission needed). Children also often serve as alloparents, helping to raise their younger siblings via direct care, food collection and preparation, and other family tasks [@hrdy2009; @meehan2009; @sear2008] despite still requiring substantial amounts of investment themselves [@kramer2018a].
+Humans are a uniquely interdependent species among the living primates [@tomasello2012] in that both sex's fitness prospects depend greatly on a network of close kin and other social allies [@apicella2019]. This need for others is most intense with children, who are born highly altricial and require many years of investment to develop to the point where they can obtain enough food to survive on their own and develop the social skills needed to succeed in their communities [@kaplan2009; @rosenberg2021; @schniter2015]. Much of this investment comes from mothers and fathers [@kramer2018]. However, grandparents, aunts, uncles, and non-relatives also provide significant investment in children in many societies [@kramer2018; @sear2008], which was likely favored due to a combination of inclusive fitness benefits, reciprocity, and reputation management [@gurven2000; @schniter2023]. Children also often serve as alloparents, helping to raise their younger siblings via direct care, food collection and preparation, and other family tasks [@hrdy2009; @meehan2009; @sear2008] despite still requiring substantial amounts of investment themselves [@kramer2018a].
 
 Children’s potential to invest in their families can also cause conflicts with their parents. Older children might prefer to spend their time investing in romantic or other social relationships, or learning valuable skills, whereas parents might prefer them to care for their siblings, acquire or prepare food, or complete other household chores [@lowe2003; @syme2023]. Conflicts of interest over investment in the family also appear to extend to when a child starts having their own children [@kushnick2023; @emlen1995], with parents potentially benefiting from delaying the reproductive careers of certain offspring in order to gain more allocare for their other children [@flinn1989; @emlen1992] or speeding up a child’s departure from the household in order to provide more parental investment to other children [@kushnick2023].
 
 ## Signals of needs and wants
 
-In order to elicit more support, children often use signals of needs and wants. Across the tree of life, signals evolve to reveal agents’ private information to other agents when doing so benefits both the signaler and the receiver [@caro2016; @maynard-smith2004; @preuschoft2000; @setchell2005; @zahavi1975]. Children often have needs and wants, where needs involve avoiding potential fitness costs, such as poor nutrition, injuries, or threats to status, and wants involve acquiring potential fitness benefits, such as highly nutritious foods and valuable artifacts. Needs and wants are often not apparent to caregivers, however, i.e., they are private information, and hence children must signal them to receive help. Signals differ from cues in that signals were favored by natural selection due to their ability to alter the behavior or perceptions of others in ways that benefit the signaler, on average, whereas cues are information organisms use to influence their behavior or physiological state that did not evolve for communicative effect [@maynardsmith1995]. Crying when injured is likely a signal of need, for instance, whereas bleeding would be a cue of need.
+In order to elicit more support, children often use signals of needs and wants. Across the tree of life, signals evolve to reveal agents’ private information to other agents when doing so benefits both the signaler and the receiver [@caro2016; @maynard-smith2004; @preuschoft2000; @setchell2005; @zahavi1975]. Children often have needs and wants, where needs involve avoiding potential fitness costs, such as poor nutrition, injuries, or threats to status, and wants involve acquiring potential fitness benefits, such as highly nutritious foods and valuable artifacts. Needs and wants (hereafter needs) are often not apparent to caregivers, however, i.e., they are private information, and hence children must signal them to receive help. Signals differ from cues in that signals were favored by natural selection due to their ability to alter the behavior or perceptions of others in ways that benefit the signaler, on average, whereas cues are information organisms use to influence their behavior or physiological state that did not evolve for communicative effect [@maynardsmith1995]. Crying when injured is likely a signal of need, for instance, whereas bleeding would be a cue of need.
 
 When conflicts of interest over investment exist, there may be much to gain from deception (e.g., crying despite the lack of need) so that one could receive the benefits that come from being seen as needy [@zahavi1993]. Unchecked, deceptive signals could result in receivers ignoring all signals.
 
@@ -122,7 +122,7 @@ Credible signals can nevertheless evolve and be maintained in multiple ways. Sig
 
 In the context of child signals of need, a child has access to information about their internal state, which is unavailable to others, that allows them to estimate their valuation of additional investment. By signaling in a credible way, the child reveals their resource valuation to potential caretakers who may be skeptical of the child’s claims due to the common conflicts of interest described above. With the information revealed by the signal, caretakers should generally be more likely to provide additional support due to their fitness interest in the child’s wellbeing. When this is the case, all parties are better off than they would be without the signal, with caretakers benefitting from the revelation of fitness-relevant information and the child benefitting from the increased likelihood of a beneficial response.
 
-However, even credible signals of needs or wants might not result in a beneficial response because belief in a child’s need is not the only factor determining the form and amount of support given by caregivers. Instead, caregivers are expected to weigh the costs and benefits of support against other options [@daly1987; @daly1983]. Ancestrally, this likely often meant evaluating the viability of the child as well as how much a particular resource benefited one child relative to other children, current or future [@clutton-brock1991; @daly1983; @dawkins1976; @hagen1999]. The former is thought to have resulted in children having to demonstrate their vigor early in life [@soltis2004], while the latter is expected to result in context-specific support [@beaulieu2008; @frankenhuis2022]. For example, one unit of a resource is often expected to be worth more to a newborn than an adolescent, favoring that investment flowing to the newborn all else being equal. However, if resources are in short supply, parents may benefit more from investing more in older children as they are closer to reaching adulthood and have higher reproductive value [@daly1983]. Additionally, a parent may also decide against investing in a child, despite deeming that investment worthwhile, if time is not right (e.g., if a mother preferred to breastfeed during rest rather than foraging) [@altmann1980]. When this is the case, outward conflicts may exaggerate the extent of a conflict of interest and involve parents teaching children ways to behave that benefit them both [@altmann1980]. Finally, caregivers often have better information about the costs and benefits of various items and actions, and therefore can make more beneficial decisions for a child than the child can herself (e.g., preventing a child from playing with matches).
+However, even credible signals of need might not result in a beneficial response because belief in a child’s need is not the only factor determining the form and amount of support given by caregivers. Instead, caregivers are expected to weigh the costs and benefits of support against other options [@daly1987; @daly1983]. Ancestrally, this likely often meant evaluating the viability of the child as well as how much a particular resource benefited one child relative to other children, current or future [@clutton-brock1991; @daly1983; @dawkins1976; @hagen1999]. The former is thought to have resulted in children having to demonstrate their vigor early in life [@soltis2004], while the latter is expected to result in context-specific support [@beaulieu2008; @frankenhuis2022]. For example, one unit of a resource is often expected to be worth more to a newborn than an adolescent, favoring that investment flowing to the newborn all else being equal. However, if resources are in short supply, parents may benefit more from investing more in older children as they are closer to reaching adulthood and have higher reproductive value [@daly1983]. Additionally, a parent may also decide against investing in a child, despite deeming that investment worthwhile, if time is not right (e.g., if a mother preferred to breastfeed during rest rather than foraging) [@altmann1980]. When this is the case, outward conflicts may exaggerate the extent of a conflict of interest and involve parents teaching children ways to behave that benefit them both [@altmann1980]. Finally, caregivers often have better information about the costs and benefits of various items and actions, and therefore can make more beneficial decisions for a child than the child can herself (e.g., preventing a child from playing with matches).
 
 Saved for now: Although differing in their details, a common theme is that the indirect fitness costs signalers incur from imposing costs on their that parents and siblings through begging (be them energetic costs, survival costs, or reduced likelihood of future siblings) creates a floor to possible deception but falls short of preventing it [@daly1990; @wells2003].
 
@@ -254,7 +254,7 @@ All analyses were conducted with `{r} R.version.string`.
 
 ## Data availability
 
-The anonymized data used in the study are available at <https://github.com/grasshoppermouse/utiladata2023>. Study code is available at <https://github.com/michaelrgaffney/utilasignaling>.
+Study code is available at <https://github.com/michaelrgaffney/utilasignaling>.
 
 # Results
 
@@ -274,12 +274,28 @@ utila_df |>
   datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
 ```
 
+```{r sumtab_adult_cont}
+#| label: tbl-sumtab_adult_cont
+#| tbl-cap: Summary statistics for continuous variables.
+
+utila_df_caregiver |>
+  dplyr::select(any_of(names(utila_df_caregiver[names(longform_dict_adult_cont)]))) |>
+  setNames(longform_dict_adult_cont) |>
+  datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
+```
+
 ```{r sumtab_factors}
 #| label: tbl-sumtab_factors
 #| tbl-cap: Summary statistics for factor variables.
 
 # convert to factor to omit NAs in datasummary_skim
-dx <- utila_df |>
+# dx <- utila_df |>
+#   dplyr::select(any_of(names(longform_dict))) |>
+#   mutate(
+#     across(starts_with(c("Lifestyle", "ImmigrateUtila")), as.factor)
+#   )
+
+dx <- utila_df_caregiver |>
   dplyr::select(any_of(names(longform_dict))) |>
   mutate(
     across(starts_with(c("Lifestyle", "ImmigrateUtila")), as.factor)
@@ -302,7 +318,7 @@ We then estimated a BGM for all study variables, extracting the MST, which revea
 ::: {#fig-mst}
 ![](Figures/plot_mst_1e6_cost_freq.edited.png)
 
-Minimum spanning tree of child signaling and variables thought to cause differences in signaling strategies. Blue edges = negative \[do we want more detail here? e.g., partial correlations or w/e the proper Bayesian way to word that is\] correlations between variables. Red edges = positive correlations between variables. Edge lengths represent \[check that this is right and if more specificity is needed\] distances between variables. Line weights represent(1 - correlation coefficient)
+Minimum spanning tree derived from a Bayesian graphical model of child signaling and variables thought to cause differences in signaling strategies. Purple edges represent negative partial correlations between variables. Orange edges represent positive partial correlations between variables. Line weights represent partial correlation coefficients. Blue text represents our interpretation of the main clusters.
 :::
 
 ## Distributions of signaling behavior, alloparenting effort, and conflict
@@ -368,7 +384,7 @@ Effects of selected predictors of child signaling frequencies when holding conti
 ::: {#fig-alloparentingXsex}
 ![](Figures/plot_alloparentingXsex.png)
 
-Effects of alloparenting frequency (per month) and signal cost and frequency of temper tantrums by sex.
+Effects of alloparenting frequency (per month) and signal cost and frequency of temper tantrums by sex when holding continuous variables at their mean and factor variables at their mode.
 :::
 
 The effects of particularly large risk or protective factors for conflict frequency are shown in @fig-conflict-effects.
@@ -394,7 +410,7 @@ There were positive relationships between perceived relative neediness within th
 ::: {#fig-effect_relativeneed}
 ![](Figures/plot_need_combined.png)
 
-The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children. A: Effect of child age on relative neediness B: Effect child sadness frequency on relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
+The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children when holding continuous variables at their mean and factor variables at their mode. A: Effect of child age on relative neediness B: Effect child sadness frequency on relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
 :::
 
 ## Relative need predicts relative investment
@@ -404,7 +420,7 @@ Signals are capable of eliciting better treatment because the information they p
 ::: {#fig-plot_relative_investment}
 ![](Figures/plot_invest_need.png)
 
-The effect of perceived need (in terms of time, effort, and resources) relative investment within the household. Outcome variable question wording: How much time, effort, and resources do you put into this child compared to your other children?
+The effect of perceived need (in terms of time, effort, and resources) relative investment within the household when holding continuous variables at their mean and factor variables at their mode. Outcome variable question wording: How much time, effort, and resources do you put into this child compared to your other children?
 :::
 
 ## Caregiver responses to most recent signal of need
@@ -616,7 +632,7 @@ Complete correlation matrix of study variables.
 plot(cause_cluster_analysis)
 ```
 
-Cluster dendrogram for the causes of child signaling. Method = ward.D2.
+Hierarchical cluster analysis dendrogram for the causes of child signaling. Method: Euclidean distances between variables agglomerated with the ward.D2 algorithm.
 :::
 
 ::: {#sfig-plot-caregiver-punish}

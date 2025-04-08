@@ -140,9 +140,10 @@ barplot_SignalFreq <-
   geom_col(position = "stack", color = "grey") +
   scale_fill_viridis_d(option = "B", direction = -1) +
   labs(x = "Number of children", y = "") +
-  guides(fill = guide_legend("Times per month:", nrow = 1, reverse = TRUE, position = "top")) +
+  guides(fill = guide_legend("Times/month:", nrow = 1, reverse = TRUE, position = "top")) +
   theme_minimal(15)
 barplot_SignalFreq
+ggsave("Figures/barplot_SignalFreq.png", barplot_SignalFreq)
 
 
 signal_subset <- utila_df[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
