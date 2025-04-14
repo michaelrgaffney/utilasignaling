@@ -84,7 +84,7 @@ source("dictionaries.R")
 source("dataprep.R")
 
 # And uncomment this line
-#load("data/utilasignalingPublicData.rda")
+# load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
 #source("analysis2.R") # Generates many plots. Slow!
