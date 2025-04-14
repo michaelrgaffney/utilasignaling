@@ -1,4 +1,3 @@
-
 library(ggplot2)
 library(forcats)
 library(patchwork)
@@ -59,11 +58,22 @@ signal_vars <- c(
 
 SignalVars <-
   utila_df |>
-  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN) & is.na(ConflictFreqN))) |>
+  dplyr::filter(
+    !(is.na(CryFreqN) &
+    is.na(SadFreqN) &
+    is.na(TantrumFreqN) &
+    is.na(ConflictFreqN))
+  ) |>
   dplyr::select(
     householdID,
     childHHid,
-    SadFreqN, CryFreqN, TantrumFreqN, SignalFreq, SignalCost, ConflictFreqN, MeanChildRelatedness, # Fullsibs, Halfsibs, Stepsibs,
+    SadFreqN,
+    CryFreqN,
+    TantrumFreqN,
+    SignalFreq,
+    SignalCost,
+    ConflictFreqN,
+    MeanChildRelatedness, # Fullsibs, Halfsibs, Stepsibs,
     all_of(names(signal_vars))
     # OnlyChild, Only children do not have to compete for attention or other forms of investment with existing children. They still may be motivated to signal for more investment which parents might prefer to devote to future children.X
     # OldestChild, Does not seem to add much beyond age + number of children.X
@@ -78,7 +88,12 @@ SignalVars <-
     # PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
     AlloparentingXsex = AlloparentingFreqN * Sex,
   ) |>
-  na.omit()
+  na.omit() |>
+  mutate(
+    OtherKidsSignalCost = sum(SignalCost) - SignalCost,
+    OtherKidsConflict = sum(ConflictFreqN) - ConflictFreqN,
+    .by = householdID
+  )
 
 ## main paper plots --------------------------------------------------------
 
@@ -120,13 +135,20 @@ freq_short2 <- c(
 sfdf <-
   signalfreqdf |>
   mutate(
-    across(Sadness:Tantrums, \(x) factor(c(freq_short[x]), levels = c(freq_short)))
+    across(
+      Sadness:Tantrums,
+      \(x) factor(c(freq_short[x]), levels = c(freq_short))
+    )
   ) |>
   na.omit()
 
 signaldf_long <-
   sfdf |>
-  pivot_longer(cols = Sadness:Tantrums, names_to = "Signal", values_to = "Freq")  |>
+  pivot_longer(
+    cols = Sadness:Tantrums,
+    names_to = "Signal",
+    values_to = "Freq"
+  ) |>
   mutate(
     Signal = factor(Signal, levels = c("Sadness", "Crying", "Tantrums"))
   ) |>
@@ -140,13 +162,31 @@ barplot_SignalFreq <-
   geom_col(position = "stack", color = "grey") +
   scale_fill_viridis_d(option = "B", direction = -1) +
   labs(x = "Number of children", y = "") +
-  guides(fill = guide_legend("Times/month:", nrow = 1, reverse = TRUE, position = "top")) +
+  guides(
+    fill = guide_legend(
+      "Times/month:",
+      nrow = 1,
+      reverse = TRUE,
+      position = "top"
+    )
+  ) +
   theme_minimal(15)
 barplot_SignalFreq
 ggsave("Figures/barplot_SignalFreq.png", barplot_SignalFreq)
 
 
-signal_subset <- utila_df[c("ConflictFreqN", "Sex", "ChildAge", "SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost", "AlloparentingFreqN", "NeighborhoodQuality")]
+signal_subset <- utila_df[c(
+  "ConflictFreqN",
+  "Sex",
+  "ChildAge",
+  "SadFreqN",
+  "CryFreqN",
+  "TantrumFreqN",
+  "SignalFreq",
+  "SignalCost",
+  "AlloparentingFreqN",
+  "NeighborhoodQuality"
+)]
 names(signal_subset) <- shortform_dict[names(signal_subset)]
 
 signal_corrplot <-
@@ -154,9 +194,23 @@ signal_corrplot <-
   mutate(
     `Child sex` = as.numeric(`Child sex`)
   ) |>
-  cor( use = "pairwise.complete.obs") |>
-  ggcorrplot(type = "upper", hc.order = TRUE, hc.method = "ward.D",lab = TRUE, lab_col = "black", lab_size = 4.5, tl.cex = 16) +
-  scico::scale_fill_scico(palette = "vik", midpoint = 0, begin = .1, end = .9, limits = c(-1, 1)) +
+  cor(use = "pairwise.complete.obs") |>
+  ggcorrplot(
+    type = "upper",
+    hc.order = TRUE,
+    hc.method = "ward.D",
+    lab = TRUE,
+    lab_col = "black",
+    lab_size = 4.5,
+    tl.cex = 16
+  ) +
+  scico::scale_fill_scico(
+    palette = "vik",
+    midpoint = 0,
+    begin = .1,
+    end = .9,
+    limits = c(-1, 1)
+  ) +
   guides(fill = guide_colorbar(title = "Correlation coefficients"))
 signal_corrplot
 ggsave("Figures/signal_corrplot.pdf", width = 12, height = 9)
@@ -166,9 +220,9 @@ barplot_conflict <-
   utila_df |>
   mutate(
     ConflictFreq2 = factor(freq_short[ConflictFreqOF], levels = c(freq_short))
-  )|>
-  filter_at(vars(ConflictFreqOF),all_vars(!is.na(.))) |>
-  ggplot(aes(x=ConflictFreq2, fill= Sex)) +
+  ) |>
+  filter_at(vars(ConflictFreqOF), all_vars(!is.na(.))) |>
+  ggplot(aes(x = ConflictFreq2, fill = Sex)) +
   geom_bar(position = "stack") +
   ylim(0, 150) +
   labs(title = "Conflict") +
@@ -180,20 +234,27 @@ barplot_conflict
 barplot_alloparenting <-
   utila_df |>
   mutate(
-    AlloparentingFreq02 = factor(freq_short[AlloparentingFreq0], levels = c(freq_short))
-  )|>
-  filter_at(vars(AlloparentingFreq0),all_vars(!is.na(.))) |>
-  ggplot(aes(x= AlloparentingFreq02, fill = Sex)) +
+    AlloparentingFreq02 = factor(
+      freq_short[AlloparentingFreq0],
+      levels = c(freq_short)
+    )
+  ) |>
+  filter_at(vars(AlloparentingFreq0), all_vars(!is.na(.))) |>
+  ggplot(aes(x = AlloparentingFreq02, fill = Sex)) +
   geom_bar(position = "stack") +
   ylim(0, 150) +
   labs(title = "Alloparenting") +
   scale_fill_viridis_d(option = "B", begin = 0.3, end = 0.7) +
-  labs(x = "Frequency of child alloparenting (per month)", y = "Number of children") +
+  labs(
+    x = "Frequency of child alloparenting (per month)",
+    y = "Number of children"
+  ) +
   theme_minimal(15)
 barplot_alloparenting
 
 plot_conflict_allo <-
-  (barplot_conflict + barplot_alloparenting) + plot_layout(axes = 'collect_y', axis_titles = "collect_y", guides = 'collect')
+  (barplot_conflict + barplot_alloparenting) +
+  plot_layout(axes = 'collect_y', axis_titles = "collect_y", guides = 'collect')
 plot_conflict_allo
 ggsave("Figures/plot_conflict_allo.pdf", width = 12, height = 9)
 ggsave("Figures/plot_conflict_allo.png", width = 12, height = 9)
@@ -207,7 +268,7 @@ cause_cluster_analysis <-
   na.omit() |>
   pvclust(method.hclust = "ward.D2")
 
-x <- cutree(cause_cluster_analysis $hclust, k = 3)
+x <- cutree(cause_cluster_analysis$hclust, k = 3)
 
 causes2 <-
   causes |>
@@ -226,16 +287,23 @@ causes2 <-
 cause_response0 <-
   utila_df |>
   left_join(causes2[c("uniqueID", "CauseType")]) |>
-  dplyr::filter(!is.na(CauseType), !is.na(CaregiverResponse), !is.na(ChildAge)) |>
+  dplyr::filter(
+    !is.na(CauseType),
+    !is.na(CaregiverResponse),
+    !is.na(ChildAge)
+  ) |>
   mutate(
     AgeCategory = ifelse(ChildAge <= 10, "Younger", "Older"), # Median age in this subsample
     AgeCategory = factor(AgeCategory, c("Younger", "Older")),
     CaregiverResponse = case_when(
       CaregiverResponse == -1 ~ "Negative",
-      CaregiverResponse ==  0 ~ "Neutral",
-      CaregiverResponse ==  1 ~ "Positive"
+      CaregiverResponse == 0 ~ "Neutral",
+      CaregiverResponse == 1 ~ "Positive"
     ),
-    CaregiverResponse = factor(CaregiverResponse, levels = c("Positive", "Neutral", "Negative"))
+    CaregiverResponse = factor(
+      CaregiverResponse,
+      levels = c("Positive", "Neutral", "Negative")
+    )
   )
 
 barplot_CaregiverResponse <-
@@ -244,21 +312,57 @@ barplot_CaregiverResponse <-
     N = n(),
     .by = c(CauseType, CaregiverResponse)
   ) |>
+  mutate(
+    CauseType = factor(
+      CauseType,
+      levels = c("Family Conflict", "Adversity", "Transgression", "Unknown")
+    )
+  ) |>
   ggplot(aes(N, CauseType, fill = CaregiverResponse)) +
   geom_col(position = "stack", color = "grey") +
   scale_fill_viridis_d(option = "B", direction = -1) +
   scale_y_discrete(limits = rev) +
   labs(x = "Number of children", y = "") +
-  guides(fill = guide_legend("Caregiver response:", nrow = 1, reverse = T, position = "top")) +
+  guides(
+    fill = guide_legend(
+      "Caregiver response:",
+      nrow = 1,
+      reverse = T,
+      position = "top"
+    )
+  ) +
   theme_minimal(15)
 barplot_CaregiverResponse
 ggsave("Figures/barplot_CaregiverResponse.pdf", width = 8, height = 8)
 ggsave("Figures/barplot_CaregiverResponse.png", width = 8, height = 8)
 
+cause_response0 |>
+  summarize(
+    N = n(),
+    .by = c(CauseType, CaregiverResponse)
+  ) |>
+  ggplot(aes(N, CaregiverResponse, fill = CauseType)) +
+  geom_col(position = "stack", color = "grey") +
+  scale_fill_viridis_d(option = "B", direction = -1) +
+  scale_y_discrete(limits = rev) +
+  labs(x = "Number of children", y = "") +
+  guides(
+    fill = guide_legend(
+      "Caregiver response:",
+      nrow = 1,
+      reverse = T,
+      position = "top"
+    )
+  ) +
+  theme_minimal(15)
+
 sfdfsum <-
   sfdf |>
   mutate(
-    across(Sadness:Tantrums, \(x) factor(c(freq_short2[x]), levels = rev(unique(freq_short2))))
+    across(
+      Sadness:Tantrums,
+      \(x) factor(c(freq_short2[x]), levels = rev(unique(freq_short2)))
+    )
   ) |>
   summarise(
     Freq = n(),
@@ -277,11 +381,17 @@ sfdfsum <-
   dplyr::filter(Freq > 2)
 
 signal_alluvial_plot <-
-  ggplot(sfdfsum, aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)) +
+  ggplot(
+    sfdfsum,
+    aes(axis1 = Sadness, axis2 = Crying, axis3 = Tantrums, y = Freq)
+  ) +
   geom_alluvium(aes(fill = Sadness), color = "black", show.legend = F) +
   geom_stratum() +
   geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("Sadness", "Crying", "Tantrums"), expand = c(.2, .05)) +
+  scale_x_discrete(
+    limits = c("Sadness", "Crying", "Tantrums"),
+    expand = c(.2, .05)
+  ) +
   ylab("Number of\nchildren") +
   theme_minimal(20) +
   theme(axis.title.y = element_text(angle = 0, hjust = 1)) +
