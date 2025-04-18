@@ -14,6 +14,8 @@ library(easybgm)
 library(tidygraph)
 library(ggraph)
 library(ordinalNet)
+library(glmmTMB)
+library(effects)
 
 source("pca_plot_functions.R")
 
@@ -397,3 +399,17 @@ signal_alluvial_plot <-
   theme(axis.title.y = element_text(angle = 0, hjust = 1)) +
   scale_fill_viridis_d()
 signal_alluvial_plot
+
+# Frequency by signal type ------------------------------------------------
+
+e <-
+  utila_df |>
+  dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN)) |>
+  pivot_longer(CryFreqN:TantrumFreqN, names_to = 'Signal', values_to = 'Frequency') |>
+  mutate(
+    Signal = factor(Signal, levels = c("SadFreqN", "CryFreqN", "TantrumFreqN"))
+    )
+
+m_freq_signal <- glmmTMB(Frequency ~ Signal * ChildAge + Signal * NeighborhoodQuality + Sex * ChildAge + (1|householdID/uniqueID), family = nbinom2, e)
+# summary(m)
+# plot(allEffects(m))
