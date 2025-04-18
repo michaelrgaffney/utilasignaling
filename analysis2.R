@@ -45,8 +45,8 @@ glmnet2 <- function(d, outcome, indices, alpha = 1, fam = 'quasipoisson'){
   return(list(data = d, lambda.min = lambda.min, model = m2, coefs = coefs, coefplot = p))
 }
 
-sv <- 
-  SignalVars |> 
+sv <-
+  SignalVars |>
   dplyr::select(where(\(x) sd(x, na.rm = T) > 0))
 
 signalparams <- expand_grid(Outcome = c("SadFreqN", "CryFreqN", "TantrumFreqN", "SignalFreq", "SignalCost"), alpha = c(0, 1))
@@ -109,7 +109,7 @@ ggsave("Figures/signal_effects_plot.png", signal_effects_plot, width = 12, heigh
 
 e <- SignalVars |>
   dplyr::select(-householdID, -childHHid, -c(SadFreqN:SignalFreq), -ConflictFreqN, -AlloparentingXsex) |>
-  dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) |> 
+  dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) |>
   relocate(AlloparentingFreqN, .after = SignalCost)
 e[-1] <- scale(e[-1])
 
@@ -211,7 +211,7 @@ sv2 <-
   SignalVars |>
   dplyr::select(-householdID, -childHHid) |>
   mutate(`Possession score` = rowSums(pick(LifestyleReality_1:LifestyleReality_8))) |>
-  dplyr::select(-starts_with("Lifestyle"), -AlloparentingXsex) |> 
+  dplyr::select(-starts_with("Lifestyle"), -AlloparentingXsex) |>
   dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) # remove vars set to mean for anonymity
 sv2 <- set_names(sv2, shortform_dict[names(sv2)])
 
