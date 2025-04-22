@@ -142,7 +142,7 @@ Infant cries increase amounts of care, resources, and attention infants receive,
 
 Crying does not always succeed in eliciting benefits, however. Compared to the previously mentioned groups, the Ngandu [@hewlett1998] and the Hadza [@blurtonjones1993] have been found to be more likely to ignore the cries of infants and young children, and concerns that being too responsive will spoil children are reasonably common in some Western populations [@barnett2010; @burchinal2010; @chaudhary2024; @frankenhuis2022; @maute2018]. Crying can also lead to negative responses beyond being ignored [@barr1990; @soltis2004; @zeifman2017]. It has been found to increase parental distress, the likelihood of maternal depression, and the child’s risk of maltreatment [@frodi1985; @fujiwara2011; @howard2006; @lin2012; @soltis2004]. For example, in a sample of 3,259 parents of Dutch infants under 6 months old, 5.6% self-reported smothering, slapping, or shaking their babies in response to their crying, outcomes that were more likely among parents who were single, unemployed, or deemed their infant’s crying to be excessive [@reijneveld2004]. Excessive infant crying, i.e., colic, has also been found to be a risk factor for multiple negative outcomes [@zeevenhooven2018], including abuse, shaken baby syndrome [@kurth2011], and earlier cessation of breastfeeding [@howard2006].
 
-Although it is widely accepted that crying is a signal, there is no consensus on if or when it should be conceptualized as a minimal signal, a costly signal, an indexical signal, or a deceptive (manipulative) signal. Contact calls between parents and offspring have evolved in numerous species, so cries might simply be a means for infants to elicit attention from caregivers [@mehr2021], which would be type of minimal signal. Demonstrating vigor and health early in life was likely vital for much of our evolutionary history due to the risk of neglect or infanticide experienced by children with poor survival prospects [@daly1984; @soltis2004]. As crying comes with physiological costs [@rao1997; @thureen1998], it could serve as a credible signal of vigor if these costs are too high for unhealthy infants to bear [@furlow1997; @lummaa1998; @soltis2004; @wells2003]. Children with severe medical conditions also produce acoustically distinct cries, suggesting that some elements of crying are indexical [@soltis2004]. Alternatively, crying might impose costs on caregivers by, e.g., attracting predators or interfering with important activities, motivating caregivers to invest more to stop the crying [so-called blackmail or bargaining models; @zahavi1977a; @eshel1991; @bergstrom1999 @kennedy2021].
+Although it is widely accepted that crying is a signal, there is no consensus on if or when it should be conceptualized as a minimal signal, a costly signal, an indexical signal, or a deceptive (manipulative) signal. Contact calls between parents and offspring have evolved in numerous species, so cries might simply be a means for infants to elicit attention from caregivers [@mehr2021], which would be type of minimal signal. Demonstrating vigor and health early in life was likely vital for much of our evolutionary history due to the risk of neglect or infanticide experienced by children with poor survival prospects [@daly1984; @soltis2004]. As crying comes with physiological costs [@rao1997; @thureen1998], it could serve as a credible signal of vigor if these costs are too high for unhealthy infants to bear [@furlow1997; @lummaa1998; @soltis2004; @wells2003]. Children with severe medical conditions also produce acoustically distinct cries, suggesting that some elements of crying are indexical [@soltis2004]. Alternatively, crying might impose costs on caregivers by, e.g., attracting predators or interfering with important activities, motivating caregivers to invest more to stop the crying [so-called blackmail or bargaining models; @zahavi1977a; @lummaa1998; @eshel1991; @bergstrom1999 @kennedy2021].
 
 For older children, the relatively insignificant energetic costs of crying might not be enough to ensure it is a credible signal when there are conflicts of interest. For this reason, crying among older children might be more similar to adult crying, which can increase support and empathy but sometimes comes with social costs [@cornelius2001; @cretser1982; @hendriks2006; @jesser1989; @vingerhoets2016; @glasberg1981; @glasberg1982; @zeman1996]. Such costs could be a means by which crying can still be a credible signal of need if they dissuade potential fakers from making the signal when there are conflicts of interest [@sznycer2023].
 
@@ -440,16 +440,6 @@ Effects of selected predictors of the likelihood of positive, neutral, and negat
 
 # Discussion
 
-<!-- [One dense paragraph on how what we have learned relates to what has been reported empirically in the past]
-- Note: we did not mention declines with age in the introduction
-- Vingerhoets' lab and their colleagues maintain crying is understudied with older children
-
-
-[Move first sentence down to 468 and broaden? Or at least broaden? MacFarlane's study of tantrums among Berkeley: declines from 5 to 12]
-
-The cries and fussing of young infants increases until 6 weeks, peaking in some populations at over two hours a day, and then declines steadily until 12-16 weeks [@vermillet2022; @barr1991].
--->
-
 Caregivers reported a wide range of child signaling frequencies. About half of children were reported to cry or throw tantrums more than once a month, and almost 40% were reported to do so more than once a week (@fig-barplot-SignalFreq), with higher frequencies in younger children, lower frequencies in older children, and particularly steep age-related declines for crying and for all types of signaling by males (@sfig-signaltype).
 
 Our bivariate correlations, PCA, MST, and lasso regression analyses all provided a consistent pattern of results: child age was a strong negative predictor of signaling frequency and cost; conflict with the primary caretaker was a positive predictor of signaling frequency and cost; and multiple indices of adversity, such as low neighborhood quality, low household income, and medical problems, were positive predictors of signaling frequency and cost (@fig-mst, @fig-PCA, @fig-signal-corrplot, @fig-lasso, @fig-signal-effects).
@@ -457,6 +447,8 @@ Our bivariate correlations, PCA, MST, and lasso regression analyses all provided
 Contrary to expectations, immigration status, residence in Camponado, and primary language (Spanish or English as proxies for cultural differences), did not predict child signaling in our lasso regressions, despite the differences in wealth, job certainty, discrimination, and living conditions between those from the mainland and Utilians [@davis2014; @garcia2017; @garcia2018; @stonich2000]. These variables correlated with neighborhood quality, however, which was retained in our models, and lasso regression tends to retain only one of a set of correlated predictors [@zou2005].
 
 Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of signals with honesty-enforcing mechanisms (e.g., "costly" signals), caregiver perceptions of conflict and child signaling frequency were positively correlated (@fig-signal-corrplot), and family conflict was the most common cause of a child's recent signaling episode (@fig-effect-last-signal-al-responses). Conflicts, in turn, were negatively associated with child age and higher neighborhood quality, and positively associated with male sex, medical problems, and (oddly) caregiver education (@fig-conflict-effects). Although conflicts of interest do not always lead to overt behavioral conflict [@altmann1980; @bateson1994], it is likely many, if not most, conflicts are ultimately caused by conflicts of interest.
+
+["perceptions of need" instead of "perceived higher"?]
 
 Consistent with the need signaling hypothesis, more frequent sadness was positively associated with perceived higher need relative to other children (@fig-effect-relativeneed). Higher perceived need, in turn, was associated with higher relative investment (@fig-plot-relative-investment). Crying and tantrums were not associated with higher perceived need, likely due to their high correlation with sadness and the propensity of lasso regression to retain only one of a set of correlated predictors [@zou2005]. Signaling behavior did not predict differences in relative caregiver investment beyond its effect on perceived need [@sfig-plot-invest-coefs], similar to an experimental vignette study that found that the likelihood of costly support was largely mediated by the effect of costly signaling on belief in need [@gaffney2022].
 
@@ -473,6 +465,8 @@ Many models designed to explain signals of need (e.g., the begging of young bird
 <!-- Signaling decreased with child age, and increased with conflict with their primary caretaker, which were the two variables most closely linked with signaling in the MST (@fig-mst). In our lasso regression models (which excluded family conflict due to the likely bidirectional relationship between signaling and perceived conflict), child age and high neighborhood quality were consistently negatively associated with signaling frequency, as were household income, caregiver education, and number of adults helping with childcare. Medical problems were a consistent, albeit small positive predictor (@fig-lasso; @fig-signal-effects). -->
 
 One possible reason for the negative association of signaling with age, which is also seen in more industrialized settings [@zeifman2013; @potegal2003; @koch2003; @macfarlane1954], is that as children mature, they are more capable of fulfilling their own needs, more able to ask others for what they need [@osterman2010], and less vulnerable to threats. The effects of age on signaling are also likely due to how age influences the costliness of signaling need. For example, while the energetic cost of crying might be costly for the youngest children, it is likely insignificant for older children. Older children might instead need to weigh the potential social costs of crying or otherwise expressing sadness [@glasberg1981; @glasberg1982; @zeman1996] against the potential increase in social support, which is consistent with our result that the age-related decline in signaling was steepest for crying. The age-related decline in signaling was also generally steeper for males than females [].
+
+[new additions above too repetive?]
 
 Previous research has shown family demands, such as caring for younger siblings (alloparenting), is an important source of parent-offspring conflict [@syme2023]. Although there was little evidence for sex differences in signaling overall (perhaps because sex differences typically emerge in adolescence, and our sample of adolescents was small), there was evidence that sex interacted with alloparenting effort. We found that higher frequencies of alloparenting by girls was associated with a higher frequency of tantrums and overall signaling costs, whereas for boys this relationship was slightly negative (@sfig-alloparentingXsex). In many societies, girls do more alloparenting than boys [@helfrecht2016; @weisner1977; @barry1971; @turke1988], which matches reports from our focus groups of Utilian mothers. It is plausible that older girls are pressured to do more care of their younger siblings, in line with other studies finding an association between household responsibilities, like caregiving, and parent-offspring conflict [@lowe2003; @syme2023]. If so, girls with excessive alloparenting responsibilities might be signaling their need for more time to invest in peer relationships and status seeking behaviors outside the household. Opposed to this interpretation, our study found a small negative association between girls' alloparenting and caregiver reports of conflict (@fig-lasso), although plausibly when girls do what caregivers want, caregivers report less conflict.
 
@@ -646,6 +640,14 @@ Effects of alloparenting frequency (per month) and signal cost and frequency of 
 Complete correlation matrix of study variables.
 :::
 
+::: {#sfig-signaltype}
+```{r}
+plot(allEffects(m_freq_signal))
+```
+
+Effects plots of a negative binomial model of signal frequency as a function of signal type by child age and neighborhood quality.
+:::
+
 ::: {#sfig-cause-clustering}
 ```{r}
 plot(cause_cluster_analysis)
@@ -694,16 +696,6 @@ Effects of predictor variables on relative investment in household children. Ord
 ![](Figures/plot_caregiverresponse_coefs.png)
 
 Effects of predictor variables on caregiver responses to the last time a child was sad or cried. Ordinal logistic regression model with elastic net penalties.
-:::
-
-## Signal frequency vs. type
-
-::: {#sfig-signaltype}
-```{r}
-plot(allEffects(m_freq_signal))
-```
-
-Effects plots of a negative binomial model of signal frequency as a function of signal type by child age and neighborhood quality.
 :::
 
 ```{r}
