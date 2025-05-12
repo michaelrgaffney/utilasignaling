@@ -335,7 +335,7 @@ ggsave("Figures/plot_mst_unit.pdf", plot_mst_unit, width = 12, height = 9)
 # Ordinal regressions -----------------------------------------------------
 
 # For binary predictors
-ordinal_plot <- function(fit, predictor, data, title){
+ordinal_plot <- function(fit, predictor, data, title, ylabel = "Probability"){
   x <- predict(fit, type = 'response')
   d <- data |>
     mutate(
@@ -360,12 +360,12 @@ ordinal_plot <- function(fit, predictor, data, title){
     scale_color_viridis_d(option = 'B', end = 0.8) +
     guides(color = guide_legend("Response", reverse = T)) +
     ylim(0, NA) +
-    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
+    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = ylabel)+
     theme_minimal(15)
 }
 
 # For continuous predictors
-ordinal_plot2 <- function(fit, predictor, data, title){
+ordinal_plot2 <- function(fit, predictor, data, title, ylabel="Probability"){
   x <- predict(fit, type = 'response')
   d <- data |>
     mutate(
@@ -390,7 +390,7 @@ ordinal_plot2 <- function(fit, predictor, data, title){
     scale_color_viridis_d(option = 'B', end = 0.8) +
     guides(color = guide_legend("Response", reverse = T)) +
     ylim(0, NA) +
-    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = "Probability")+
+    labs(title = title, x = shortform_dict[deparse(substitute(predictor))], y = ylabel)+
     theme_minimal(15)
 }
 
@@ -424,8 +424,8 @@ plot_need_coefs
 ggsave("Figures/plot_need_coefs.pdf", plot_need_coefs, width = 12, height = 12)
 ggsave("Figures/plot_need_coefs.png", plot_need_coefs, width = 12, height = 12)
 
-plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need')
-plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need')
+plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
+plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
 
 plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "a")
 ggsave("Figures/plot_need_combined.pdf", plot_need_combined, width = 12, height = 12)
@@ -461,7 +461,7 @@ plot_invest_coefs
 ggsave("Figures/plot_invest_coefs.pdf", plot_invest_coefs, width = 12, height = 12)
 ggsave("Figures/plot_invest_coefs.png", plot_invest_coefs, width = 12, height = 12)
 
-plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment')
+plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment', ylabel = "Probability of relative investment")
 ggsave("Figures/plot_invest_need.pdf", plot_invest_need, width = 12, height = 12)
 ggsave("Figures/plot_invest_need.png", plot_invest_need, width = 12, height = 12)
 
@@ -507,10 +507,10 @@ plot_caregiverresponse_coefs
 ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
 ggsave("Figures/plot_caregiverresponse_coefs.png", plot_caregiverresponse_coefs, width = 12, height = 12)
 
-plot_caregiver_familyconflict <- ordinal_plot(out$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response')
-plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response')
-plot_caregiver_loss <- ordinal_plot(out$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response')
-plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_familyconflict <- ordinal_plot(out$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_loss <- ordinal_plot(out$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
 
 plot_caregiver_response_combined <- plot_caregiver_familyconflict + plot_caregiver_loss + ggtitle("") + plot_caregiver_trangsression + ggtitle("") + plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)

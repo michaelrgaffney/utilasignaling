@@ -411,5 +411,8 @@ e <-
     )
 
 m_freq_signal <- glmmTMB(Frequency ~ Signal * ChildAge + Signal * NeighborhoodQuality + Sex * ChildAge + (1|householdID/uniqueID), family = nbinom2, e)
-# summary(m)
-# plot(allEffects(m))
+# summary(m_freq_signal)
+# plot(allEffects(m_freq_signal))
+# plot(Effect(c("Signal", "ChildAge"), mod=m_freq_signal), cols = 3)
+# plot(Effect(c("Signal", "NeighborhoodQuality"), mod=m_freq_signal), cols = 3)
+# plot(Effect(c("ChildAge", "Sex"), mod=m_freq_signal), cols = 3)
