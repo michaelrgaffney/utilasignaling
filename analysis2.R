@@ -402,15 +402,15 @@ SignalVars4 <-
   relocate(RelativeNeed3, .after = 'childHHid') |>
   mutate(
     across(-c(1:3), as.numeric),
-    across(SadFreqN:AlloparentingXsex, \(x) c(scale(x)))
+    across(SadFreqN:OtherKidsConflict, \(x) c(scale(x)))
   ) |>
   na.omit()
 
 out <- ordinalNetCV(
-  as.matrix(SignalVars4[-c(1:3)]),
+  as.matrix(SignalVars4[-c(1:3, 45)]),
   SignalVars4[[3]],
   standardize = F,
-  alpha = 1.0,
+  alpha = 1,
   family = "cumulative",
   link = "logit",
   lambdaMinRatio = 1e-04,
@@ -419,7 +419,9 @@ out <- ordinalNetCV(
 summary(out)
 colMeans(summary(out))
 # coef(out$fit, matrix = TRUE, whichLambda = 1)
-plot_need_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+m_ordinalcv1coefs <- coef(out$fit)[-c(1:2)]
+names(m_ordinalcv1coefs) <- shortform_dict[names(m_ordinalcv1coefs)]
+plot_need_coefs <- ggdotchart(m_ordinalcv1coefs)
 plot_need_coefs
 ggsave("Figures/plot_need_coefs.pdf", plot_need_coefs, width = 12, height = 12)
 ggsave("Figures/plot_need_coefs.png", plot_need_coefs, width = 12, height = 12)
@@ -485,7 +487,7 @@ SignalVars3 <-
   relocate(CaregiverResponse, .after = childHHid) |>
   mutate(
     across(-c(1:3), as.numeric),
-    across(SadFreqN:SeparationAttentionSeeking, \(x) c(scale(x))) # changed StatusConcerns to SeparationAttentionSeeking
+    across(SadFreqN:StatusConcerns, \(x) c(scale(x))) # changed StatusConcerns to SeparationAttentionSeeking
     ) |>
   na.omit()
 

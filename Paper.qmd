@@ -75,7 +75,7 @@ crossref:
 ---
 
 ```{r setup, include=FALSE}
-if(!dir.exists("Figures")) dir.create("Figures")
+if (!dir.exists("Figures")) dir.create("Figures")
 
 library(dplyr)
 library(purrr)
@@ -94,7 +94,7 @@ source("dataprep.R")
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-#source("analysis2.R") # Generates many plots. Slow!
+# source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
@@ -129,7 +129,7 @@ When the fitness interests of signalers and receivers are aligned, i.e., there a
 
 When conflicts of interest over investment exist, however, there may be much to gain from deception (e.g., crying despite the lack of need) so that one could receive the benefits that come from being seen as needy [@zahavi1993]. Unchecked, deceptive signals could result in receivers ignoring all signals. Credible signals can nevertheless evolve and be maintained in multiple ways, such as when signals cannot be faked (i.e., indexical signals). Credible signals can also evolve when the benefits of sending a signal outweigh the costs for individuals with the underlying quality or state, but otherwise the costs outweigh the benefits [@spence1973; @zahavi1975; @chisausky2023]. Such signals are often termed “costly,” although what is costly is deception, not necessarily signaling per se [for discussion, see @chisausky2023].^[Even when a mechanism is needed to ensure honesty, it is possible for signal cost to be zero at equilibrium because it is the potential cost of deceptive signaling, not honest signaling, that ensures honesty [@chisausky2023].]
 
-In the context of child signals of need, a child has access to information about their internal state, which is unavailable to others, that allows them to estimate their valuation of additional investment. When there are conflicts of interest between children and their caregivers, children might need to use signals whose costs outweigh the benefits of additional care for those not in need, but would result in a net benefit to those with genuine needs. In doing so, the child reveals their resource valuation to potential caretakers who may be skeptical of the child’s claims. With the information revealed by the signal, caretakers should generally be more likely to provide additional support due to their fitness interest in the child’s wellbeing.
+In the context of child signals of need, a child has access to information about their internal state, which is unavailable to others, that allows them to estimate their valuation of additional investment. When there are conflicts of interest between children and their caregivers, children might need to use signals whose costs outweigh the benefits of additional care for those not in need, e.g., because increased caregiver investment is less valuable to them and/or the opportunity costs of signaling are higher, but would result in a net benefit to those with genuine needs. In doing so, the child reveals their resource valuation to potential caretakers who may be skeptical of the child’s claims. With the information revealed by the signal, caretakers should generally be more likely to provide additional support due to their fitness interest in the child’s wellbeing.
 
 However, even credible signals of need might not result in a beneficial response because belief in a child’s need is not the only factor determining the form and amount of support given by caregivers. Instead, caregivers are expected to weigh the costs and benefits of support, which would take into account the reproductive value of current and future offspring, against other options [@daly1987; @daly1983], with selection favoring the allocation of parental investment to current and future offspring that equalizes marginal fitness returns to the parent [@clutton-brock1991; @daly1983; @dawkins1976; @hagen1999; @beaulieu2008; @frankenhuis2022; @daly1983].
 
@@ -139,7 +139,7 @@ Additionally, a parent may also decide against investing in a child, despite dee
 
 Sadness is an internal affective state that also has signaling functions in the form of facial expressions and other behavioral manifestations. It is generally thought to arise from loss [@horwitz2017; @levenson1999; @smith1993], especially when one has little power to reverse or mitigate the loss without help [@emanuel2023; @gunderson2021]. Sadness and low mood, like other forms of psychological pain, probably evolved to motivate victims of adversity to shift their attention to the causes of adversity to mitigate its negative fitness consequences and to learn to solve or avoid similar events in the future [@andrews2009; @nesse1990; @thornhill1989]. Low mood, for example, is often thought to be adaptive in situations when activity is dangerous or unlikely to result in benefits, with anhedonia, pessimism, and fatigue all helping reduce behavior that may not be worth the costs or that may cause additional problems [@nesse2019; @nettle2009; @trimmer2015]. It may also encourage the reappraisal of one’s circumstances after new information comes to light that one’s current strategy is not working [@nesse2009].
 
-Through the reduction in behavior and attention in one’s usual interests that can accompany sadness and low-mood [@nettle2009], one’s relatives and other social partners would likely gain some indication, in the form of cues, that the sad individual was experiencing adversity and could benefit from increased support. In addition to this cue-based information, sadness also results in facial expressions and crying, both of which probably evolved to signal need [@balsters2013; @bowlby1980; @reed2017; @darwin1872]. Such expressions seem to be important to conveying this information as is seen by the skeptical responses to those who cannot produce certain elements of facial expressions like tear production [@hasson2009; @nesse2019] or certain facial movements [@bogart2012; @bogart2010]. We conceptualize infrequent and transient sadness signals as minimal signals of need [per @maynardsmith1995]. Frequent or prolonged sadness, however, is likely a form of withdrawal or depression, both of which might be effective costly signals of need when there are conflicts between the child and their caregivers [@gaffney2022; @syme2023].
+Through the reduction in behavior and attention in one’s usual interests that can accompany sadness and low-mood [@nettle2009], one’s relatives and other social partners would likely gain some indication, in the form of cues, that the sad individual was experiencing adversity and could benefit from increased support. In addition to this cue-based information, sadness also results in facial expressions and crying, both of which probably evolved to signal need [@balsters2013; @bowlby1980; @reed2017; @darwin1872]. Such expressions seem to be important to conveying this information as is seen by the skeptical responses to those who cannot produce certain elements of facial expressions like tear production [@hasson2009; @nesse2019] or certain facial movements [@bogart2012; @bogart2010]. We conceptualize infrequent and transient sadness signals as minimal signals of need [per @maynardsmith1995]. Frequent or prolonged sadness, however, is likely a form of withdrawal or depression, both of which might be effective costly signals of need when there are conflicts between the child and their caregivers [for theory and evidence, see @gaffney2022; @syme2023].
 
 ### Crying
 
@@ -279,7 +279,15 @@ sex_table <- table(utila_df$Sex)
 utila_df |>
   dplyr::select(any_of(names(utila_df[names(longform_dict[1:23])]))) |>
   setNames(longform_dict[1:23]) |>
-  datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
+  datasummary_skim(
+    fun_numeric = list(
+      N = \(x) length(na.omit(x)),
+      Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"),
+      Mean = Mean,
+      SD = SD,
+      Histogram = function(x) ""
+    )
+  )
 ```
 
 ```{r sumtab_adult_cont}
@@ -287,9 +295,19 @@ utila_df |>
 #| tbl-cap: Summary statistics for continuous variables.
 
 utila_df_caregiver |>
-  dplyr::select(any_of(names(utila_df_caregiver[names(longform_dict_adult_cont)]))) |>
+  dplyr::select(any_of(names(utila_df_caregiver[names(
+    longform_dict_adult_cont
+  )]))) |>
   setNames(longform_dict_adult_cont) |>
-  datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
+  datasummary_skim(
+    fun_numeric = list(
+      N = \(x) length(na.omit(x)),
+      Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"),
+      Mean = Mean,
+      SD = SD,
+      Histogram = function(x) ""
+    )
+  )
 ```
 
 ```{r sumtab_factors}
@@ -332,11 +350,11 @@ Minimum spanning tree derived from a Bayesian graphical model of child signaling
 ## Distributions of signaling behavior, alloparenting effort, and conflict
 
 ```{r}
-fmt_sum <- function(v){
+fmt_sum <- function(v) {
   v <- na.omit(v)
   n <- length(v)
   thesum <- sum(v)
-  thepct <- 100*signif(thesum/n, 2)
+  thepct <- 100 * signif(thesum / n, 2)
   str_glue("{thesum} children ({thepct}%)")
 }
 ```
@@ -349,7 +367,15 @@ The frequency of child alloparenting effort, which previous research has linked 
 
 ::: {#fig-barplot-SignalFreq}
 ```{r}
-barplot_SignalFreq + guides(fill = guide_legend(title = 'Times/month', nrow = 1, position = 'top', reverse = T))
+barplot_SignalFreq +
+  guides(
+    fill = guide_legend(
+      title = 'Times/month',
+      nrow = 1,
+      position = 'top',
+      reverse = T
+    )
+  )
 ```
 
 Frequencies of child sadness, crying, and temper tantrums per month as reported by the primary caretaker. Frequency key: 0 corresponds to "never," \<=1 corresponds to "once a month or less," 2-3 corresponds to "more than once a month but less than once a week," 4-29 corresponds to "more than once a week but not daily," 30 corresponds to "daily," and \>30 corresponds to "multiple times per day"

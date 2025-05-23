@@ -172,9 +172,9 @@ barplot_SignalFreq <-
       position = "top"
     )
   ) +
-  theme_minimal(15)
+  theme_minimal(20)
 barplot_SignalFreq
-ggsave("Figures/barplot_SignalFreq.png", barplot_SignalFreq)
+ggsave("Figures/barplot_SignalFreq.svg", barplot_SignalFreq)
 
 
 signal_subset <- utila_df[c(
@@ -215,8 +215,9 @@ signal_corrplot <-
   ) +
   guides(fill = guide_colorbar(title = "Correlation coefficients"))
 signal_corrplot
-ggsave("Figures/signal_corrplot.pdf", width = 12, height = 9)
-ggsave("Figures/signal_corrplot.png", width = 12, height = 9)
+ggsave("Figures/signal_corrplot.pdf", signal_corrplot, width = 12, height = 9)
+ggsave("Figures/signal_corrplot.png", signal_corrplot, width = 12, height = 9)
+ggsave("Figures/signal_corrplot.svg", signal_corrplot, width = 12, height = 9)
 
 barplot_conflict <-
   utila_df |>
