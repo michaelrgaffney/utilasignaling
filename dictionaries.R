@@ -21,6 +21,8 @@ longform_dict <-
     IncomeCategoryN = "Monthly household income (Lempira)",
     FoodSecurity = "Household food insecurity",
     NeighborhoodQuality = "Neighborhood quality index",
+    OtherKidsConflict = "Other children conflict",
+    OtherKidsSignalCost = "Other children signal cost",
     HouseQuality = "House sanitation index",
     MedicalProblemsMean = "Child medical problems index",
     IllnessSusceptibilityMean = "Child illness avoidance index",
@@ -86,6 +88,8 @@ shortform_dict <-
     Punishment21 = "Punishment",
     Punishment = "Punishment",
     Family21 = "Family conflict",
+    ActivityDesired = "Activity Desired",
+    StatusConcerns = "Status Concerns",
     DiscomfortPainInjuryIllness = "Discomfort/Pain/Injury/Illness",
     CaregiverResponse = "Caregiver Response",
     OlderKids = "Older children",
@@ -150,8 +154,18 @@ shortform_dict <-
     "FlexedR" = "FlexedR",
     RelativeMaternalInvestment2 = "Relative investment (w/in household)",
     ConflictFamily = "Family conflict",
+    ConflictOutsideFamily = "Non-family conflict",
+    ConflictFamilyOverPeers = "Family conflict over peers",
+    ConflictSibling = "Sibling Conflict",
+    DeathORIllnessInjuryHarmInOthers = "Harm to others",
     TransgressionMade = "Transgression made",
-    LossOfPrivlegesOrItem = "Loss of privileges or item"
+    LossOfPrivlegesOrItem = "Loss of privileges or item",
+    SeparationAttentionSeeking = "Separation or attention seeking",
+    HouseholdAdversity = "HouseholdAdveristy",
+    ExplicitInvestmentDesired = "Explicity Investment Desired",
+    FearAnxiety = "Fear or Anxiety",
+    OtherKidsConflict = "Other children conflict",
+    OtherKidsSignalCost = "Other children signal cost"
 
   )
 

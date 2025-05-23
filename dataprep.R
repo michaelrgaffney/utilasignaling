@@ -343,6 +343,86 @@ utila_df <-
     LifestyleReality_8
   )
 
+# for summary statistics
+utila_df2 <-
+  d2 |>
+  dplyr::filter(!(is.na(CryFreqN) & is.na(SadFreqN) & is.na(TantrumFreqN))) |>
+  dplyr::select(
+    uniqueID,
+    householdID,
+    childHHid,
+    CryFreqN,
+    SadFreqN,
+    TantrumFreqN,
+    SignalFreq,
+    SignalCost,
+    SignalFreqMax,
+    CaregiverResponse,
+    ChildAge,
+    OtherChildrenHH,
+    YoungerKids,
+    OtherChildAlloparentingFreqN,
+    OlderGirls,
+    OldestChild,
+    LogIncome,
+    number_adults,
+    ConflictFreqN,
+    AlloparentingFreqN,
+    EducationLevelYears,
+    IllnessSusceptibility1,
+    IllnessSusceptibility2,
+    IllnessSusceptibility3,
+    MedicalProblemsMean,
+    IllnessSusceptibilityMean,
+    AdultsChildcare,
+    AdultsHousework,
+    SadFreqOF,
+    CryFreqOF,
+    TantrumFreqOF,
+    ConflictFreqOF,
+    AlloparentingFreq0,
+    NeighborhoodQuality,
+    HouseQuality,
+    NumberOfChildren,
+    MeanChildRelatedness,
+    RelativeNeed3,
+    PositiveResponse,
+    NegativeResponse,
+    CaregiverAge,
+    IncomeCategoryN,
+    CaregiverAge,
+    FoodSecurity,
+    Neighborhood2,
+    Sex,
+    UserLanguage,
+    ImmigrateUtila,
+    PartnerStatus,
+    RelativeNeed,
+    RelativeMaternalInvestment,
+    RelativeMaternalInvestment2,
+    Neighborhood2F,
+    StayAtHomeMom,
+    StayAtHomeMomF,
+    HomeInstability_1,
+    HomeInstability_2,
+    HomeInstability_3,
+    HomeInstability_4,
+    LifestyleReality_1,
+    LifestyleReality_2,
+    LifestyleReality_3,
+    LifestyleReality_4,
+    LifestyleReality_5,
+    LifestyleReality_6,
+    LifestyleReality_7,
+    LifestyleReality_8
+  ) |>
+  mutate(
+    OtherKidsSignalCost = sum(SignalCost) - SignalCost,
+    OtherKidsConflict = sum(ConflictFreqN) - ConflictFreqN,
+    .by = householdID
+  )
+
+
 # dataframes for analysis -------------------------------------------------
 
 # new vars:

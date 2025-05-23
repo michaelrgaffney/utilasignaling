@@ -406,8 +406,9 @@ SignalVars4 <-
   ) |>
   na.omit()
 
-out <- ordinalNetCV(
-  as.matrix(SignalVars4[-c(1:3, 45)]),
+
+m_ordinalcv1 <- ordinalNetCV(
+  as.matrix(SignalVars4[-c(1:3)]),
   SignalVars4[[3]],
   standardize = F,
   alpha = 1,
@@ -416,18 +417,19 @@ out <- ordinalNetCV(
   lambdaMinRatio = 1e-04,
   printProgress = T
 )
-summary(out)
-colMeans(summary(out))
-# coef(out$fit, matrix = TRUE, whichLambda = 1)
-m_ordinalcv1coefs <- coef(out$fit)[-c(1:2)]
+
+summary(m_ordinalcv1)
+colMeans(summary(m_ordinalcv1))
+# coef(m_ordinalcv1$fit, matrix = TRUE, whichLambda = 1)
+m_ordinalcv1coefs <- coef(m_ordinalcv1$fit)[-c(1:2)]
 names(m_ordinalcv1coefs) <- shortform_dict[names(m_ordinalcv1coefs)]
 plot_need_coefs <- ggdotchart(m_ordinalcv1coefs)
 plot_need_coefs
 ggsave("Figures/plot_need_coefs.pdf", plot_need_coefs, width = 12, height = 12)
 ggsave("Figures/plot_need_coefs.png", plot_need_coefs, width = 12, height = 12)
 
-plot_need_age <- ordinal_plot2(out$fit, ChildAge, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
-plot_need_sad <- ordinal_plot2(out$fit, SadFreqN, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
+plot_need_age <- ordinal_plot2(m_ordinalcv1$fit, ChildAge, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
+plot_need_sad <- ordinal_plot2(m_ordinalcv1$fit, SadFreqN, SignalVars4, 'Relative need', ylabel = "Probability of relative need")
 
 plot_need_combined <- plot_need_age / plot_need_sad + ggtitle("") + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "a")
 ggsave("Figures/plot_need_combined.pdf", plot_need_combined, width = 12, height = 12)
@@ -445,7 +447,7 @@ SignalVars5 <-
   ) |>
   na.omit()
 
-out <- ordinalNetCV(
+m_ordinalcv2 <- ordinalNetCV(
   as.matrix(SignalVars5[-c(1:3)]),
   SignalVars5[[3]],
   standardize = F,
@@ -455,15 +457,17 @@ out <- ordinalNetCV(
   lambdaMinRatio = 1e-04,
   printProgress = T
 )
-summary(out)
-colMeans(summary(out))
-# coef(out$fit, matrix = TRUE, whichLambda = 1)
-plot_invest_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+summary(m_ordinalcv2)
+colMeans(summary(m_ordinalcv2))
+# coef(m_ordinalcv2$fit, matrix = TRUE, whichLambda = 1)
+m_ordinalcv2coefs <- coef(m_ordinalcv2$fit)[-c(1:2)]
+names(m_ordinalcv2coefs) <- shortform_dict[names(m_ordinalcv2coefs)]
+plot_invest_coefs <- ggdotchart(m_ordinalcv2coefs)
 plot_invest_coefs
 ggsave("Figures/plot_invest_coefs.pdf", plot_invest_coefs, width = 12, height = 12)
 ggsave("Figures/plot_invest_coefs.png", plot_invest_coefs, width = 12, height = 12)
 
-plot_invest_need <- ordinal_plot2(out$fit, RelativeNeed3, SignalVars5, 'Relative investment', ylabel = "Probability of relative investment")
+plot_invest_need <- ordinal_plot2(m_ordinalcv2$fit, RelativeNeed3, SignalVars5, 'Relative investment', ylabel = "Probability of relative investment")
 ggsave("Figures/plot_invest_need.pdf", plot_invest_need, width = 12, height = 12)
 ggsave("Figures/plot_invest_need.png", plot_invest_need, width = 12, height = 12)
 
@@ -491,7 +495,7 @@ SignalVars3 <-
     ) |>
   na.omit()
 
-out <- ordinalNetCV(
+m_ordinalcv3 <- ordinalNetCV(
   as.matrix(SignalVars3[-c(1:3)]),
   SignalVars3[[3]],
   standardize = F,
@@ -501,24 +505,26 @@ out <- ordinalNetCV(
   lambdaMinRatio = 1e-04,
   printProgress = T
 )
-summary(out)
-colMeans(summary(out))
-# coef(out$fit, matrix = TRUE, whichLambda = 1)
-plot_caregiverresponse_coefs <- ggdotchart(coef(out$fit)[-c(1:2)])
+summary(m_ordinalcv3)
+colMeans(summary(m_ordinalcv3))
+# coef(m_ordinalcv3$fit, matrix = TRUE, whichLambda = 1)
+m_ordinalcv3coefs <- coef(m_ordinalcv3$fit)[-c(1:2)]
+names(m_ordinalcv3coefs) <- shortform_dict[names(m_ordinalcv3coefs)]
+plot_caregiverresponse_coefs <- ggdotchart(m_ordinalcv3coefs)
 plot_caregiverresponse_coefs
 ggsave("Figures/plot_caregiverresponse_coefs.pdf", plot_caregiverresponse_coefs, width = 12, height = 12)
 ggsave("Figures/plot_caregiverresponse_coefs.png", plot_caregiverresponse_coefs, width = 12, height = 12)
 
-plot_caregiver_familyconflict <- ordinal_plot(out$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
-plot_caregiver_trangsression <- ordinal_plot(out$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
-plot_caregiver_loss <- ordinal_plot(out$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
-plot_caregiver_pain <- ordinal_plot(out$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_familyconflict <- ordinal_plot(m_ordinalcv3$fit, ConflictFamily, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_trangsression <- ordinal_plot(m_ordinalcv3$fit, TransgressionMade, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_loss <- ordinal_plot(m_ordinalcv3$fit, LossOfPrivlegesOrItem, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
+plot_caregiver_pain <- ordinal_plot(m_ordinalcv3$fit, DiscomfortPainInjuryIllness, data = SignalVars3, title = 'Caregiver response', ylabel = "Probability of caregiver response")
 
 plot_caregiver_response_combined <- plot_caregiver_familyconflict + plot_caregiver_loss + ggtitle("") + plot_caregiver_trangsression + ggtitle("") + plot_caregiver_pain + ggtitle("") + plot_layout(guides = 'collect')
 ggsave("Figures/plot_caregiver_response_combined.pdf", plot_caregiver_response_combined, width = 12, height = 12)
 ggsave("Figures/plot_caregiver_response_combined.png", plot_caregiver_response_combined, width = 12, height = 12)
 
-plot_caregiver_punish <- ordinal_plot(out$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
+plot_caregiver_punish <- ordinal_plot(m_ordinalcv3$fit, Punishment, data = SignalVars3, title = 'Caregiver response')
 ggsave("Figures/plot_caregiver_punish.pdf", plot_caregiver_punish, width = 12, height = 12)
 ggsave("Figures/plot_caregiver_punish.png", plot_caregiver_punish, width = 12, height = 12)
 
