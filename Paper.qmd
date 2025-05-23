@@ -82,6 +82,8 @@ library(purrr)
 library(stringr)
 library(labelled)
 
+set.seed(51300)
+
 load("data/m3_1e6_cost_freq.rda")
 
 source("recode.R")
@@ -94,7 +96,7 @@ source("dataprep.R")
 # load("data/utilasignalingPublicData.rda")
 
 source("analysis.R")
-#source("analysis2.R") # Generates many plots. Slow!
+source("analysis2.R") # Generates many plots. Slow!
 ```
 
 # Abstract
@@ -216,7 +218,7 @@ We used six-point Likert-type scales to get caregiver reports on the frequencies
 
 : Variable names and question wording for measures about the frequency of signaling, allocare, and conflict. All questions had the following labels attached to each point on its Likert scale: Never; Once a month or less; More than once a month but less than once a week; More than once a week but not daily; Daily; Multiple times per day. For analyses, we converted these categorical variables to numeric frequencies per month as follows: never = 0; once a month or less = 1; more than once a month = 3; more than once a week = 8; daily = 30; multiple times per day = 60 {#tbl-freqvars}
 
-From these count variables we created three composite signaling variables to be used as outcome variables. The *frequency of signaling* was the sum of the frequencies of child sadness, crying, and temper tantrums. *Maximum signal frequency* was the frequency of the most common of these three signals. *Signal cost* was the sum of the frequencies of these three signals weighted by their relative costliness (i.e., *Signal cost* = *frequency of sadness* + 2 $\times$ *frequency of crying* + 3 $\times$ *frequency of temper tantrums*). Although we treated *signal cost* as a continuous variable, we conceptualized low signal cost values (e.g., infrequent sadness or crying) as more likely to be minimal signals, and high signal cost values (e.g., frequent crying or temper tantrums) as more likely to be "costly" signals.
+From these count variables we created two composite signaling variables. The *frequency of signaling* was the sum of the frequencies of child sadness, crying, and temper tantrums. *Signal cost* was the sum of the frequencies of these three signals weighted by their relative costliness (i.e., *Signal cost* = *frequency of sadness* + 2 $\times$ *frequency of crying* + 3 $\times$ *frequency of temper tantrums*). Although we treated *signal cost* as a continuous variable, we conceptualized low signal cost values (e.g., infrequent sadness or crying) as more likely to be minimal signals, and high signal cost values (e.g., frequent crying or temper tantrums) as more likely to be "costly" signals. For each child we also summed the frequencies of conflict with caretakers and signaling cost for all other children in the household, termed *Other children conflict* and *Other children signal cost*, respectively.
 
 ### Relative neediness of children and relative investment in children within the family
 
@@ -276,9 +278,9 @@ sex_table <- table(utila_df$Sex)
 #| label: tbl-sumtab_combined
 #| tbl-cap: Summary statistics for continuous variables.
 
-utila_df |>
-  dplyr::select(any_of(names(utila_df[names(longform_dict[1:23])]))) |>
-  setNames(longform_dict[1:23]) |>
+utila_df2 |>
+  dplyr::select(any_of(names(utila_df2[names(longform_dict[1:25])]))) |>
+  setNames(longform_dict[1:25]) |>
   datasummary_skim(fun_numeric = list(N = \(x) length(na.omit(x)), Range = \(x) str_glue("{min(x, na.rm=T)}-{max(x, na.rm=T)}"), Mean = Mean, SD = SD, Histogram = function(x) ""))
 ```
 
@@ -406,7 +408,7 @@ There were positive relationships between perceived relative neediness within th
 ::: {#fig-effect-relativeneed}
 ![](Figures/plot_need_combined.png)
 
-The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children when holding continuous variables at their mean and factor variables at their mode. A: Effect of child age on the probability of relative neediness B: Effect of child sadness frequency on the probability of relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
+The proportion of children perceived by caretakers as being more needy, as needy, or less needy than a caretaker's other children when holding continuous variables at their mean and factor variables at their mode. a: Effect of child age on the probability of relative neediness. b: Effect of child sadness frequency on the probability of relative neediness. Outcome variable question wording: How much time, effort, and resources does this child need compared to your other children?
 :::
 
 ## Relative need predicts relative investment
@@ -453,7 +455,7 @@ Caregivers reported a wide range of child signaling frequencies. About half of c
 
 Our bivariate correlations, PCA, MST, and lasso regression analyses all provided a consistent pattern of results: child age was a strong negative predictor of signaling frequency and cost; conflict with the primary caretaker was a positive predictor of signaling frequency and cost; and multiple indices of adversity, such as low neighborhood quality, low household income, and medical problems, were positive predictors of signaling frequency and cost (@fig-PCA, @fig-mst, @fig-signal-corrplot, @fig-lasso, @fig-signal-effects).
 
-Contrary to expectations, immigration status, residence in Camponado, and primary language (Spanish or English as proxies for cultural differences), did not predict child signaling in our lasso regressions, despite the differences in wealth, job certainty, discrimination, and living conditions between those from the mainland and Utilians [@davis2014; @garcia2017; @garcia2018; @stonich2000]. These variables correlated with neighborhood quality, however, which was retained in our models, and lasso regression tends to retain only one of a set of correlated predictors [@zou2005].
+Contrary to expectations, immigration status, residence in Camponado, and primary language (Spanish or English as proxies for cultural differences), did not predict child signaling in our lasso regressions, despite the differences in wealth, job certainty, discrimination, and living conditions between those from the mainland and English speaking Utilians [@davis2014; @garcia2017; @garcia2018; @stonich2000]. These variables correlated with neighborhood quality, however, which was retained in our models, and lasso regression tends to retain only one of a set of correlated predictors [@zou2005]. Additionally, families from Camponado appeared to be willing to care for children outside their immediate families, which might have reduced children's needs.
 
 Consistent with signaling models that emphasize the role of conflicts of interest in favoring the use of signals with honesty-enforcing mechanisms (e.g., "costly" signals), caregiver perceptions of conflict and child signaling frequency were positively correlated (@fig-signal-corrplot), and family conflict was the most common cause of a child's recent signaling episode (@fig-effect-last-signal-al-responses). Conflicts, in turn, were negatively associated with child age and higher neighborhood quality, and positively associated with male sex, medical problems, and (oddly) caregiver education (@fig-conflict-effects). Although conflicts of interest do not always lead to overt behavioral conflict [@altmann1980; @bateson1994], it is likely many, if not most, conflicts are ultimately caused by conflicts of interest.
 
@@ -461,7 +463,7 @@ Consistent with the need signaling hypothesis, more frequent sadness was positiv
 
 Interestingly, older children were perceived to be needier than younger ones (@fig-effect-relativeneed). One likely reason for this might be that caretakers perceive the types of investment older children seek as more costly. In line with this reasoning, multiple caretakers mentioned that older kids need more money and advice and get into trouble more often. It might also be that caretakers see investing in older children as relatively costly when they seek to redirect investment to younger children, whose needs might be perceived to be more legitimate.
 
-Caregiver responses to signals of need were generally positive or neutral, more so for situations involving injury and illness, and less so for situations involving family conflict, loss of privileges, and transgressions, which had greater proportions of negative responses (@fig-effect-last-signal-al-responses; @fig-effect-last-signal-response). These patterns probably reflect a combination of shared interests vs. conflicts of interest between child and caretaker, some of which might represent caretaker investment in some children more than others, and greater caretaker certainty about need in cases of injury and illness. Negative responses, e.g., punishment, can be used to change future child behavior that is costly to the caregiver (e.g., harming siblings or wasting resources), and possibly also to signal the costliness of providing the desired support [@hagen2024; @gaffney2022]. That said, our model predicts positive responses in 35% of cases involving transgressions, suggesting that children are successful in negotiating better outcomes at least some of the time.
+Keeping in mind possible biases, caregiver self-reported responses to signals of need were generally positive or neutral, more so for situations involving injury and illness, and less so for situations involving family conflict, loss of privileges, and transgressions, which had greater proportions of negative responses (@fig-effect-last-signal-al-responses; @fig-effect-last-signal-response). These patterns probably reflect a combination of shared interests vs. conflicts of interest between child and caretaker, some of which might represent caretaker investment in some children more than others, and greater caretaker certainty about need in cases of injury and illness. Negative responses, e.g., punishment, can be used to change future child behavior that is costly to the caregiver (e.g., harming siblings or wasting resources), and possibly also to signal the costliness of providing the desired support [@hagen2024; @gaffney2022]. That said, our model predicts positive responses in 35% of cases involving transgressions, suggesting that children are successful in negotiating better outcomes at least some of the time.
 
 Our results parallel those of previous studies of infants and young children that found that, outside of peaks in infancy and early childhood, the frequencies of crying and temper tantrums decrease with age [@macfarlane1954; @ward1970; @osterman2010; @vermillet2022; @barr1991; @potegal2003; @bhatia1990]. Studies examining crying and tantrums in later childhood and adolescence are rare, especially for crying [@rottenberg2012; @zeifman2013]. Our findings suggest the frequency of crying continues to decrease into childhood, dropping precipitously as children grow older. The frequency of temper tantrums also declined, as did the frequency of child sadness, albeit at a much slower rate (@fig-lasso, @fig-signal-effects). Our results also align with studies examining responses to the crying and fussing of infants that have shown that they often lead to increased support [e.g., breastfeeding, attention, or maintaining proximity, @lin2012; @kushnick2006; @kruger2010; @hewlett1998; @chaudhary2024; @tronick1987], but can also lead  to negative responses like abuse [@zeevenhooven2018; @kurth2011; @howard2006; @soltis2004].
 
