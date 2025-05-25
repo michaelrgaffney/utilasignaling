@@ -37,6 +37,8 @@ signal_vars <- c(
   AdultsHousework = "More adults helping around the house likely leads to less pressure from caretakers for children engage in household labor.",
   NumberOfChildren = "More children equals more behavioral conflict over investment.",
   OtherChildAlloparentingFreqN = "More alloparenting effort from other children leads to more care for younger children and less pressure for the focal child to alloparent for other chlildren of alloparenting age.",
+  OtherKidsConflict = "The total conflict from other children in the household might impact conflict with the focal child",
+  OtherKidsSignalCost = "Total costly signaling by other children in the household might impact signaling by the focal child",
   LogIncome = "The pool of availible resources influences the benefits to signaling.",
   HouseQuality = "Children might determine relative status based in part on house quality. This alters the payoffs to signaling.",
   LifestyleReality_1 = "",
@@ -90,12 +92,7 @@ SignalVars <-
     # PartnerStatus = ifelse(PartnerStatus == "Unpartnered", 0, 1),
     AlloparentingXsex = AlloparentingFreqN * Sex,
   ) |>
-  na.omit() |>
-  mutate(
-    OtherKidsSignalCost = sum(SignalCost) - SignalCost,
-    OtherKidsConflict = sum(ConflictFreqN) - ConflictFreqN,
-    .by = householdID
-  )
+  na.omit()
 
 ## main paper plots --------------------------------------------------------
 
@@ -403,7 +400,7 @@ signal_alluvial_plot
 
 # Frequency by signal type ------------------------------------------------
 
-e <-
+e1 <-
   utila_df |>
   dplyr::filter(!is.na(CryFreqN) & !is.na(SadFreqN) & !is.na(TantrumFreqN)) |>
   pivot_longer(CryFreqN:TantrumFreqN, names_to = 'Signal', values_to = 'Frequency') |>
@@ -411,7 +408,7 @@ e <-
     Signal = factor(Signal, levels = c("SadFreqN", "CryFreqN", "TantrumFreqN"))
     )
 
-m_freq_signal <- glmmTMB(Frequency ~ Signal * ChildAge + Signal * NeighborhoodQuality + Sex * ChildAge + (1|householdID/uniqueID), family = nbinom2, e)
+m_freq_signal <- glmmTMB(Frequency ~ Signal * ChildAge + Signal * NeighborhoodQuality + Sex * ChildAge + (1|householdID/uniqueID), family = nbinom2, data = e1)
 # summary(m_freq_signal)
 # plot(allEffects(m_freq_signal))
 # plot(Effect(c("Signal", "ChildAge"), mod=m_freq_signal), cols = 3)

@@ -107,22 +107,22 @@ ggsave("Figures/signal_effects_plot.png", signal_effects_plot, width = 12, heigh
 
 # Alloparenting special case (SignalCost)
 
-e <- SignalVars |>
+e0 <- SignalVars |>
   dplyr::select(-householdID, -childHHid, -c(SadFreqN:SignalFreq), -ConflictFreqN, -AlloparentingXsex) |>
   dplyr::select(where(\(x) sd(x, na.rm = T) > 0)) |>
   relocate(AlloparentingFreqN, .after = SignalCost)
-e[-1] <- scale(e[-1])
+e0[-1] <- scale(e0[-1])
 
-f <- paste(names(e[-c(1,2)]), collapse = " + ")
+f <- paste(names(e0[-c(1,2)]), collapse = " + ")
 f <- as.formula(paste("SignalCost ~ ", "AlloparentingFreqN*Sex +", f))
 
 m_alloparent <-
   poisson_reg(mixture = 1, penalty = signalparams$out$SignalCost1$lambda.min) |>
   set_engine("glmnet", family = quasipoisson) |>
-  fit(f, data = e)
+  fit(f, data = e0)
 
 plot_alloparenting_cost <-
-  plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newdata = e) +
+  plot_predictions(m_alloparent, condition = c("AlloparentingFreqN", "Sex"), newdata = e0) +
   scale_color_binary(labels = c("Female", "Male")) +
   ylim(0, NA) +
   labs(x = "Alloparenting Frequency (standardized)", y = "Signal cost") +

@@ -12,6 +12,9 @@ invert <- function(x){
 # 2) yet do not result in NAs if values exist for other columns.
 sum2 <- function(..., na.rm = F){
   v <- as.numeric(list(...))
+  # args <- list(...)
+  # if (length(args) == 1) v <- unlist(args)
+  # else v <- as.numeric(args)
   if(all(is.na(v))) return(NA)
   sum(v, na.rm = na.rm)
 }
@@ -261,6 +264,8 @@ d2 <-
     HHOtherKidsAge5_10 = sum(Age5_10, na.rm = TRUE) - Age5_10,
     HHOtherKidsAge10Plus = sum(Age10Plus, na.rm = TRUE) - Age10Plus,
     HHOtherKidsAge5Minus = sum(Age5Minus, na.rm = TRUE) - Age5Minus,
+    OtherKidsSignalCost = sum(SignalCost, na.rm = T) - SignalCost,
+    OtherKidsConflict = sum(ConflictFreqN, na.rm = T) - ConflictFreqN,
     .by = householdID
   ) |>
   mutate(
@@ -288,6 +293,8 @@ utila_df <-
     OtherChildrenHH,
     YoungerKids,
     OtherChildAlloparentingFreqN,
+    OtherKidsSignalCost,
+    OtherKidsConflict,
     OlderGirls,
     OldestChild,
     LogIncome,
@@ -362,6 +369,8 @@ utila_df2 <-
     OtherChildrenHH,
     YoungerKids,
     OtherChildAlloparentingFreqN,
+    OtherKidsSignalCost,
+    OtherKidsConflict,
     OlderGirls,
     OldestChild,
     LogIncome,
@@ -415,11 +424,6 @@ utila_df2 <-
     LifestyleReality_6,
     LifestyleReality_7,
     LifestyleReality_8
-  ) |>
-  mutate(
-    OtherKidsSignalCost = sum(SignalCost) - SignalCost,
-    OtherKidsConflict = sum(ConflictFreqN) - ConflictFreqN,
-    .by = householdID
   )
 
 
